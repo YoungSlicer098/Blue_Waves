@@ -1,6 +1,9 @@
 package com.example.bluewaves
 
 import android.os.Bundle
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,34 +18,16 @@ import com.example.bluewaves.ui.theme.BlueWavesTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-//        setContent {
-//            BlueWavesTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
-//            }
-//        }
-    }
-}
+        super.onCreate(savedInstanceState);
+        enableEdgeToEdge();
+        setContentView(R.layout.activity_main);
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+        val hamburgMenuBtn: ImageView = findViewById(R.id.hamburgMenu_btn)
+        val navLogo: ImageView = findViewById(R.id.navLogo)
+        val navTitle: TextView = findViewById(R.id.navTitle)
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BlueWavesTheme {
-        Greeting("Android")
+        hamburgMenuBtn.setOnClickListener {
+            Toast.makeText(this, "You clicked on the Hamburger Menu Icon", Toast.LENGTH_SHORT).show()
+        }
     }
 }
