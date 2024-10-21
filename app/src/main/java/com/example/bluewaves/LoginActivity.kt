@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 
-class MainActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity() {
 
     lateinit var toggle : ActionBarDrawerToggle
     private lateinit var navBarLayout: RelativeLayout
@@ -18,16 +18,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_login)
 
         // Initialize UI components
         val hamburgMenuBtn: ImageView = findViewById(R.id.hamburgMenuBtn)
 //        val drawerLayout: DrawerLayout = findViewById(R.id.drawerLayout)
 //        val sidebarNav: NavigationView = findViewById(R.id.sidebar_nav)
-        val startBtn: Button = findViewById(R.id.startBtn)
+        val signUpBtn: Button = findViewById(R.id.startBtn)
 
-        startBtn.setOnClickListener {
-            val Intent = Intent(this, LoginActivity::class.java)
+        signUpBtn.setOnClickListener {
+            val Intent = Intent(this, SignUpActivity::class.java)
             startActivity(Intent)
         }
 //

@@ -1,4 +1,4 @@
-package com.example.bluewaves.ui.theme
+package com.example.testingdevelopment.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

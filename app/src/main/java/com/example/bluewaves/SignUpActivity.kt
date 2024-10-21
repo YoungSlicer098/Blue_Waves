@@ -2,15 +2,24 @@ package com.example.bluewaves
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
+import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.drawerlayout.widget.DrawerLayout
+import com.example.bluewaves.databinding.ActivityMainBinding
+import com.google.android.material.navigation.NavigationView
 
-class MainActivity : AppCompatActivity() {
+class SignUpActivity : AppCompatActivity() {
 
     lateinit var toggle : ActionBarDrawerToggle
     private lateinit var navBarLayout: RelativeLayout
@@ -18,20 +27,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_signup)
 
         // Initialize UI components
         val hamburgMenuBtn: ImageView = findViewById(R.id.hamburgMenuBtn)
 //        val drawerLayout: DrawerLayout = findViewById(R.id.drawerLayout)
 //        val sidebarNav: NavigationView = findViewById(R.id.sidebar_nav)
-        val startBtn: Button = findViewById(R.id.startBtn)
+        val signUpBackBtn: ImageView = findViewById(R.id.signUpBackBtn)
+//        val signupUsernameInput: EditText = findViewById(R.id.signup_username_input)
+//        val signupPasswordInput: EditText = findViewById(R.id.signup_password_input)
+//        val signupConfirmPasswordInput: EditText = findViewById(R.id.signup_confirmpassword_input)
+//        val signupEmailInput: EditText = findViewById(R.id.signup_email_input)
+//        val signupPhoneInput: EditText = findViewById(R.id.signup_phone_input)
 
-        startBtn.setOnClickListener {
+        signUpBackBtn.setOnClickListener {
             val Intent = Intent(this, LoginActivity::class.java)
             startActivity(Intent)
         }
-//
-//
+
+
 //        toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
 //        drawerLayout.addDrawerListener(toggle)
 //        toggle.syncState()
@@ -39,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 //        hamburgMenuBtn.setOnClickListener() {
 //            drawerLayout.openDrawer(navBarLayout)
 //        }
-//
+
 //        sidebarNav.setNavigationItemSelectedListener {
 //
 //            when(it.itemId){
@@ -63,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "You clicked on the Hamburger Menu Icon", Toast.LENGTH_SHORT).show()
         }
     }
-//
+
 //    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 //
 //        if (toggle.onOptionsItemSelected(item)){

@@ -52,7 +52,7 @@
         android:textColorHint="#CFB4B4B4" />
 
     <Button
-        android:id="@+id/login_btn"
+        android:id="@+id/loginBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
@@ -61,6 +61,19 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/rounded_corner_fill"
         android:text="LOG IN"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/startBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/rounded_corner_fill"
+        android:text="Sign Up"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold" />

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="sidebar_nav">
+
+    <item
+        android:id="@+id/sidebar_settings"
+        android:enabled="true"
+        android:icon="@drawable/logout_logo_black"
+        android:title="Settings" />
+
+    <item android:title="Customization">
+        <menu>
+            <group
+                android:id="@+id/sidebar_background"
+                android:checkableBehavior="single"
+                android:enabled="true">
+                <item
+                    android:id="@+id/sidebar_background_white"
+                    android:checkable="true"
+                    android:icon="@drawable/circle_logo_white" />
+                <item
+                    android:id="@+id/sidebar_background_black"
+                    android:checkable="true"
+                    android:icon="@drawable/circle_logo_black" />
+                <item
+                    android:id="@+id/sidebar_background_purple"
+                    android:checkable="true"
+                    android:icon="@drawable/circle_logo_purple" />
+                <item
+                    android:id="@+id/sidebar_background_blue"
+                    android:checkable="true"
+                    android:icon="@drawable/circle_logo_blue" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/sidebar_logout"
+        android:enabled="true"
+        android:icon="@drawable/logout_logo_black"
+        android:title="Logout" />
+</menu>

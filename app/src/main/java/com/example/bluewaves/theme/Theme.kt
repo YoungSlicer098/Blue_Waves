@@ -1,4 +1,4 @@
-package com.example.bluewaves.ui.theme
+package com.example.testingdevelopment.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -34,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun BlueWavesTheme(
+fun TestingDevelopmentTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
