@@ -12,4 +12,17 @@
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="title_activity_signup">SignUpActivity</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="email">Email</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="submit">Submit</string>
+    <string name="blue_waves_logo">Blue Waves Logo</string>
+    <string name="log_in">LOG IN</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="start">Start</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="back_button">Back Button</string>
 </resources>

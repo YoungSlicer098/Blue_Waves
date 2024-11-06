@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bluewaves"
+    namespace = "com.dld.bluewaves"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.bluewaves"
+        applicationId = "com.dld.bluewaves"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -63,7 +63,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -71,4 +71,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    //coroutines
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 }
