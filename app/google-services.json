@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "503859069311",
+    "project_id": "bluewaves-dld",
+    "storage_bucket": "bluewaves-dld.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503859069311:android:7439f6811adbf22b351a4a",
+        "android_client_info": {
+          "package_name": "com.dld.bluewaves"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArwQKPGYR2kUSNyrGw-P7FuCV1tpV7XaA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

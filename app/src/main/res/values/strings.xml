@@ -25,4 +25,11 @@
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="back_button">Back Button</string>
+    <string name="client_id">503859069311-eldqbthfsr9qp234j37o56725bkijn26.apps.googleusercontent.com</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="register">Register</string>
+    <string name="click_to_login">Click to Login</string>
+    <string name="click_to_register">Click to Register</string>
+    <string name="mainactivity">MainActivity</string>
+    <string name="logout">Logout</string>
 </resources>

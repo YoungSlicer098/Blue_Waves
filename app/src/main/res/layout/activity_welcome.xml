@@ -30,12 +30,10 @@
             <include
                 android:id="@+id/toolbar"
                 layout="@layout/toolbar" />
+
             <include
-                android:id="@+id/tabbar"
-                layout="@layout/tabbar"/>
-            <include
-                android:id="@+id/layoutAnnouncement"
-                layout="@layout/announcement_layout" />
+                android:id="@+id/layoutWelcome"
+                layout="@layout/welcome_layout" />
 
         </LinearLayout>
 

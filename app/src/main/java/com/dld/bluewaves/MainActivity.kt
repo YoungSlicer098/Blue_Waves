@@ -9,78 +9,55 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import com.dld.bluewaves.databinding.ActivityMainBinding
+import com.dld.bluewaves.databinding.AnnouncementLayoutBinding
+import com.dld.bluewaves.databinding.TabbarBinding
+import com.dld.bluewaves.databinding.ToolbarBinding
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var toggle: ActionBarDrawerToggle
     private lateinit var navBarLayout: RelativeLayout
+    private lateinit var mBinding: ActivityMainBinding
+    private lateinit var toolbar: ToolbarBinding
+    private lateinit var tabbar: TabbarBinding
+    private lateinit var incAnnouncement: AnnouncementLayoutBinding
+    private lateinit var auth: FirebaseAuth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+        toolbar = ToolbarBinding.bind(mBinding.toolbar.root)
+        tabbar = TabbarBinding.bind(mBinding.tabbar.root)
+        incAnnouncement = AnnouncementLayoutBinding.bind(mBinding.layoutAnnouncement.root)
+        auth = FirebaseAuth.getInstance()
 
         // Initialize UI components
-        val hamburgMenuBtn: ImageView = findViewById(R.id.hamburgMenuBtn)
-        val startBtn: Button = findViewById(R.id.startBtn)
-
-        startBtn.setOnClickListener {
+        val user = auth.currentUser
+        if(user == null){
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
+            this.finish()
+        }else{
+            incAnnouncement.user.text = "Hello, ${user.email}"
         }
-//
-//
-//        toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
-//        drawerLayout.addDrawerListener(toggle)
-//        toggle.syncState()
-//
-//        hamburgMenuBtn.setOnClickListener() {
-//            drawerLayout.openDrawer(navBarLayout)
-//        }
-//
-//        sidebarNav.setNavigationItemSelectedListener {
-//
-//            when(it.itemId){
-//
-//                R.id.sidebar_settings -> Toast.makeText(applicationContext, "Clicked Settings.", Toast.LENGTH_SHORT).show()
-//                R.id.sidebar_background -> Toast.makeText(applicationContext, "Clicked Background.", Toast.LENGTH_SHORT).show()
-//                R.id.sidebar_background_blue -> Toast.makeText(applicationContext, "Clicked Blue.", Toast.LENGTH_SHORT).show()
-//                R.id.sidebar_background_black -> Toast.makeText(applicationContext, "Clicked Black.", Toast.LENGTH_SHORT).show()
-//                R.id.sidebar_background_purple -> Toast.makeText(applicationContext, "Clicked Purple.", Toast.LENGTH_SHORT).show()
-//                R.id.sidebar_background_white -> Toast.makeText(applicationContext, "Clicked White.", Toast.LENGTH_SHORT).show()
-//                R.id.sidebar_logout -> Toast.makeText(applicationContext, "Clicked Logout.", Toast.LENGTH_SHORT).show()
-//
-//            }
-//
-//            true
-//
-//        }
 
+        incAnnouncement.logout.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            this.finish()
+        }
         // Onclick Events
-        hamburgMenuBtn.setOnClickListener {
+        toolbar.hamburgMenuBtn.setOnClickListener {
             Toast.makeText(this, "You clicked on the Hamburger Menu Icon", Toast.LENGTH_SHORT)
                 .show()
         }
     }
-//
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//
-//        if (toggle.onOptionsItemSelected(item)){
-//
-//            return true
-//
-//        }
-//
-//        return true
-//    }
-
-//    private fun replaceFragment(fragment : Fragment) {
-//
-//        val fragmentManager = supportFragmentManager
-//        val fragmentTransaction = fragmentManager.beginTransaction()
-//        fragmentTransaction.replace(R.id.fragment_container, fragment)
-//        fragmentTransaction.commit()
-//
-//    }
-
 }

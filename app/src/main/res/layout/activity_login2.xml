@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".MainActivity"
-    tools:openDrawer="start">
+    tools:context=".MainActivity">
+
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/sidebar_nav"
@@ -27,15 +27,9 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <include
-                android:id="@+id/toolbar"
-                layout="@layout/toolbar" />
-            <include
-                android:id="@+id/tabbar"
-                layout="@layout/tabbar"/>
-            <include
-                android:id="@+id/layoutAnnouncement"
-                layout="@layout/announcement_layout" />
+            <include layout="@layout/toolbar" />
+
+            <include layout="@layout/login_layout2" />
 
         </LinearLayout>
 

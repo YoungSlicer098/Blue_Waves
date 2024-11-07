@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.dld.bluewaves" />
+                  <option name="mobileSdkAppId" value="1:503859069311:android:7439f6811adbf22b351a4a" />
+                  <option name="projectId" value="bluewaves-dld" />
+                  <option name="projectNumber" value="503859069311" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

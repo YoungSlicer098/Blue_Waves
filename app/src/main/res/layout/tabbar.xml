@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/tabbar"
+    android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/tabbar"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Announcement"
+                android:fontFamily="@font/gupter_bold"
+                android:textSize="20sp"
+                android:layout_marginVertical="3dp"
+                android:layout_marginHorizontal="10dp"
+                android:paddingHorizontal="40dp"
+                android:paddingVertical="10dp"
+                android:textColor="@color/text"/>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?android:attr/listDivider" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="3dp"
+                android:fontFamily="@font/gupter_bold"
+                android:paddingHorizontal="40dp"
+                android:paddingVertical="10dp"
+                android:text="Tracker"
+                android:textSize="20sp"
+                android:textColor="@color/text" />
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?android:attr/listDivider" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contact Owner"
+                android:fontFamily="@font/gupter_bold"
+                android:textSize="20sp"
+                android:layout_marginVertical="3dp"
+                android:layout_marginHorizontal="10dp"
+                android:paddingHorizontal="40dp"
+                android:paddingVertical="10dp"
+                android:textColor="@color/text"/>
+
+        </LinearLayout>
+
+</ScrollView>

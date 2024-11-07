@@ -24,6 +24,7 @@
             android:layout_centerInParent="true"
             android:elevation="100dp"
             android:indeterminate="true"/>
+    </RelativeLayout>
 
     <ScrollView
         app:layout_constraintLeft_toLeftOf="parent"
@@ -32,23 +33,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/signUpBackBtn"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="top|start"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
-        android:contentDescription="@string/back_button"
-        app:srcCompat="@drawable/arrow_back_white" />
-
-
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"><ImageView
+            android:id="@+id/signUpBackBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="15dp"
+            android:contentDescription="@string/back_button"
+            app:srcCompat="@drawable/arrow_back_white" />
 
             <ImageView
                 android:id="@+id/imageView"
@@ -59,7 +56,7 @@
                 android:contentDescription="@string/blue_waves_logo"
                 android:cropToPadding="false"
                 android:scaleType="centerInside"
-                android:src="@drawable/bluewavestitlewhite" />
+                android:src="@drawable/bluewavestitlewhite"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fNameSUTil"
@@ -226,8 +223,8 @@
                 android:text="@string/submit"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:backgroundTint="@color/buttonColor"/>
         </LinearLayout>
     </ScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
