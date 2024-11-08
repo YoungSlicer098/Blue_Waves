@@ -5,9 +5,6 @@
     android:layout_height="wrap_content"
     android:background="@color/toolbar">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/navLogo"
@@ -43,6 +40,5 @@
             android:layout_marginEnd="15dp"
             android:layout_marginBottom="10dp"
             android:src="@drawable/hamburger_menu_white" />
-    </RelativeLayout>
 
 </RelativeLayout>

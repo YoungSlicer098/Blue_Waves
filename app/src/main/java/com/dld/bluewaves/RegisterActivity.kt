@@ -152,6 +152,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener, View.OnFocus
             incReg.passwordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                incReg.progressBar.visibility = View.GONE
             }
         }
 
@@ -171,6 +172,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener, View.OnFocus
             incReg.cPasswordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                incReg.progressBar.visibility = View.GONE
             }
         }
 
@@ -189,6 +191,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener, View.OnFocus
             incReg.cPasswordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                incReg.progressBar.visibility = View.GONE
             }
         }
 

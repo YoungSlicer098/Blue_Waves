@@ -20,5 +20,6 @@
     <color name="mtrl_textinput_default_box_stroke_color">#fff</color>
     <color name="toolbar">#57E9DD</color>
     <color name="tabbar">#114473</color>
+    <color name="selectedText">#0282A9</color>
 
 </resources>
