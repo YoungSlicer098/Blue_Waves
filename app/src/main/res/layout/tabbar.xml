@@ -19,7 +19,6 @@
         app:tabSelectedTextColor="@color/selectedText">
 
         <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_announcement"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/gupter_bold"
@@ -28,7 +27,6 @@
             android:textSize="20sp" />
 
         <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_tracker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/gupter_bold"
@@ -39,7 +37,6 @@
             android:textSize="20sp" />
 
         <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_contact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/gupter_bold"

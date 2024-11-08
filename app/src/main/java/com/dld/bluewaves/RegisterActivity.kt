@@ -59,7 +59,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener, View.OnFocus
         incReg.cPasswordET.onFocusChangeListener = this
 
         // OnClick Events
-        incReg.BackBtn.setOnClickListener {
+        incReg.backBtn.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             this.finish()
@@ -76,7 +76,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener, View.OnFocus
                 .show()
         }
 
-        incReg.submitBtn.setOnClickListener {
+        incReg.registerBtn.setOnClickListener {
             incReg.progressBar.visibility = View.VISIBLE
             val email = incReg.emailET.text.toString()
             val password = incReg.passwordET.text.toString()

@@ -18,8 +18,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical"><ImageView
-            android:id="@+id/BackBtn"
+            android:orientation="vertical">
+
+            <ImageView
+            android:id="@+id/backBtn"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="top|start"
@@ -66,7 +68,8 @@
                 style="@style/TextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:passwordToggleEnabled="true">
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/boxStrokeColor">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordET"
@@ -90,7 +93,8 @@
                 style="@style/TextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:passwordToggleEnabled="true">
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/boxStrokeColor">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/cPasswordET"
@@ -116,7 +120,7 @@
                 android:indeterminate="true"/>
 
             <Button
-                android:id="@+id/submit_btn"
+                android:id="@+id/register_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dp"
@@ -124,7 +128,7 @@
                 android:layout_marginRight="50dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/rounded_corner_fill"
-                android:text="@string/submit"
+                android:text="@string/register"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -136,7 +140,7 @@
                 android:id="@+id/loginNow"
                 android:text="@string/click_to_login"
                 android:textStyle="bold"
-                android:textSize="25sp"
+                android:textSize="18sp"
                 android:gravity="center"
                 android:layout_marginTop="20dp"/>
 

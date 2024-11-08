@@ -118,6 +118,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, View.OnFocusCha
             incLog.emailTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                incLog.progressBar.visibility = View.GONE
             }
         }
 
@@ -137,6 +138,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, View.OnFocusCha
             incLog.passwordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                incLog.progressBar.visibility = View.GONE
             }
         }
 
