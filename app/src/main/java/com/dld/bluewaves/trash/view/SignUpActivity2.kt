@@ -1,4 +1,4 @@
-package com.dld.bluewaves.view
+package com.dld.bluewaves.trash.view
 //
 //import android.content.Intent
 //import android.content.res.ColorStateList

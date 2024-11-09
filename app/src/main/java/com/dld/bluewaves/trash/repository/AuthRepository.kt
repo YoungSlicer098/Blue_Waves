@@ -1,4 +1,4 @@
-package com.dld.bluewaves.repository
+package com.dld.bluewaves.trash.repository
 //
 //import com.dld.bluewaves.data.UniqueEmailValidationResponse
 //import com.dld.bluewaves.data.ValidateEmailBody

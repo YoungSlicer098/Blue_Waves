@@ -1,4 +1,4 @@
-package com.dld.bluewaves
+package com.dld.bluewaves.trash
 //
 //import android.content.Intent
 //import android.os.Bundle

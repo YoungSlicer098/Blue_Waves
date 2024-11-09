@@ -1,4 +1,4 @@
-package com.dld.bluewaves.view_model
+package com.dld.bluewaves.trash.view_model
 //
 //import android.app.Application
 //import androidx.lifecycle.ViewModel

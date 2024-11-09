@@ -1,4 +1,4 @@
-package com.dld.bluewaves.utils
+package com.dld.bluewaves.trash.utils
 //
 //import okhttp3.OkHttpClient
 //import retrofit2.Retrofit

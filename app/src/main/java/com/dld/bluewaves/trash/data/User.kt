@@ -1,4 +1,4 @@
-package com.dld.bluewaves.data
+package com.dld.bluewaves.trash.data
 
 import com.google.gson.annotations.SerializedName
 

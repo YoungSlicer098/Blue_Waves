@@ -9,6 +9,13 @@
     tools:context=".MainActivity"
     tools:openDrawer="start">
 
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -17,12 +24,17 @@
             <include
                 android:id="@+id/toolbar"
                 layout="@layout/toolbar" />
+            <FrameLayout
+                android:id="@+id/fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
-            <include
-                android:id="@+id/layoutWelcome"
-                layout="@layout/welcome_layout" />
 
         </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/sidebar_nav"
@@ -34,6 +46,5 @@
         android:rotationX="0"
         app:headerLayout="@layout/sidebar_layout"
         app:menu="@menu/sidebar_menu" />
-
 
 </androidx.drawerlayout.widget.DrawerLayout>

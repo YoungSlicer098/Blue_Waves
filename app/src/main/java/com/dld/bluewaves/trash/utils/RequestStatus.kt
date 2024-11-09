@@ -1,4 +1,4 @@
-package com.dld.bluewaves.utils
+package com.dld.bluewaves.trash.utils
 //
 //sealed class RequestStatus<out T> {
 //    object Waiting : RequestStatus<Nothing>()

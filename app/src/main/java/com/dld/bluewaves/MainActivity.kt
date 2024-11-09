@@ -2,23 +2,16 @@ package com.dld.bluewaves
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.dld.bluewaves.databinding.ActivityMainBinding
-import com.dld.bluewaves.databinding.AnnouncementLayoutBinding
 import com.dld.bluewaves.databinding.TabbarBinding
 import com.dld.bluewaves.databinding.ToolbarBinding
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 
 class MainActivity : AppCompatActivity() {
 
@@ -82,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         fun logout(context: MainActivity) {
             FirebaseAuth.getInstance().signOut()
-            val intent = Intent(context, LoginActivity::class.java)
+            val intent = Intent(context, AuthActivity::class.java)
             context.startActivity(intent)
             context.finish()
         }

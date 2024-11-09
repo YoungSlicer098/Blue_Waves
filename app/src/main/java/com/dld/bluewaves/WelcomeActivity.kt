@@ -2,8 +2,6 @@ package com.dld.bluewaves
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -31,7 +29,7 @@ class WelcomeActivity : AppCompatActivity() {
         incWelcome = WelcomeLayoutBinding.bind(mBinding.layoutWelcome.root)
 
         incWelcome.startBtn.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
+            val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
         }
 
