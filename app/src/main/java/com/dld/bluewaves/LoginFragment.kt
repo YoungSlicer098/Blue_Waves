@@ -37,6 +37,7 @@ View.OnKeyListener{
     ): View? {
         // Inflate the layout and initialize binding
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        auth = FirebaseAuth.getInstance()
 
         // Initialize UI components
         mBinding.emailET.onFocusChangeListener = this

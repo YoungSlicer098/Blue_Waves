@@ -11,33 +11,56 @@
 
 
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="56dp"
+            android:layout_gravity="end"
+            android:background="@color/toolbar"
+            android:elevation="4dp"
+            android:layoutDirection="rtl"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <include
-                android:id="@+id/toolbar"
-                layout="@layout/toolbar" />
-            <include
-                android:id="@+id/tabbar"
-                layout="@layout/tabbar"/>
-            <FrameLayout
-                android:id="@+id/fragment_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+            <TextView
+                android:id="@+id/navTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/gupter_bold"
+                android:text="Blue Waves"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
+            <ImageView
+                android:id="@+id/navLogo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:background="@drawable/circle_logo"
+                android:padding="5dp"
+                android:src="@drawable/bluewaves" />
 
-        </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
 
+        <include
+            android:id="@+id/tabbar"
+            layout="@layout/tabbar"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
+    </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/sidebar_nav"
@@ -49,5 +72,7 @@
         android:rotationX="0"
         app:headerLayout="@layout/sidebar_layout"
         app:menu="@menu/sidebar_menu" />
+
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

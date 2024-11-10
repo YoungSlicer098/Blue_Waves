@@ -38,4 +38,5 @@
     <string name="contact_owner">Contact Owner</string>
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
+    <string name="authactivity">AuthActivity</string>
 </resources>

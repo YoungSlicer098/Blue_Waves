@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="">
     <item
-        android:id="@+id/sidebar_settings"
+        android:id="@+id/nav_customization"
         android:enabled="true"
         android:icon="@drawable/settings_white"
         android:title="Customization"/>
