@@ -13,6 +13,8 @@ import com.dld.bluewaves.databinding.ActivityWelcomeBinding
 import com.dld.bluewaves.databinding.WelcomeLayoutBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -20,6 +22,7 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private lateinit var mBinding: ActivityWelcomeBinding
     private lateinit var incWelcome: WelcomeLayoutBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +31,8 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         setContentView(mBinding.root)
         auth = FirebaseAuth.getInstance()
         incWelcome = WelcomeLayoutBinding.bind(mBinding.layoutWelcome.root)
+        database = FirebaseDatabase.getInstance().getReference("Users")
+
 
         setSupportActionBar(mBinding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -65,6 +70,13 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
         // Start button click listener to launch AuthActivity
         incWelcome.startBtn.setOnClickListener {
+            //Testing Run for database
+            database.setValue("Ya hallo").addOnCompleteListener{
+                Toast.makeText(this, "Database updated", Toast.LENGTH_SHORT).show()
+            }.addOnFailureListener {
+                Toast.makeText(this, "Database Failed", Toast.LENGTH_SHORT).show()
+            }
+
             val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
         }
@@ -108,6 +120,7 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             mBinding.drawerLayout.closeDrawer(GravityCompat.END)
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

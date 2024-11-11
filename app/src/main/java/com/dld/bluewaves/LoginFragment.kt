@@ -39,6 +39,7 @@ View.OnKeyListener{
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         auth = FirebaseAuth.getInstance()
 
+
         // Initialize UI components
         mBinding.emailET.onFocusChangeListener = this
         mBinding.passwordET.onFocusChangeListener = this
@@ -46,7 +47,7 @@ View.OnKeyListener{
         // OnClick Events
 
         mBinding.registerNow.setOnClickListener {
-            AuthActivity.changeFragment(context as AuthActivity, RegisterFragment())
+            AuthActivity.changeFragment(context as AuthActivity, RegisterFragment(), true)
         }
 
         mBinding.loginBtn.setOnClickListener {
@@ -86,6 +87,7 @@ View.OnKeyListener{
         return mBinding.root
     }
 
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -104,6 +106,11 @@ View.OnKeyListener{
                     putString(ARG_PARAM2, param2)
                 }
             }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Clear binding reference to prevent memory leaks
     }
 
     private fun validateEmail(): Boolean {

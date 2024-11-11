@@ -98,43 +98,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val newFragmentPosition = tab?.position ?: return
                 mBinding.viewPager.setCurrentItem(newFragmentPosition, true)
-
-//                val newFragmentPosition = tab?.position ?: return
-//                val fragment: Fragment = when (newFragmentPosition) {
-
-//                    0 -> AnnouncementFragment()
-//                    1 -> TrackerFragment()
-//                    2 -> ContactFragment()
-//                    else -> AnnouncementFragment() // Default or fallback fragment
-//                }
-//
-//                // Only perform the transition if the selected fragment is different
-//                if (newFragmentPosition != currentFragmentPosition) {
-//                    val fragmentTransaction = supportFragmentManager.beginTransaction()
-//
-//                    // Set the appropriate animation based on the direction of navigation
-//                    when {
-//                        newFragmentPosition > currentFragmentPosition -> {
-//                            // New fragment slides in from the right, old fragment slides out to the left
-//                            fragmentTransaction.setCustomAnimations(
-//                                R.anim.slide_in_right, R.anim.slide_out_left
-//                            )
-//                        }
-//                        newFragmentPosition < currentFragmentPosition -> {
-//                            // New fragment slides in from the left, old fragment slides out to the right
-//                            fragmentTransaction.setCustomAnimations(
-//                                R.anim.slide_in_left, R.anim.slide_out_right
-//                            )
-//                        }
-//                    }
-//
-//                    // Replace the fragment and commit the transaction
-//                    fragmentTransaction.replace(mBinding.viewPager.id, fragment)
-//                        .commit()
-//
-//                    // Update the current fragment position
-//                    currentFragmentPosition = newFragmentPosition
-//                }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -190,6 +153,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             mBinding.drawerLayout.closeDrawer(GravityCompat.END)
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

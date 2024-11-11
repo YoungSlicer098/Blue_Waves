@@ -41,7 +41,6 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         supportFragmentManager.beginTransaction()
             .replace(mBinding.fragmentContainer.id, LoginFragment())
-            .addToBackStack(null)
             .commit()
 
         setSupportActionBar(mBinding.toolbar)
@@ -79,11 +78,16 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     companion object {
-        fun changeFragment(context: AuthActivity, fragment: Fragment){
-            context.supportFragmentManager.beginTransaction()
-                .replace(context.mBinding.fragmentContainer.id, fragment!!)
+        fun changeFragment(context: AuthActivity, fragment: Fragment, addToBackStack: Boolean) {
+            val transaction = context.supportFragmentManager.beginTransaction()
+                .replace(context.mBinding.fragmentContainer.id, fragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit()
+
+            if (addToBackStack) {
+                transaction.addToBackStack(null) // Add to back stack if true
+            }
+
+            transaction.commit()
         }
         fun login(context: AuthActivity){
             val intent = Intent(context, MainActivity::class.java)
@@ -132,6 +136,7 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             mBinding.drawerLayout.closeDrawer(GravityCompat.END)
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

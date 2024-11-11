@@ -1,6 +1,6 @@
 package com.dld.bluewaves
 
-import android.content.res.ColorStateList
+import  android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Patterns
 import android.view.KeyEvent
@@ -9,8 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.GravityCompat
 import com.dld.bluewaves.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -28,6 +30,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     private var _binding: FragmentRegisterBinding? = null
     private val mBinding get() = _binding!!
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
 
 
     override fun onCreateView(
@@ -44,18 +47,17 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
 
         // OnClick Events
         mBinding.backBtn.setOnClickListener {
-            AuthActivity.changeFragment(context as AuthActivity, LoginFragment())
+            AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
         }
 
         mBinding.loginNow.setOnClickListener {
-            AuthActivity.changeFragment(context as AuthActivity, LoginFragment())
+            AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
         }
 
         mBinding.registerBtn.setOnClickListener {
             mBinding.progressBar.visibility = View.VISIBLE
             val email = mBinding.emailET.text.toString()
             val password = mBinding.passwordET.text.toString()
-            val confirmPassword = mBinding.cPasswordET.text.toString()
 
             if (!validateEmail()) {
                 return@setOnClickListener
@@ -78,7 +80,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                             "Account created.",
                             Toast.LENGTH_SHORT,
                         ).show()
-                        AuthActivity.changeFragment(context as AuthActivity, LoginFragment())
+                        AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
 
                     } else {
                         mBinding.progressBar.visibility = View.GONE
@@ -96,11 +98,6 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     }
 
 
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null // Clear binding reference to prevent memory leaks
-    }
 
     companion object {
         /**
