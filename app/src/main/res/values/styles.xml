@@ -23,4 +23,9 @@
         <item name="errorEnabled">true</item>
         <item name="hintTextColor">@color/hintText</item>
     </style>
+
+    <style name="Theme.BlueWaves.Launch" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splashscreen</item>
+    </style>
+
 </resources>
