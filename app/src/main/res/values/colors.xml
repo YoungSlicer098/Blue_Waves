@@ -11,13 +11,13 @@
     <color name="colorPrimaryDark">#3A3A3A</color>
     <color name="colorAccent">#57E9DD</color>
     <color name="lightBlue">#0067CE</color>
-    <color name="buttonColor">#1961A7</color>
     <color name="text">#FFFFFF</color>
     <color name="hintText">#CFB4B4B4</color>
     <color name="background">#3A3A3A</color>
     <color name="boxStrokeColor">#23ABCE</color>
     <color name="transparent">#00000000</color>
     <color name="mtrl_textinput_default_box_stroke_color">#fff</color>
+    <color name="splash_i_guess">#4EC9EB</color>
     <color name="toolbar">#57E9DD</color>
     <color name="tabbar">#114473</color>
     <color name="selectedText">#0282A9</color>
