@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="146dp"
+    android:layout_height="160dp"
     android:layout_gravity="end"
     android:background="@drawable/headerbkg"
     android:orientation="vertical">
@@ -11,9 +11,9 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="start"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="15dp"
         android:layout_marginStart="15dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="15dp"
         android:src="@drawable/close_white" />
 
     <LinearLayout
@@ -30,7 +30,9 @@
             android:layout_marginStart="15dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:background="@drawable/circle_logo"
+            android:background="@drawable/circular_bg"
+            android:backgroundTint="@color/white"
+            android:scaleType="centerCrop"
             android:padding="5dp"
             android:src="@drawable/bluewaves" />
 
@@ -40,17 +42,14 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="15dp"
             android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:fontFamily="@font/gupter_bold"
             android:text="Blue Waves"
             android:textColor="#FFFFFF"
             android:textColorLink="#000000"
             android:textSize="25sp"
             android:textStyle="bold" />
-
-
-    </LinearLayout>
 
 
 </LinearLayout>

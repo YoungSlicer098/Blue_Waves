@@ -55,10 +55,7 @@ View.OnKeyListener{
             val email = mBinding.emailET.text.toString()
             val password = mBinding.passwordET.text.toString()
 
-            if (!validateEmail()) {
-                return@setOnClickListener
-            }
-            if (!validatePassword()) {
+            if (!validateEmail() || !validatePassword()) {
                 return@setOnClickListener
             }
             auth.signInWithEmailAndPassword(email, password)

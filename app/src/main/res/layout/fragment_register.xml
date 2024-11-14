@@ -32,14 +32,39 @@
 
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
                 android:layout_gravity="center"
                 android:adjustViewBounds="false"
                 android:contentDescription="@string/blue_waves_logo"
                 android:cropToPadding="false"
-                android:scaleType="centerInside"
-                android:src="@drawable/bluewavestitlewhite"/>
+                android:scaleType="centerCrop"
+                android:background="@drawable/circular_bg"
+                android:backgroundTint="@color/buttonColor"
+                android:src="@drawable/profile_white"
+                android:layout_marginBottom="20dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/displayNameTil"
+                style="@style/TextInputLayoutStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/displayNameET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="Display Name"
+                    android:inputType="text"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/hintText"
+                    android:maxLength="24"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailTil"
@@ -135,14 +160,14 @@
                 android:backgroundTint="@color/buttonColor"/>
 
             <TextView
+                android:id="@+id/loginNow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/loginNow"
-                android:text="@string/click_to_login"
-                android:textStyle="bold"
-                android:textSize="18sp"
+                android:layout_marginTop="20dp"
                 android:gravity="center"
-                android:layout_marginTop="20dp"/>
+                android:text="@string/click_to_login"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
     </ScrollView>

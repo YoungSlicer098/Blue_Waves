@@ -1,18 +1,25 @@
 package com.dld.bluewaves
 
-import  android.content.res.ColorStateList
+import android.app.Activity
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.util.Patterns
 import android.view.KeyEvent
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.view.GravityCompat
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.Nullable
+import androidx.fragment.app.Fragment
 import com.dld.bluewaves.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -31,6 +38,24 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     private val mBinding get() = _binding!!
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
+    private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
+    private lateinit var selectedImageUri: Uri
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize the image picker launcher
+        imagePickLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data
+                data?.data?.let { uri ->
+                    selectedImageUri = uri
+                    // Set the selected image to profilePic ImageView using AndroidUtil
+//                    AndroidUtil.setProfilePic(requireContext(), selectedImageUri, profilePic)
+                }
+            }
+        }
+    }
 
 
     override fun onCreateView(
@@ -59,16 +84,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             val email = mBinding.emailET.text.toString()
             val password = mBinding.passwordET.text.toString()
 
-            if (!validateEmail()) {
-                return@setOnClickListener
-            }
-            if (!validatePassword()) {
-                return@setOnClickListener
-            }
-            if (!validateConfirmPassword()) {
-                return@setOnClickListener
-            }
-            if (!validatePasswordAndConfirmPassword()) {
+            if (!validateDisplayName() || !validateEmail() || !validatePassword() || !validateConfirmPassword()) {
                 return@setOnClickListener
             }
             auth.createUserWithEmailAndPassword(email, password)
@@ -119,6 +135,23 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             }
     }
 
+    private fun validateDisplayName(): Boolean {
+        var errorMessage: String? = null
+        val value: String = mBinding.displayNameET.text.toString()
+        if (value.isEmpty()) {
+            errorMessage = "Display name is required"
+        }
+
+        if (errorMessage != null) {
+            mBinding.displayNameTil.apply {
+                isErrorEnabled = true
+                error = errorMessage
+            }
+        }
+
+        return errorMessage == null
+    }
+
     private fun validateEmail(): Boolean {
         var errorMessage: String? = null
         val value: String = mBinding.emailET.text.toString()
@@ -140,11 +173,14 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
 
     private fun validatePassword(): Boolean {
         var errorMessage: String? = null
+        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = mBinding.passwordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "Password is required"
         } else if (value.length < 8) {
             errorMessage = "Password must be at least 8 characters"
+        } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
+            errorMessage = "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
@@ -160,11 +196,14 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
 
     private fun validateConfirmPassword(): Boolean {
         var errorMessage: String? = null
+        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = mBinding.cPasswordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "Confirm password is required"
         } else if (value.length < 8) {
             errorMessage = "Confirm password must be at least 8 characters"
+        } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
+            errorMessage = "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
