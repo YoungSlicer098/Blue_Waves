@@ -32,11 +32,9 @@ class authDB {
                 .addOnSuccessListener {
                     // User data saved successfully
                 }
-                .addOnFailureListener { e ->
+                .addOnFailureListener {
                     // Handle the error
                 }
         }
     }
-}
-
 }

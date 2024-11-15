@@ -19,16 +19,22 @@
             android:name=".AuthActivity"
             android:exported="false"
             android:label="@string/authactivity"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/mainactivity"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.BlueWaves.Launch">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.BlueWaves.Launch"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,9 +45,11 @@
         <!-- Other activities -->
         <activity
             android:name=".WelcomeActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="WelcomeActivity"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
 
         <meta-data
             android:name="preloaded_fonts"

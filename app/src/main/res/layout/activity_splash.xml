@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="@drawable/splashscreen"
+    android:background="#111527"
     android:gravity="bottom|center_horizontal"
     android:orientation="vertical"
-    tools:context="com.dld.bluewaves.SplashActivity">
+    tools:context="com.dld.bluewaves.SplashActivity"
+    >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/splashscreen"
+        android:scaleType="fitCenter"
+        android:scaleX="1.05"
+        android:scaleY="1.1"
+        android:src="@drawable/splashscreen"
+        android:translationY="0dp" />
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="36dp"
         android:layout_height="36dp"
+        android:layout_marginBottom="-36dp"
         android:elevation="100dp"
-        android:indeterminate="true" />
+        android:indeterminate="true"
+        android:translationY="-200sp" />
 
 </LinearLayout>
