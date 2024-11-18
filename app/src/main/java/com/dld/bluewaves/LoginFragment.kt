@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.dld.bluewaves.databinding.FragmentLoginBinding
 import com.dld.bluewaves.databinding.FragmentRegisterBinding
+import com.dld.bluewaves.utils.AndroidUtils
 import com.google.firebase.auth.FirebaseAuth
 
 // TODO: Rename parameter arguments, choose names that match
@@ -43,43 +44,12 @@ View.OnKeyListener{
         // Initialize UI components
         mBinding.emailET.onFocusChangeListener = this
         mBinding.passwordET.onFocusChangeListener = this
+        mBinding.registerNow.setOnClickListener(this)
+        mBinding.loginBtn.setOnClickListener(this)
 
         // OnClick Events
 
-        mBinding.registerNow.setOnClickListener {
-            AuthActivity.changeFragment(context as AuthActivity, RegisterFragment(), true)
-        }
 
-        mBinding.loginBtn.setOnClickListener {
-            mBinding.progressBar.visibility = View.VISIBLE
-            val email = mBinding.emailET.text.toString()
-            val password = mBinding.passwordET.text.toString()
-
-            if (!validateEmail() || !validatePassword()) {
-                return@setOnClickListener
-            }
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(context as AuthActivity) { task ->
-                    mBinding.progressBar.visibility = View.GONE
-                    if (task.isSuccessful) {
-                        Toast.makeText(
-                            context as AuthActivity,
-                            "Logged in.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                        AuthActivity.login(context as AuthActivity)
-                    } else {
-                        mBinding.progressBar.visibility = View.GONE
-                        Toast.makeText(
-                            context as AuthActivity,
-                            "Failed to login.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                }
-
-
-        }
 
         return mBinding.root
     }
@@ -123,7 +93,7 @@ View.OnKeyListener{
             mBinding.emailTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
-                mBinding.progressBar.visibility = View.GONE
+                inProgress(false)
             }
         }
 
@@ -143,15 +113,50 @@ View.OnKeyListener{
             mBinding.passwordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
-                mBinding.progressBar.visibility = View.GONE
+                inProgress(false)
             }
         }
 
         return errorMessage == null
     }
 
-    override fun onClick(v: View?) {
-        TODO("Not yet implemented")
+    private fun inProgress(inProgress: Boolean) {
+        if (inProgress) {
+            mBinding.progressBar.visibility = View.VISIBLE
+            mBinding.loginBtn.visibility = View.GONE
+        } else {
+            mBinding.progressBar.visibility = View.GONE
+            mBinding.loginBtn.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onClick(view: View?) {
+        if (view != null) {
+            when (view.id){
+                R.id.registerNow -> {
+                    AuthActivity.changeFragment(context as AuthActivity, RegisterFragment(), true)
+                }
+                R.id.loginBtn -> {
+                    inProgress(true)
+                    val email = mBinding.emailET.text.toString()
+                    val password = mBinding.passwordET.text.toString()
+
+                    if (!validateEmail() || !validatePassword()) {
+                        return
+                    }
+                    auth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(context as AuthActivity) { task ->
+                            inProgress(false)
+                            if (task.isSuccessful) {
+                                AndroidUtils.showToast(context as AuthActivity, "Logged in.")
+                                AuthActivity.login(context as AuthActivity)
+                            } else {
+                                AndroidUtils.showToast(context as AuthActivity, "Wrong password or email.")
+                            }
+                        }
+                }
+            }
+        }
     }
 
     override fun onFocusChange(view: View?, hasFocus: Boolean) {
@@ -170,9 +175,9 @@ View.OnKeyListener{
                     if (hasFocus) {
                         if (mBinding.passwordTil.isErrorEnabled) {
                             mBinding.passwordTil.isErrorEnabled = false
-                        } else {
-                            validatePassword()
                         }
+                    }else {
+                        validatePassword()
                     }
                 }
             }

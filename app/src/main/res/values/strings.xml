@@ -41,4 +41,5 @@
     <string name="authactivity">AuthActivity</string>
     <string name="splashscreen">SplashScreen</string>
     <string name="blue_waves">Blue Waves</string>
+    <string name="display_name">Display Name</string>
 </resources>

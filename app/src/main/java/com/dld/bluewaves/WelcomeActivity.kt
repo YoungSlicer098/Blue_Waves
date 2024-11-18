@@ -15,6 +15,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 
 class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -53,8 +54,6 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 mBinding.drawerLayout.openDrawer(GravityCompat.END)
             }
         }
-
-
 
 
 
