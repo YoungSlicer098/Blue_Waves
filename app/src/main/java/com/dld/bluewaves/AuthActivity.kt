@@ -12,6 +12,7 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.dld.bluewaves.databinding.ActivityAuthBinding
+import com.dld.bluewaves.utils.AndroidUtils
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 
@@ -123,10 +124,11 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_profile -> Toast.makeText(this, "Profile!", Toast.LENGTH_SHORT).show()
             R.id.nav_logout -> {
                 FirebaseAuth.getInstance().signOut()
-                Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
+                AndroidUtils.showToast(this, "Logged out!")
                 validationSideBar(FirebaseAuth.getInstance())
             }
         }
+        validationSideBar(FirebaseAuth.getInstance())
         mBinding.drawerLayout.closeDrawer(GravityCompat.END)
         return true
     }

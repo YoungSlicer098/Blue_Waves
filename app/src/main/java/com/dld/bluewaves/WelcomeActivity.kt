@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import com.dld.bluewaves.databinding.ActivityWelcomeBinding
 import com.dld.bluewaves.databinding.WelcomeLayoutBinding
+import com.dld.bluewaves.utils.AndroidUtils
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -106,10 +107,11 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
             R.id.nav_profile -> Toast.makeText(this, "Profile!", Toast.LENGTH_SHORT).show()
             R.id.nav_logout -> {
                 FirebaseAuth.getInstance().signOut()
-                Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
+                AndroidUtils.showToast(this, "Logged out!")
                 validationSideBar(FirebaseAuth.getInstance())
             }
         }
+        validationSideBar(FirebaseAuth.getInstance())
         mBinding.drawerLayout.closeDrawer(GravityCompat.END)
         return true
     }

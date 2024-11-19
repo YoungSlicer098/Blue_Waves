@@ -16,9 +16,6 @@ object FirebaseUtils {
         return FirebaseAuth.getInstance().uid
     }
 
-    fun isLoggedIn(): Boolean {
-        return currentUserId() != null
-    }
 
     fun createUserDetails(): DocumentReference {
         return FirebaseFirestore.getInstance()
