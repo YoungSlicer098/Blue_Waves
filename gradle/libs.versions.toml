@@ -28,6 +28,7 @@ ccp = "2.7.1"
 activity = "1.9.3"
 firebaseFirestore = "25.1.1"
 firebaseStorageKtx = "21.0.1"
+firebaseUIFirestore = "8.0.2"
 
 [libraries]
 imagepicker = { group = "com.github.dhaval2404", name = "imagepicker", version.ref = "imagepicker"}
@@ -63,6 +64,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-ui-firestore = { group = "com.firebaseui", name = "firebase-ui-firestore", version.ref = "firebaseUIFirestore" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 [plugins]

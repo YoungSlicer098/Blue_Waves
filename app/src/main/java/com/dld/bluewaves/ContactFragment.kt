@@ -10,16 +10,7 @@ import com.dld.bluewaves.databinding.FragmentContactBinding
 import com.dld.bluewaves.databinding.FragmentTrackerBinding
 import com.google.firebase.auth.FirebaseAuth
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ContactFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ContactFragment : Fragment() {
 
     private var _binding: FragmentContactBinding? = null
@@ -36,12 +27,12 @@ class ContactFragment : Fragment() {
 
         // Access the current user and safely handle nullability
         val user = auth.currentUser
-        mBinding.user.text = "Hello, ${user?.email ?: "Guest"}"
 
-        // Set up logout button listener
-        mBinding.logout.setOnClickListener {
-            MainActivity.logout(context as MainActivity)
+
+        mBinding.searchET.setOnClickListener {
+            MainActivity.searchUserActivity(context as MainActivity)
         }
+
 
         return mBinding.root
     }

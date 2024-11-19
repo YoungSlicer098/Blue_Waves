@@ -5,15 +5,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.dld.bluewaves.databinding.ActivityMainBinding
 import com.dld.bluewaves.databinding.TabbarBinding
-import com.dld.bluewaves.databinding.ToolbarBinding
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.view.ViewPagerAdapter
 import com.google.android.material.navigation.NavigationView
@@ -21,6 +17,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
 
@@ -33,7 +30,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
         tabbar = TabbarBinding.bind(mBinding.tabbar.root)
@@ -117,6 +113,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val intent = Intent(context, AuthActivity::class.java)
             context.startActivity(intent)
             context.finish()
+        }
+
+        fun searchUserActivity(context: MainActivity) {
+            val intent = Intent(context, SearchUserActivity::class.java)
+            context.startActivity(intent)
+            context.overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
         }
     }
 

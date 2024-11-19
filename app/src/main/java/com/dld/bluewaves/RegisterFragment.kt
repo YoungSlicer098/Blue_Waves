@@ -45,12 +45,11 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     private lateinit var auth: FirebaseAuth
     private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
     private lateinit var selectedImageUri: Uri
-    private lateinit var userModel: UserModel
+    private var userModel = UserModel()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         auth = FirebaseAuth.getInstance()
-        userModel = UserModel
         // Initialize the image picker launcher
         imagePickLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -125,7 +124,10 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                 inProgress(false)
             }
         } else{
-            userModel.displayName = value
+            userModel = userModel.copy(
+                displayName = value,
+                displayNameLowercase = value.lowercase()
+            )
         }
 
 
@@ -148,7 +150,9 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                 inProgress(false)
             }
         }else {
-            userModel.email = value
+            userModel = userModel.copy(
+                email = value
+            )
         }
 
         return errorMessage == null
@@ -233,10 +237,10 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         if (view != null){
             when (view.id){
                 R.id.loginNow -> {
-                    AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
+                    AuthActivity.backPressed(context as AuthActivity)
                 }
                 R.id.backBtn -> {
-                    AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
+                    AuthActivity.backPressed(context as AuthActivity)
                 }
                 R.id.register_btn -> {
                     inProgress(true)
@@ -253,10 +257,13 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                             if (task.isSuccessful) {
                                 val currentUser = auth.currentUser
                                 if (currentUser != null) {
-                                    userModel.userid = currentUser.uid
-                                    userModel.role = "customer"
-                                    userModel.lastSession = Timestamp.now()
-                                    userModel.profilePic = ""
+                                    userModel = userModel.copy(
+                                        userId = currentUser.uid,
+                                        role = "customer",
+                                        lastSession = Timestamp.now(),
+                                        profilePic = ""
+                                    )
+
 
                                     // Save user details to Firestore
                                     FirebaseUtils.createUserDetails().set(userModel!!)

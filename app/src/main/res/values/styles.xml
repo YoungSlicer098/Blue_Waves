@@ -24,9 +24,18 @@
         <item name="errorEnabled">true</item>
         <item name="hintTextColor">@color/hintText</item>
     </style>
+    <style name="MyButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/buttonColor</item>
+    </style>
 
     <style name="Theme.BlueWaves.Launch" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/splashscreen</item>
+    </style>
+
+    <style name="Transparent" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
 </resources>

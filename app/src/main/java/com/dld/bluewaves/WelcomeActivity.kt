@@ -28,7 +28,6 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         mBinding = ActivityWelcomeBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
         auth = FirebaseAuth.getInstance()
@@ -70,13 +69,6 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
         // Start button click listener to launch AuthActivity
         incWelcome.startBtn.setOnClickListener {
-            //Testing Run for database
-            database.setValue("Ya hallo").addOnCompleteListener{
-                Toast.makeText(this, "Database updated", Toast.LENGTH_SHORT).show()
-            }.addOnFailureListener {
-                Toast.makeText(this, "Database Failed", Toast.LENGTH_SHORT).show()
-            }
-
             val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
         }

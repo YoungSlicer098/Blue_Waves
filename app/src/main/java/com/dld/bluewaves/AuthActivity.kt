@@ -16,6 +16,7 @@ import com.dld.bluewaves.utils.AndroidUtils
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 
+@Suppress("DEPRECATION")
 class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener  {
 
     private lateinit var toggle: ActionBarDrawerToggle
@@ -34,7 +35,6 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         mBinding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
         auth = FirebaseAuth.getInstance()
@@ -90,6 +90,11 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             transaction.commit()
         }
+
+        fun backPressed(context: AuthActivity){
+            context.onBackPressed()
+        }
+
         fun login(context: AuthActivity){
             val intent = Intent(context, MainActivity::class.java)
             context.startActivity(intent)
