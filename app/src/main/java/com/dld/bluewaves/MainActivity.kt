@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun validationSideBar(auth: FirebaseAuth) {
+    private fun validationSideBar(auth: FirebaseAuth) {
         val user = auth.currentUser
 
         if (user == null) {
@@ -140,7 +140,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT).show()
-            R.id.nav_profile -> Toast.makeText(this, "Profile!", Toast.LENGTH_SHORT).show()
+            R.id.nav_profile -> {
+                val intent = Intent(this, ProfileActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
+            }
             R.id.nav_logout -> {
                 FirebaseAuth.getInstance().signOut()
                 AndroidUtils.showToast(this, "Logged out!")

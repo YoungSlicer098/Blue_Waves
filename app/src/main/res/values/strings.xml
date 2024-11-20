@@ -44,4 +44,12 @@
     <string name="display_name">Display Name</string>
     <string name="search">Search</string>
     <string name="search_user">Search User...</string>
+    <string name="password_secret">**************</string>
+    <string name="role">Role:</string>
+    <string name="passwordask">Password:</string>
+    <string name="emailask">Email:</string>
+    <string name="edit">Edit</string>
+    <string name="display_nameask">Display Name:</string>
+    <string name="logo">Logo</string>
+
 </resources>

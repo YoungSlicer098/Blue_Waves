@@ -23,6 +23,12 @@ object FirebaseUtils {
             .document(currentUserId() ?: throw IllegalStateException("User not logged in"))
     }
 
+    fun currentUserDetails(): DocumentReference {
+        return FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(currentUserId() ?: throw IllegalStateException("User not logged in"))
+    }
+
     fun allUserCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection("users")
     }

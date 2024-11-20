@@ -18,13 +18,13 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
+@Suppress("DEPRECATION")
 class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var mBinding: ActivityWelcomeBinding
     private lateinit var incWelcome: WelcomeLayoutBinding
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +32,6 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         setContentView(mBinding.root)
         auth = FirebaseAuth.getInstance()
         incWelcome = WelcomeLayoutBinding.bind(mBinding.layoutWelcome.root)
-        database = FirebaseDatabase.getInstance().getReference("Users")
 
 
         setSupportActionBar(mBinding.toolbar)
@@ -78,7 +77,7 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         validationSideBar(FirebaseAuth.getInstance())
     }
 
-    fun validationSideBar(auth: FirebaseAuth) {
+    private fun validationSideBar(auth: FirebaseAuth) {
         val user = auth.currentUser
 
         if (user == null) {
@@ -96,11 +95,18 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT).show()
-            R.id.nav_profile -> Toast.makeText(this, "Profile!", Toast.LENGTH_SHORT).show()
+            R.id.nav_profile -> {
+                val intent = Intent(this, ProfileActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
+            }
             R.id.nav_logout -> {
                 FirebaseAuth.getInstance().signOut()
                 AndroidUtils.showToast(this, "Logged out!")
                 validationSideBar(FirebaseAuth.getInstance())
+                val intent = Intent(this, AuthActivity::class.java)
+                startActivity(intent)
+                this.finish()
             }
         }
         validationSideBar(FirebaseAuth.getInstance())
