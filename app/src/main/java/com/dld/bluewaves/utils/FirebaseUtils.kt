@@ -1,12 +1,12 @@
 package com.dld.bluewaves.utils
 
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.security.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -55,10 +55,10 @@ object FirebaseUtils {
         return allUserCollectionReference().document(otherUserId)
     }
 
-//    fun timestampToString(timestamp: Timestamp): String {
-//        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-//        return dateFormat.format(timestamp.toDate())
-//    }
+    fun timestampToString(timestamp: Timestamp): String {
+        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return dateFormat.format(timestamp.toDate())
+    }
 
     fun logout() {
         FirebaseAuth.getInstance().signOut()

@@ -1,6 +1,7 @@
 package com.dld.bluewaves
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dld.bluewaves.adapter.SearchUserRecyclerAdapter
@@ -21,11 +22,21 @@ class SearchUserActivity : AppCompatActivity() {
         mBinding = ActivitySearchUserBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
+        val recyclerView = mBinding.recyclerView
+        (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false
+
         mBinding.searchET.requestFocus()
 
         mBinding.backBtn.setOnClickListener {
             onBackPressed()
         }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+                overridePendingTransition(R.anim.fade_in_static, R.anim.fade_out_down)
+            }
+        })
+
         mBinding.searchBtn.setOnClickListener {
             val searchInput: String = mBinding.searchET.text.toString()
             if (searchInput.isEmpty() || searchInput.length < 2) {
@@ -41,50 +52,50 @@ class SearchUserActivity : AppCompatActivity() {
                 }
 
             }
+
+
+
             setupSearchRecyclerView(searchInput)
         }
     }
-
     private fun setupSearchRecyclerView(searchInput: String) {
+        adapter?.stopListening()
+        adapter = null
 
         val formattedInput = searchInput.lowercase()
-
-        val query: Query = FirebaseUtils.allUserCollectionReference()
+        val query = FirebaseUtils.allUserCollectionReference()
             .orderBy("displayNameLowercase")
             .startAt(formattedInput)
             .endAt(formattedInput + "\uf8ff")
 
-        val options: FirestoreRecyclerOptions<UserModel> = FirestoreRecyclerOptions.Builder<UserModel>()
-            .setQuery(query, UserModel::class.java).build()
+        val options = FirestoreRecyclerOptions.Builder<UserModel>()
+            .setQuery(query, UserModel::class.java)
+            .setLifecycleOwner(this) // Automatically starts/stops listening with lifecycle
+            .build()
 
-        adapter = SearchUserRecyclerAdapter(options, applicationContext)
-        mBinding.recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = SearchUserRecyclerAdapter(options, this, this)
+        mBinding.recyclerView.setLayoutManager(LinearLayoutManager(this))
         mBinding.recyclerView.adapter = adapter
         adapter?.startListening()
     }
 
     override fun onStart() {
         super.onStart()
-        if(adapter!=null){
-            adapter!!.startListening()
-        }
+        adapter?.startListening() // Ensure adapter starts listening here
     }
+
     override fun onStop() {
         super.onStop()
-        if(adapter!=null){
-            adapter!!.stopListening()
-        }
+        adapter?.stopListening() // Properly stop adapter when activity stops
     }
 
     override fun onResume() {
         super.onResume()
-        if(adapter!=null){
-            adapter!!.startListening()
-        }
+        adapter?.startListening() // Restart listening in case onResume is called without onStart
     }
-    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        overridePendingTransition(R.anim.fade_in_static, R.anim.fade_out_down)
+
+    override fun onPause() {
+        super.onPause()
+        adapter?.stopListening() // Avoid memory leaks or inconsistencies
     }
 }

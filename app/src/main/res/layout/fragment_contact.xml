@@ -42,31 +42,10 @@
                         android:focusable="false"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
-        <TextView
-            android:layout_width="wrap_content"
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Contact View"
-            android:textSize="30sp"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textColor="@color/text"/>
-
-        <TextView
-            android:id="@+id/user"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello, "
-            android:textSize="15sp"
-            android:gravity="center"
-            android:textColor="@color/text" />
-
-        <Button
-            android:id="@+id/logout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Logout"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/rounded_corner_fill"/>
+            android:id="@+id/recyclerView"/>
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

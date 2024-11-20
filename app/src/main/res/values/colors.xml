@@ -19,4 +19,8 @@
     <color name="tabbar">#114473</color>
     <color name="selectedText">#0282A9</color>
 
+    <color name="chat_color_sender">#2196F3</color>
+    <color name="chat_color_receiver">#673AB7</color>
+
+
 </resources>

@@ -145,6 +145,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 FirebaseAuth.getInstance().signOut()
                 AndroidUtils.showToast(this, "Logged out!")
                 validationSideBar(FirebaseAuth.getInstance())
+                val intent = Intent(this, AuthActivity::class.java)
+                startActivity(intent)
+                this.finish()
             }
         }
         validationSideBar(FirebaseAuth.getInstance())

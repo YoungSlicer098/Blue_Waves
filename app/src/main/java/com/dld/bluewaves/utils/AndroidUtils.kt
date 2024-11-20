@@ -14,14 +14,14 @@ object AndroidUtils {
     fun passUserModelAsIntent(intent: Intent, userModel: UserModel){
         intent.putExtra("displayName", userModel.displayName)
         intent.putExtra("email", userModel.email)
-        intent.putExtra("userid", userModel.userid)
+        intent.putExtra("userId", userModel.userId)
     }
 
     fun  getUserModelFromIntent(intent: Intent): UserModel {
-        val userModel: UserModel = UserModel
+        val userModel: UserModel = UserModel()
         userModel.displayName = intent.getStringExtra("displayName")!!
         userModel.email = intent.getStringExtra("email")!!
-        userModel.userid = intent.getStringExtra("userid")!!
+        userModel.userId = intent.getStringExtra("userId")!!
         return userModel
 
     }
