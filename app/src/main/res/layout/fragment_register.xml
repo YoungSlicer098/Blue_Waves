@@ -63,7 +63,7 @@
                     android:paddingVertical="8dp"
                     android:textColor="@color/text"
                     android:textColorHint="@color/hintText"
-                    android:maxLength="24"/>
+                    android:maxLength="18"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

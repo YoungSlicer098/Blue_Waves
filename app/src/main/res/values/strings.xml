@@ -51,5 +51,8 @@
     <string name="edit">Edit</string>
     <string name="display_nameask">Display Name:</string>
     <string name="logo">Logo</string>
+    <string name="no_user_found">No User Found</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
 
 </resources>

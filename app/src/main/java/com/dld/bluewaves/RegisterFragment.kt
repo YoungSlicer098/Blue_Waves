@@ -122,7 +122,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         } else{
             userModel = userModel.copy(
                 displayName = value,
-                displayNameLowercase = value.lowercase()
+                displayNameLowercase = value.lowercase(),
+                searchKeywords = generateSearchKeywords(value)
             )
         }
 
@@ -227,6 +228,26 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             mBinding.progressBar.visibility = View.GONE
             mBinding.registerBtn.visibility = View.VISIBLE
         }
+    }
+
+    fun generateSearchKeywords(displayName: String): List<String> {
+        val keywords = mutableSetOf<String>()
+        val words = displayName.lowercase().split(" ")
+
+        // Add full name and individual words
+        keywords.add(displayName.lowercase())
+        keywords.addAll(words)
+
+        // Add substrings for each word
+        words.forEach { word ->
+            for (i in 1..word.length) {
+                for (j in 0..word.length - i) {
+                    keywords.add(word.substring(j, j + i))
+                }
+            }
+        }
+
+        return keywords.toList()
     }
 
     override fun onClick(view: View?) {

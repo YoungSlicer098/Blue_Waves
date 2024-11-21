@@ -55,19 +55,15 @@ object FirebaseUtils {
         return FirebaseFirestore.getInstance().collection("chatrooms")
     }
 
-    fun getOtherUserFromChatroom(userIds: List<String>): DocumentReference {
+    fun getOtherUserFromChatroom(userIds: List<String?>): DocumentReference {
         val currentUserId = currentUserId() ?: throw IllegalStateException("User not logged in")
         val otherUserId = if (userIds[0] == currentUserId) userIds[1] else userIds[0]
-        return allUserCollectionReference().document(otherUserId)
+        return allUserCollectionReference().document(otherUserId!!)
     }
 
     fun timestampToString(timestamp: Timestamp): String {
         val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         return dateFormat.format(timestamp.toDate())
-    }
-
-    fun logout() {
-        FirebaseAuth.getInstance().signOut()
     }
 
     fun getCurrentProfilePicStorageRef(): StorageReference {

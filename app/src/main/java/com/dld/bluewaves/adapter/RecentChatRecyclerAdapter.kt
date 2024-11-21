@@ -10,15 +10,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.dld.bluewaves.ChatActivity
 import com.dld.bluewaves.R
-import com.dld.bluewaves.SearchUserActivity
 import com.dld.bluewaves.model.ChatRoomModel
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentSnapshot
 
 class RecentChatRecyclerAdapter(options: FirestoreRecyclerOptions<ChatRoomModel>,
                                 private val context: Context
@@ -36,34 +33,64 @@ class RecentChatRecyclerAdapter(options: FirestoreRecyclerOptions<ChatRoomModel>
     }
 
     override fun onBindViewHolder(holder: ChatRoomModelViewHolder, position: Int, model: ChatRoomModel) {
-        FirebaseUtils.getOtherUserFromChatroom(model.userIds as List<String>).get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val lastMessageSentByMe: Boolean = model.lastMessageSenderId == FirebaseUtils.currentUserId()
+        // Fetch the other user's details based on chat room's userIds
+        FirebaseUtils.getOtherUserFromChatroom(model.userIds).get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful && task.result != null) {
+                    val otherUserModel = task.result.toObject(UserModel::class.java)
 
+                    if (otherUserModel != null) {
+                        // Display Name
+                        holder.displayNameText.text = if (otherUserModel.userId == FirebaseUtils.currentUserId()) {
+                            "${otherUserModel.displayName} (Me)"
+                        } else {
+                            otherUserModel.displayName
+                        }
 
-                val otherUserModel: UserModel = task.getResult().toObject(UserModel::class.java)!!
-                holder.displayNameText.text = otherUserModel.displayName
-                if (lastMessageSentByMe && model.lastMessage.length > 20) {
-                    holder.lastMessageText.text = "You: " + model.lastMessage.substring(0,20) + "..."
-                } else if(lastMessageSentByMe) {
-                    holder.lastMessageText.text = "You: " + model.lastMessage
-                } else if(model.lastMessage.length > 20){
-                    holder.lastMessageText.text = model.lastMessage.substring(0,20) + "..."
-                } else{
-                    holder.lastMessageText.text = model.lastMessage
-                }
-                holder.lastMessageTime.text = FirebaseUtils.timestampToString(model.lastMessageTimestamp!!)
+                        // Last Chat Log
+                        val lastMessageSentByMe = model.lastMessageSenderId == FirebaseUtils.currentUserId()
+                        holder.lastMessageText.text = when {
+                            lastMessageSentByMe && model.lastMessage.length > 20 -> "You: ${model.lastMessage.substring(0, 20)}..."
+                            lastMessageSentByMe -> "You: ${model.lastMessage}"
+                            model.lastMessage.length > 20 -> "${model.lastMessage.substring(0, 20)}..."
+                            else -> model.lastMessage
+                        }
 
-                holder.itemView.setOnClickListener {
-                    val intent = Intent(context, ChatActivity::class.java).apply {
-                        AndroidUtils.passUserModelAsIntent(this, otherUserModel)
-                        this.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        // Last Interaction or Time Message
+                        holder.lastMessageTime.text = FirebaseUtils.timestampToString(model.lastMessageTimestamp!!)
+
+                        // Set OnClickListener to navigate to ChatActivity
+                        holder.itemView.setOnClickListener {
+                            val intent = Intent(context, ChatActivity::class.java).apply {
+                                AndroidUtils.passUserModelAsIntent(this, otherUserModel)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        }
+                    } else {
+                        // Handle case where user data is missing or null
+                        bindEmptyState(holder)
                     }
-                    context.startActivity(intent)
+                } else {
+                    // Handle Firestore errors or empty data
+                    bindEmptyState(holder)
                 }
             }
-        }
+            .addOnFailureListener { exception ->
+                // Handle failure to fetch user data
+                exception.printStackTrace()
+                bindEmptyState(holder)
+            }
     }
+
+    // Helper function to handle empty or invalid user data
+    private fun bindEmptyState(holder: ChatRoomModelViewHolder) {
+        holder.displayNameText.text = "Unknown User"
+        holder.lastMessageText.text = "No recent messages"
+        holder.lastMessageTime.text = "--"
+        holder.itemView.setOnClickListener(null) // Disable click
+    }
+
 
     override fun getItemId(position: Int): Long {
         return snapshots.getSnapshot(position).id.hashCode().toLong()

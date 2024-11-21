@@ -1,6 +1,7 @@
 package com.dld.bluewaves
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +26,8 @@ class SearchUserActivity : AppCompatActivity() {
         val recyclerView = mBinding.recyclerView
         (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false
 
+        setupRecyclerView()
+
         mBinding.searchET.requestFocus()
 
         mBinding.backBtn.setOnClickListener {
@@ -38,61 +41,96 @@ class SearchUserActivity : AppCompatActivity() {
         })
 
         mBinding.searchBtn.setOnClickListener {
-            val searchInput: String = mBinding.searchET.text.toString()
-            if (searchInput.isEmpty() || searchInput.length < 2) {
-                mBinding.searchTil.apply(){
-                    isErrorEnabled = true
-                    error = "Invalid username"
-                    return@setOnClickListener
-                }
-            }else {
-                mBinding.searchTil.apply {
-                    isErrorEnabled = false
-                    error = null
-                }
-
-            }
-
-
-
+            val searchInput = mBinding.searchET.text.toString()
             setupSearchRecyclerView(searchInput)
         }
     }
+
+
+    private fun setupRecyclerView() {
+        setupSearchRecyclerView("") // Initialize with empty search input to show all users
+    }
+
     private fun setupSearchRecyclerView(searchInput: String) {
         adapter?.stopListening()
         adapter = null
 
-        val formattedInput = searchInput.lowercase()
-        val query = FirebaseUtils.allUserCollectionReference()
-            .orderBy("displayNameLowercase")
-            .startAt(formattedInput)
-            .endAt(formattedInput + "\uf8ff")
+        inProgress(true)
+
+        val formattedInput = searchInput.lowercase().trim()
+        val query = if (formattedInput.isEmpty()) {
+            // Show all users
+            FirebaseUtils.allUserCollectionReference()
+                .orderBy("displayNameLowercase")
+        } else {
+            // Search for specific users using keywords
+            FirebaseUtils.allUserCollectionReference()
+                .whereArrayContainsAny("searchKeywords", listOf(formattedInput))
+        }
+
+        // Fetch the results to check if we have any documents
+        query.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val querySnapshot = task.result
+                if (querySnapshot != null && querySnapshot.isEmpty) {
+                    noUserFound(true) // Show empty state if no results found
+                } else {
+                    noUserFound(false) // Hide empty state if there are results
+                }
+            } else {
+                noUserFound(false) // Hide empty state in case of an error
+            }
+        }
 
         val options = FirestoreRecyclerOptions.Builder<UserModel>()
             .setQuery(query, UserModel::class.java)
-            .setLifecycleOwner(this) // Automatically starts/stops listening with lifecycle
+            .setLifecycleOwner(this)
             .build()
 
         adapter = SearchUserRecyclerAdapter(options, this, this)
-        mBinding.recyclerView.setLayoutManager(LinearLayoutManager(this))
+        mBinding.recyclerView.layoutManager = LinearLayoutManager(this)
         mBinding.recyclerView.adapter = adapter
         adapter?.startListening()
+
+        inProgress(false)
     }
+
+    private fun inProgress(inProgress: Boolean) {
+        if (inProgress) {
+            mBinding.progressBar.visibility = View.VISIBLE
+            mBinding.searchBtn.isEnabled = false
+        } else {
+            mBinding.progressBar.visibility = View.GONE
+            mBinding.searchBtn.isEnabled = true
+        }
+    }
+
+    private fun noUserFound(noUserFound: Boolean) {
+        if (noUserFound) {
+            mBinding.emptyLayout.visibility = View.VISIBLE
+        } else {
+            mBinding.emptyLayout.visibility = View.GONE
+        }
+    }
+
 
     override fun onStart() {
         super.onStart()
         adapter?.startListening() // Ensure adapter starts listening here
     }
 
+
     override fun onStop() {
         super.onStop()
         adapter?.stopListening() // Properly stop adapter when activity stops
     }
 
+
     override fun onResume() {
         super.onResume()
         adapter?.startListening() // Restart listening in case onResume is called without onStart
     }
+
 
     override fun onPause() {
         super.onPause()

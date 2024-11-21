@@ -9,5 +9,6 @@ data class UserModel(
     var displayNameLowercase: String = "",
     var email: String = "",
     var profilePic: String = "",
-    var role: String = ""
+    var role: String = "",
+    var searchKeywords: List<String>? = null
 )
