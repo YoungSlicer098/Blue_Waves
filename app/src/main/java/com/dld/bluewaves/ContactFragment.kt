@@ -44,6 +44,7 @@ class ContactFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter?.stopListening()
         adapter = null
+        inProgress(true)
 
         val query = FirebaseUtils.allChatroomCollectionReference()
             .whereArrayContains("userIds", FirebaseUtils.currentUserId()!!)
@@ -58,7 +59,19 @@ class ContactFragment : Fragment() {
         mBinding.recyclerView.setLayoutManager(LinearLayoutManager(context))
         mBinding.recyclerView.adapter = adapter
         adapter?.startListening()
+
+        inProgress(false)
     }
+
+
+    private fun inProgress(progress: Boolean) {
+        if (progress) {
+            mBinding.progressBar.visibility = View.VISIBLE
+        } else {
+            mBinding.progressBar.visibility = View.GONE
+        }
+    }
+
 
     override fun onStart() {
         super.onStart()

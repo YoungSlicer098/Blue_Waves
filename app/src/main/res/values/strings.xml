@@ -56,5 +56,20 @@
     <string name="new_password">New Password</string>
     <string name="upload">Upload</string>
     <string name="pictures">Pictures</string>
-
+    <string name="version">v0.51</string>
+    <string name="post_a_message">Post a Message</string>
+    <string name="just_now">Now</string>
+    <string name="yesterday">Yesterday</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
 </resources>

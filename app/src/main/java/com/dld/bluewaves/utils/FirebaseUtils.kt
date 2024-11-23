@@ -1,5 +1,7 @@
 package com.dld.bluewaves.utils
 
+import com.dld.bluewaves.model.AnnouncementModel
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
@@ -57,6 +59,27 @@ object FirebaseUtils {
 
     fun allChatroomCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection("chatrooms")
+    }
+
+    fun allAnnouncementCollectionReference(): CollectionReference {
+        return FirebaseFirestore.getInstance().collection("announcements")
+    }
+    fun createAnnouncement(model: AnnouncementModel): Task<DocumentReference> {
+        return allAnnouncementCollectionReference().add(model)
+    }
+
+    fun getAnnouncementReference(announcementId: String): DocumentReference {
+        return FirebaseFirestore.getInstance()
+            .collection("announcements").document(announcementId)
+    }
+    fun getUserAnnouncementReference(userId: String): DocumentReference {
+        return FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(userId)
+    }
+
+    fun deleteAnnouncement(annId: String): Task<Void> {
+        return getAnnouncementReference(annId).delete()
     }
 
     fun getOtherUserFromChatroom(userIds: List<String?>): DocumentReference {

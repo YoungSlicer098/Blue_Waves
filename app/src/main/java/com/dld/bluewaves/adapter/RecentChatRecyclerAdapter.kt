@@ -95,9 +95,13 @@ class RecentChatRecyclerAdapter(
                             else -> model.lastMessage
                         }
 
-                        // Last Interaction or Time Message
-                        holder.lastMessageTime.text =
-                            FirebaseUtils.timestampToString(model.lastMessageTimestamp!!)
+                        // Convert Firebase.Timestamp to milliseconds
+                        val timestamp = model.lastMessageTimestamp?.toDate()?.time ?: System.currentTimeMillis()
+
+                        // Format the timestamp to relative time
+                        val relativeTime = TimeUtils.getRelativeTime(context, timestamp)
+                        holder.lastMessageTime.text = relativeTime
+
 
                         // Set OnClickListener to navigate to ChatActivity
                         holder.itemView.setOnClickListener {
