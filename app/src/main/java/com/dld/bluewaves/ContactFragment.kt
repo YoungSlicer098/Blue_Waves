@@ -42,8 +42,6 @@ class ContactFragment : Fragment() {
 
 
     private fun setupRecyclerView() {
-        adapter?.stopListening()
-        adapter = null
         inProgress(true)
 
         val query = FirebaseUtils.allChatroomCollectionReference()
@@ -72,30 +70,30 @@ class ContactFragment : Fragment() {
         }
     }
 
-
-    override fun onStart() {
-        super.onStart()
-        adapter?.startListening() // Ensure adapter starts listening here
-    }
-
-    override fun onStop() {
-        super.onStop()
-        adapter?.stopListening() // Properly stop adapter when activity stops
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setupRecyclerView() // Ensure setupRecyclerView is called when the fragment resumes
-        adapter?.startListening() // Restart listening in case onResume is called without onStart
-    }
-
-    override fun onPause() {
-        super.onPause()
-        adapter?.stopListening() // Avoid memory leaks or inconsistencies
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null // Clear binding reference to prevent memory leaks
-    }
+//
+//    override fun onStart() {
+//        super.onStart()
+//        adapter?.startListening() // Ensure adapter starts listening here
+//    }
+//
+//    override fun onStop() {
+//        super.onStop()
+//        adapter?.stopListening() // Properly stop adapter when activity stops
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        adapter?.startListening()
+//
+//    }
+//
+//    override fun onPause(){
+//        super.onPause()
+//        adapter?.stopListening()
+//    }
+//
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        _binding = null // Clear binding reference to prevent memory leaks
+//    }
 }

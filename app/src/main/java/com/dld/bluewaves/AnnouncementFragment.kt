@@ -30,6 +30,8 @@ class AnnouncementFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private var adapter: AnnouncementRecyclerAdapter? = null
     private lateinit var annModel: AnnouncementModel
+    private var times = 0
+    private var hasMoreData = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,15 +61,19 @@ class AnnouncementFragment : Fragment() {
                     inProgress(true)
                     if (validateMessage(dialogPost)) {
                         annModel = annModel.copy(
-                            annId = FirebaseUtils.allAnnouncementCollectionReference().document().id,
+                            annId = FirebaseUtils.allAnnouncementCollectionReference()
+                                .document().id,
                             userId = auth.currentUser!!.uid,
                             message = dialogPost.messageET.text.toString(),
                             timestamp = Timestamp.now()
                         )
                         FirebaseUtils.allAnnouncementCollectionReference().document(annModel.annId)
-                            .set(annModel).addOnCompleteListener{
+                            .set(annModel).addOnCompleteListener {
                                 inProgress(false)
-                                AndroidUtils.showToast(context as MainActivity, "Announcement posted")
+                                AndroidUtils.showToast(
+                                    context as MainActivity,
+                                    "Announcement posted"
+                                )
                                 dialog.dismiss()
                             }
                     }
@@ -78,7 +84,7 @@ class AnnouncementFragment : Fragment() {
                 if (hasFocus) {
                     dialogPost.messageTil.error = null
                     dialogPost.messageTil.isErrorEnabled = false
-                }else{
+                } else {
                     validateMessage(dialogPost)
                 }
             }
@@ -90,11 +96,33 @@ class AnnouncementFragment : Fragment() {
 
         setupRecyclerView()
 
+        mBinding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                // Don't load more data if there's no more data to load
+                if (!hasMoreData) return
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+
+                // Check if the user has scrolled to the bottom of the list
+                if ((visibleItemCount + pastVisibleItems) >= totalItemCount ||
+                    layoutManager.findLastCompletelyVisibleItemPosition() == totalItemCount - 1) {
+                    // Load more data if at the bottom and there is more data
+                    loadMoreData()
+                }
+            }
+        })
+
+
+
         return mBinding.root
 
 
     }
-
 
 
     private fun validateMessage(dialogPost: DialogPostAnnouncementBinding): Boolean {
@@ -106,42 +134,90 @@ class AnnouncementFragment : Fragment() {
             dialogPost.messageTil.error = "Message is too short"
             dialogPost.messageTil.isErrorEnabled = true
 
-        }
-        else {
+        } else {
             dialogPost.messageTil.error = null
             dialogPost.messageTil.isErrorEnabled = false
         }
         return dialogPost.messageTil.error == null
     }
-    private fun setupRecyclerView() {
-        adapter?.stopListening()
-        adapter = null
 
-        inProgress(true) // Show the progress bar while setting up
+
+    private fun setupRecyclerView() {
+        inProgress(true)
 
         val query = FirebaseUtils.allAnnouncementCollectionReference()
-            .orderBy("timestamp", Query.Direction.DESCENDING) // Latest first
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(20)
 
         val options = FirestoreRecyclerOptions.Builder<AnnouncementModel>()
             .setQuery(query, AnnouncementModel::class.java)
-            .setLifecycleOwner(this) // Automatically starts/stops listening with lifecycle
+            .setLifecycleOwner(viewLifecycleOwner)
             .build()
 
         adapter = AnnouncementRecyclerAdapter(options, context as MainActivity)
-
-        // Ensure the RecyclerView is initialized before data is loaded
         mBinding.recyclerView.layoutManager = LinearLayoutManager(context)
         mBinding.recyclerView.adapter = adapter
-
-        adapter?.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onChanged() {
-                super.onChanged()
-                inProgress(false) // Hide the progress bar once data is loaded
-            }
-        })
-        inProgress(false)
         adapter?.startListening()
+
+        inProgress(false)
+
     }
+
+    private fun loadMoreData() {
+        if (!hasMoreData) return // Stop if no more data is available
+
+        inProgress(true) // Show progress indicator
+
+        val currentSnapshots = adapter?.snapshots ?: return inProgress(false) // Ensure snapshots are not null
+
+        if (currentSnapshots.isEmpty()) {
+            // If there are no items yet, stop loading more
+            hasMoreData = false
+            inProgress(false)
+            return
+        }
+
+        val lastVisibleItem = (mBinding.recyclerView.layoutManager as LinearLayoutManager)
+            .findLastVisibleItemPosition()
+
+        if (lastVisibleItem < 0 || lastVisibleItem >= currentSnapshots.size) {
+            // If the last item index is invalid, stop loading
+            inProgress(false)
+            return
+        }
+
+        val lastVisibleDocument = currentSnapshots.getSnapshot(lastVisibleItem)
+
+        // Prepare the query for the next batch of data
+        val nextQuery = FirebaseUtils.allAnnouncementCollectionReference()
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .startAfter(lastVisibleDocument) // Start after the last visible document
+            .limit(20) // Limit the results for pagination
+
+        nextQuery.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                if (task.result?.isEmpty == true) {
+                    // No more data available
+                    hasMoreData = false
+                } else {
+                    // Update the adapter with the new query results
+                    val options = FirestoreRecyclerOptions.Builder<AnnouncementModel>()
+                        .setQuery(nextQuery, AnnouncementModel::class.java)
+                        .setLifecycleOwner(viewLifecycleOwner)
+                        .build()
+
+                    mBinding.recyclerView.post {
+                        adapter?.updateOptions(options)
+                    }
+                }
+            } else {
+                // Handle errors during data loading
+                AndroidUtils.showToast(context as MainActivity, "Error loading more data: ${task.exception?.message}")
+            }
+            inProgress(false) // Hide progress indicator
+        }
+    }
+
 
     private fun inProgress(progress: Boolean) {
         if (progress) {
@@ -151,29 +227,41 @@ class AnnouncementFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        adapter?.startListening() // Ensure adapter starts listening here
-    }
-
-    override fun onStop() {
-        super.onStop()
-        adapter?.stopListening() // Properly stop adapter when activity stops
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setupRecyclerView() // Ensure setupRecyclerView is called when the fragment resumes
-        adapter?.startListening() // Restart listening in case onResume is called without onStart
-    }
-
-    override fun onPause() {
-        super.onPause()
-        adapter?.stopListening() // Avoid memory leaks or inconsistencies
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null // Clear binding reference to prevent memory leaks
-    }
+//
+//    // Lifecycle management for FirestoreRecyclerAdapter
+//    override fun onStart() {
+//        super.onStart()
+//        if (adapter != null) {
+//            adapter?.startListening() // Start listening once when the fragment starts
+//        }
+//    }
+//
+//    override fun onStop() {
+//        super.onStop()
+//        if (adapter != null) {
+//            adapter?.stopListening() // Stop listening when the fragment is no longer in the foreground
+//        }
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        if (adapter != null) {
+//            adapter?.startListening() // Ensure adapter starts listening here
+//        }
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        if (adapter != null) {
+//            adapter?.stopListening() // Properly stop listening when the fragment is paused
+//        }
+//    }
+//
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        if (adapter != null) {
+//            adapter?.stopListening() // Clean up to avoid memory leaks
+//        }
+//        _binding = null // Clear binding reference to prevent memory leaks
+//    }
 }

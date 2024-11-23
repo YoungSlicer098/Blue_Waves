@@ -85,6 +85,7 @@ class AnnouncementRecyclerAdapter(
                                 .addOnSuccessListener {
                                     FirebaseUtils.deleteAnnouncement(model.annId)
                                     AndroidUtils.showToast(context, "Announcement deleted successfully.")
+                                    notifyItemRemoved(position)
                                 }
                                 .addOnFailureListener { e ->
                                     AndroidUtils.showToast(context, "Failed to delete: ${e.message}")
@@ -100,7 +101,9 @@ class AnnouncementRecyclerAdapter(
         }
 
     }
-
+    override fun getItemId(position: Int): Long {
+        return snapshots.getSnapshot(position).id.hashCode().toLong()  // Use the unique ID from Firestore
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnnouncementModelViewHolder {
         val view = LayoutInflater.from(parent.context)
