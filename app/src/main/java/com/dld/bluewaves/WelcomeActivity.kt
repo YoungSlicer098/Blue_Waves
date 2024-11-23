@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -14,9 +13,7 @@ import com.dld.bluewaves.databinding.WelcomeLayoutBinding
 import com.dld.bluewaves.utils.AndroidUtils
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 @Suppress("DEPRECATION")
 class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -55,7 +52,6 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         }
 
 
-
         // Initialize the navigation view and set the listener
         mBinding.sidebarNav.setNavigationItemSelectedListener(this)
 
@@ -72,6 +68,7 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
             startActivity(intent)
         }
     }
+
     override fun onResume() {
         super.onResume()
         validationSideBar(FirebaseAuth.getInstance())
@@ -94,19 +91,26 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT).show()
+            R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT)
+                .show()
+
             R.id.nav_profile -> {
                 val intent = Intent(this, ProfileActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
             }
+
             R.id.nav_logout -> {
-                FirebaseAuth.getInstance().signOut()
-                AndroidUtils.showToast(this, "Logged out!")
-                validationSideBar(FirebaseAuth.getInstance())
-                val intent = Intent(this, AuthActivity::class.java)
-                startActivity(intent)
-                this.finish()
+                FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        FirebaseAuth.getInstance().signOut()
+                        AndroidUtils.showToast(this, "Logged out!")
+                        validationSideBar(FirebaseAuth.getInstance())
+                        val intent = Intent(this, SplashActivity::class.java)
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        startActivity(intent)
+                    }
+                }
             }
         }
         validationSideBar(FirebaseAuth.getInstance())

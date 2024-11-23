@@ -1,16 +1,13 @@
 package com.dld.bluewaves
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.view.KeyEvent
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.dld.bluewaves.databinding.FragmentLoginBinding
-import com.dld.bluewaves.databinding.FragmentRegisterBinding
 import com.dld.bluewaves.utils.AndroidUtils
 import com.google.firebase.auth.FirebaseAuth
 
@@ -25,7 +22,7 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListener,
-View.OnKeyListener{
+    View.OnKeyListener {
 
     private var _binding: FragmentLoginBinding? = null
     private val mBinding get() = _binding!!
@@ -35,7 +32,7 @@ View.OnKeyListener{
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout and initialize binding
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         auth = FirebaseAuth.getInstance()
@@ -48,7 +45,6 @@ View.OnKeyListener{
         mBinding.loginBtn.setOnClickListener(this)
 
         // OnClick Events
-
 
 
         return mBinding.root
@@ -132,10 +128,11 @@ View.OnKeyListener{
 
     override fun onClick(view: View?) {
         if (view != null) {
-            when (view.id){
+            when (view.id) {
                 R.id.registerNow -> {
                     AuthActivity.changeFragment(context as AuthActivity, RegisterFragment(), true)
                 }
+
                 R.id.loginBtn -> {
                     inProgress(true)
                     val email = mBinding.emailET.text.toString()
@@ -151,7 +148,10 @@ View.OnKeyListener{
                                 AndroidUtils.showToast(context as AuthActivity, "Logged in.")
                                 AuthActivity.login(context as AuthActivity)
                             } else {
-                                AndroidUtils.showToast(context as AuthActivity, "Wrong password or email.")
+                                AndroidUtils.showToast(
+                                    context as AuthActivity,
+                                    "Wrong password or email."
+                                )
                             }
                         }
                 }
@@ -171,12 +171,13 @@ View.OnKeyListener{
                         validateEmail()
                     }
                 }
+
                 R.id.passwordET -> {
                     if (hasFocus) {
                         if (mBinding.passwordTil.isErrorEnabled) {
                             mBinding.passwordTil.isErrorEnabled = false
                         }
-                    }else {
+                    } else {
                         validatePassword()
                     }
                 }

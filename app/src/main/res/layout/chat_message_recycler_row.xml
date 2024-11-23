@@ -3,11 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <include layout="@layout/profile_pic_view"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/profile_pic_layout"
+        android:layout_marginStart="4dp"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="3dp"
         android:layout_marginStart="80dp"
+        android:layout_marginEnd="4dp"
         android:background="@drawable/rounded_corner_chat_fill"
         android:backgroundTint="@color/chat_color_sender"
         android:padding="8dp"
@@ -28,6 +35,7 @@
         android:padding="8dp"
         android:layout_margin="3dp"
         android:layout_marginEnd="80dp"
+        android:layout_toEndOf="@id/profile_pic_layout"
         android:id="@+id/left_chat_layout">
         <TextView
             android:layout_width="wrap_content"

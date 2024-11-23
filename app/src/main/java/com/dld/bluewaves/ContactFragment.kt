@@ -1,18 +1,14 @@
 package com.dld.bluewaves
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dld.bluewaves.adapter.RecentChatRecyclerAdapter
-import com.dld.bluewaves.adapter.SearchUserRecyclerAdapter
-import com.dld.bluewaves.databinding.FragmentAnnouncementBinding
 import com.dld.bluewaves.databinding.FragmentContactBinding
-import com.dld.bluewaves.databinding.FragmentTrackerBinding
 import com.dld.bluewaves.model.ChatRoomModel
-import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -29,13 +25,10 @@ class ContactFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout and initialize binding
         _binding = FragmentContactBinding.inflate(inflater, container, false)
         auth = FirebaseAuth.getInstance()
-
-        // Access the current user and safely handle nullability
-        val user = auth.currentUser
 
 
         mBinding.searchET.setOnClickListener {

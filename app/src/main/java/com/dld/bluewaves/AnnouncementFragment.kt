@@ -1,13 +1,11 @@
 package com.dld.bluewaves
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.dld.bluewaves.databinding.FragmentAnnouncementBinding
-import com.dld.bluewaves.databinding.FragmentTrackerBinding
 import com.google.firebase.auth.FirebaseAuth
 
 // TODO: Rename parameter arguments, choose names that match
@@ -29,7 +27,7 @@ class AnnouncementFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout and initialize binding
         _binding = FragmentAnnouncementBinding.inflate(inflater, container, false)
         auth = FirebaseAuth.getInstance()

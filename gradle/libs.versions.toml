@@ -24,15 +24,22 @@ fragment = "1.8.5"
 viewpager2 = "1.1.0"
 firebaseDatabase = "21.0.0"
 imagepicker = "2.1"
-ccp = "2.7.1"
 activity = "1.9.3"
 firebaseFirestore = "25.1.1"
 firebaseStorageKtx = "21.0.1"
 firebaseUIFirestore = "8.0.2"
+firebaseStorage = "21.0.1"
+firebaseBom = "33.6.0"
+firebasePlayIntegrity = "18.0.0"
+firebaseMessaging = "24.1.0"
+okhttp3 = "4.12.0"
+oauth2 = "1.12.1"
+firebaseAdmin = "9.1.1"
 
 [libraries]
 imagepicker = { group = "com.github.dhaval2404", name = "imagepicker", version.ref = "imagepicker"}
-ccp = { group = "com.hbb20", name = "ccp", version.ref = "ccp"}
+oauth2 = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "oauth2"}
+okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3"}
 viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
@@ -66,6 +73,11 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-ui-firestore = { group = "com.firebaseui", name = "firebase-ui-firestore", version.ref = "firebaseUIFirestore" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebasePlayIntegrity" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-admin = { group = "com.google.firebase", name = "firebase-admin", version.ref = "firebaseAdmin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

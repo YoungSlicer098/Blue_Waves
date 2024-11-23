@@ -1,11 +1,10 @@
 package com.dld.bluewaves
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.dld.bluewaves.databinding.FragmentContactBinding
+import androidx.fragment.app.Fragment
 import com.dld.bluewaves.databinding.FragmentTrackerBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -28,7 +27,7 @@ class TrackerFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout and initialize binding
         _binding = FragmentTrackerBinding.inflate(inflater, container, false)
         auth = FirebaseAuth.getInstance()

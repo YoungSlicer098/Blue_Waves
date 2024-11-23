@@ -10,5 +10,6 @@ data class UserModel(
     var email: String = "",
     var profilePic: String = "",
     var role: String = "",
-    var searchKeywords: List<String>? = null
+    var searchKeywords: List<String>? = null,
+    var fcmToken: String = ""
 )

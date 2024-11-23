@@ -2,6 +2,7 @@ package com.dld.bluewaves.adapter
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,15 +18,17 @@ import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
-class SearchUserRecyclerAdapter(options: FirestoreRecyclerOptions<UserModel>,
-                                private val context: Context,
-                                private val activity: SearchUserActivity
+class SearchUserRecyclerAdapter(
+    options: FirestoreRecyclerOptions<UserModel>,
+    private val context: Context,
+    private val activity: SearchUserActivity
 ) : FirestoreRecyclerAdapter<UserModel, SearchUserRecyclerAdapter.UserModelViewHolder>(options) {
 
     init {
         setHasStableIds(true)
     }
-     class UserModelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+    class UserModelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val displayNameText: TextView = itemView.findViewById(R.id.display_name_text)
         val emailText: TextView = itemView.findViewById(R.id.email_text)
         val profilePic: ImageView = itemView.findViewById(R.id.profile_pic_image_view)
@@ -35,6 +38,16 @@ class SearchUserRecyclerAdapter(options: FirestoreRecyclerOptions<UserModel>,
         // Set username and phone text
         holder.displayNameText.text = model.displayName
         holder.emailText.text = model.email
+
+        FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val uri: Uri = task.result
+                AndroidUtils.setProfilePic(context, uri, holder.profilePic)
+            } else {
+                // Optionally, set a placeholder or fallback image for failed loads
+                holder.profilePic.setImageResource(R.drawable.profile_white)
+            }
+        }
 
         // Add "(Me)" if the user ID matches the current user
         if (model.userId == FirebaseUtils.currentUserId()) {

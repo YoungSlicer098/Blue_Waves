@@ -2,6 +2,7 @@ package com.dld.bluewaves.adapter
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,9 +18,12 @@ import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
-class RecentChatRecyclerAdapter(options: FirestoreRecyclerOptions<ChatRoomModel>,
-                                private val context: Context
-) : FirestoreRecyclerAdapter<ChatRoomModel, RecentChatRecyclerAdapter.ChatRoomModelViewHolder>(options) {
+class RecentChatRecyclerAdapter(
+    options: FirestoreRecyclerOptions<ChatRoomModel>,
+    private val context: Context
+) : FirestoreRecyclerAdapter<ChatRoomModel, RecentChatRecyclerAdapter.ChatRoomModelViewHolder>(
+    options
+) {
 
     init {
         setHasStableIds(true)
@@ -32,32 +36,63 @@ class RecentChatRecyclerAdapter(options: FirestoreRecyclerOptions<ChatRoomModel>
         val profilePic: ImageView = itemView.findViewById(R.id.profile_pic_image_view)
     }
 
-    override fun onBindViewHolder(holder: ChatRoomModelViewHolder, position: Int, model: ChatRoomModel) {
+    override fun onBindViewHolder(
+        holder: ChatRoomModelViewHolder,
+        position: Int,
+        model: ChatRoomModel
+    ) {
         // Fetch the other user's details based on chat room's userIds
         FirebaseUtils.getOtherUserFromChatroom(model.userIds).get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful && task.result != null) {
                     val otherUserModel = task.result.toObject(UserModel::class.java)
 
+
                     if (otherUserModel != null) {
-                        // Display Name
-                        holder.displayNameText.text = if (otherUserModel.userId == FirebaseUtils.currentUserId()) {
-                            "${otherUserModel.displayName} (Me)"
-                        } else {
-                            otherUserModel.displayName
+                        // Profile Picture
+                        FirebaseUtils.getOtherProfilePicStorageRef(otherUserModel.userId).downloadUrl.addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                val uri: Uri = it.result
+                                AndroidUtils.setProfilePic(context, uri, holder.profilePic)
+                            } else {
+                                // Optionally, set a placeholder or fallback image for failed loads
+                                holder.profilePic.setImageResource(R.drawable.profile_white)
+                            }
                         }
 
+                        // Display Name
+                        holder.displayNameText.text =
+                            if (otherUserModel.userId == FirebaseUtils.currentUserId()) {
+                                "${otherUserModel.displayName} (Me)"
+                            } else {
+                                otherUserModel.displayName
+                            }
+
                         // Last Chat Log
-                        val lastMessageSentByMe = model.lastMessageSenderId == FirebaseUtils.currentUserId()
+                        val lastMessageSentByMe =
+                            model.lastMessageSenderId == FirebaseUtils.currentUserId()
                         holder.lastMessageText.text = when {
-                            lastMessageSentByMe && model.lastMessage.length > 20 -> "You: ${model.lastMessage.substring(0, 20)}..."
+                            lastMessageSentByMe && model.lastMessage.length > 20 -> "You: ${
+                                model.lastMessage.substring(
+                                    0,
+                                    20
+                                )
+                            }..."
+
                             lastMessageSentByMe -> "You: ${model.lastMessage}"
-                            model.lastMessage.length > 20 -> "${model.lastMessage.substring(0, 20)}..."
+                            model.lastMessage.length > 20 -> "${
+                                model.lastMessage.substring(
+                                    0,
+                                    20
+                                )
+                            }..."
+
                             else -> model.lastMessage
                         }
 
                         // Last Interaction or Time Message
-                        holder.lastMessageTime.text = FirebaseUtils.timestampToString(model.lastMessageTimestamp!!)
+                        holder.lastMessageTime.text =
+                            FirebaseUtils.timestampToString(model.lastMessageTimestamp!!)
 
                         // Set OnClickListener to navigate to ChatActivity
                         holder.itemView.setOnClickListener {

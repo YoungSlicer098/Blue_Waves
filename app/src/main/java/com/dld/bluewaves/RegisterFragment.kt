@@ -10,8 +10,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -34,7 +32,7 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListener,
-    View.OnKeyListener{
+    View.OnKeyListener {
 
     private var _binding: FragmentRegisterBinding? = null
     private val mBinding get() = _binding!!
@@ -47,23 +45,24 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         super.onViewCreated(view, savedInstanceState)
         auth = FirebaseAuth.getInstance()
         // Initialize the image picker launcher
-        imagePickLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                data?.data?.let { uri ->
-                    selectedImageUri = uri
-                    // Set the selected image to profilePic ImageView using AndroidUtil
+        imagePickLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data = result.data
+                    data?.data?.let { uri ->
+                        selectedImageUri = uri
+                        // Set the selected image to profilePic ImageView using AndroidUtil
 //                    AndroidUtil.setProfilePic(requireContext(), selectedImageUri, profilePic)
+                    }
                 }
             }
-        }
     }
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout and initialize binding
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
 
@@ -78,7 +77,6 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
 
         return mBinding.root
     }
-
 
 
     companion object {
@@ -119,7 +117,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                 error = errorMessage
                 inProgress(false)
             }
-        } else{
+        } else {
             userModel = userModel.copy(
                 displayName = value,
                 displayNameLowercase = value.lowercase(),
@@ -146,7 +144,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                 error = errorMessage
                 inProgress(false)
             }
-        }else {
+        } else {
             userModel = userModel.copy(
                 email = value
             )
@@ -164,7 +162,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         } else if (value.length < 8) {
             errorMessage = "Password must be at least 8 characters"
         } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
-            errorMessage = "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
+            errorMessage =
+                "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
@@ -187,7 +186,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         } else if (value.length < 8) {
             errorMessage = "Confirm password must be at least 8 characters"
         } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
-            errorMessage = "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
+            errorMessage =
+                "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
@@ -251,14 +251,16 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     }
 
     override fun onClick(view: View?) {
-        if (view != null){
-            when (view.id){
+        if (view != null) {
+            when (view.id) {
                 R.id.loginNow -> {
                     AuthActivity.backPressed(context as AuthActivity)
                 }
+
                 R.id.backBtn -> {
                     AuthActivity.backPressed(context as AuthActivity)
                 }
+
                 R.id.register_btn -> {
                     inProgress(true)
                     val email = mBinding.emailET.text.toString()
@@ -278,12 +280,11 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                         userId = currentUser.uid,
                                         role = "customer",
                                         lastSession = Timestamp.now(),
-                                        profilePic = ""
                                     )
 
 
                                     // Save user details to Firestore
-                                    FirebaseUtils.createUserDetails().set(userModel!!)
+                                    FirebaseUtils.createUserDetails().set(userModel)
                                         .addOnCompleteListener { firestoreTask ->
                                             inProgress(false)
                                             if (firestoreTask.isSuccessful) {
@@ -299,25 +300,29 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                                 )
                                             } else {
                                                 // Rollback: delete user from Firebase Authentication
-                                                currentUser.delete().addOnCompleteListener { deleteTask ->
-                                                    if (deleteTask.isSuccessful) {
-                                                        AndroidUtils.showToast(
-                                                            context as AuthActivity,
-                                                            "Registration failed. Please try again."
-                                                        )
-                                                    } else {
-                                                        AndroidUtils.showToast(
-                                                            context as AuthActivity,
-                                                            "Error during rollback. Contact support."
-                                                        )
+                                                currentUser.delete()
+                                                    .addOnCompleteListener { deleteTask ->
+                                                        if (deleteTask.isSuccessful) {
+                                                            AndroidUtils.showToast(
+                                                                context as AuthActivity,
+                                                                "Registration failed. Please try again."
+                                                            )
+                                                        } else {
+                                                            AndroidUtils.showToast(
+                                                                context as AuthActivity,
+                                                                "Error during rollback. Contact support."
+                                                            )
+                                                        }
                                                     }
-                                                }
                                             }
                                         }
                                 }
                             } else {
                                 inProgress(false)
-                                AndroidUtils.showToast(context as AuthActivity, "Authentication failed.")
+                                AndroidUtils.showToast(
+                                    context as AuthActivity,
+                                    "Authentication failed."
+                                )
                             }
                         }
                 }
@@ -333,16 +338,17 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                         if (mBinding.displayNameTil.isErrorEnabled) {
                             mBinding.displayNameTil.isErrorEnabled = false
                         }
-                    }else {
+                    } else {
                         validateDisplayName()
                     }
                 }
+
                 R.id.emailET -> {
                     if (hasFocus) {
                         if (mBinding.emailTil.isErrorEnabled) {
                             mBinding.emailTil.isErrorEnabled = false
                         }
-                    }else {
+                    } else {
                         validateEmail()
                     }
                 }

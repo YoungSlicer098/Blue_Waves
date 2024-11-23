@@ -11,11 +11,13 @@ import androidx.core.view.GravityCompat
 import com.dld.bluewaves.databinding.ActivityMainBinding
 import com.dld.bluewaves.databinding.TabbarBinding
 import com.dld.bluewaves.utils.AndroidUtils
+import com.dld.bluewaves.utils.FirebaseUtils
 import com.dld.bluewaves.view.ViewPagerAdapter
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -37,11 +39,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // If not authenticated go back to the auth activity
         val user = auth.currentUser
-        if(user == null){
+        if (user == null) {
             val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
             this.finish()
         }
+
 
         // Initializing the toolbar and the sidebar drawer
         setSupportActionBar(mBinding.toolbar)
@@ -90,8 +93,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }.attach()
 
+        val targetFragment =
+            intent.getIntExtra("TARGET_FRAGMENT", -1) // Default: -1 (no fragment specified)
+        if (targetFragment in 0..2) {
+            mBinding.viewPager.setCurrentItem(
+                targetFragment,
+                false
+            ) // Navigate to the desired fragment
+            tabbar.tabLayout.selectTab(tabbar.tabLayout.getTabAt(targetFragment))
+        }
 
-        tabbar.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+        getFCMToken()
+
+
+        tabbar.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val newFragmentPosition = tab?.position ?: return
                 mBinding.viewPager.setCurrentItem(newFragmentPosition, true)
@@ -122,6 +137,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+
+    private fun getFCMToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+            if (it.isSuccessful) {
+                val token = it.result
+                FirebaseUtils.currentUserDetails().update("fcmToken", token)
+            }
+        }
+    }
+
     private fun validationSideBar(auth: FirebaseAuth) {
         val user = auth.currentUser
 
@@ -139,19 +164,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT).show()
+            R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT)
+                .show()
+
             R.id.nav_profile -> {
                 val intent = Intent(this, ProfileActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
             }
+
             R.id.nav_logout -> {
-                FirebaseAuth.getInstance().signOut()
-                AndroidUtils.showToast(this, "Logged out!")
-                validationSideBar(FirebaseAuth.getInstance())
-                val intent = Intent(this, AuthActivity::class.java)
-                startActivity(intent)
-                this.finish()
+                FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        FirebaseAuth.getInstance().signOut()
+                        AndroidUtils.showToast(this, "Logged out!")
+                        validationSideBar(FirebaseAuth.getInstance())
+                        val intent = Intent(this, SplashActivity::class.java)
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        startActivity(intent)
+                    }
+                }
             }
         }
         validationSideBar(FirebaseAuth.getInstance())

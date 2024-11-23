@@ -10,7 +10,6 @@ import com.dld.bluewaves.databinding.ActivitySearchUserBinding
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.firebase.firestore.Query
 
 @Suppress("DEPRECATION")
 class SearchUserActivity : AppCompatActivity() {
@@ -24,7 +23,8 @@ class SearchUserActivity : AppCompatActivity() {
         setContentView(mBinding.root)
 
         val recyclerView = mBinding.recyclerView
-        (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false
+        (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations =
+            false
 
         setupRecyclerView()
 

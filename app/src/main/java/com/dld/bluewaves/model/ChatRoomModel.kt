@@ -7,5 +7,5 @@ data class ChatRoomModel(
     var userIds: List<String?> = listOf(),
     var lastMessageTimestamp: Timestamp? = null,
     var lastMessageSenderId: String = "",
-    var lastMessage:String = ""
+    var lastMessage: String = ""
 )

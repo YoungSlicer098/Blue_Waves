@@ -9,9 +9,9 @@
         android:layout_height="52dp"
         android:background="@drawable/circular_bg"
         android:src="@drawable/profile_white"
-        android:padding="4dp"
         android:backgroundTint="@color/buttonColor"
         android:layout_centerInParent="true"
+        android:scaleType="centerCrop"
         android:id="@+id/profile_pic_image_view"/>
 
 </RelativeLayout>

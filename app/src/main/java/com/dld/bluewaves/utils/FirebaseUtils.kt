@@ -29,6 +29,10 @@ object FirebaseUtils {
             .document(currentUserId() ?: throw IllegalStateException("User not logged in"))
     }
 
+    fun isLoggedIn(): Boolean {
+        return FirebaseAuth.getInstance().currentUser != null
+    }
+
     fun allUserCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection("users")
     }
@@ -45,9 +49,9 @@ object FirebaseUtils {
 
     fun getChatroomId(userId1: String, userId2: String): String {
         return if (userId1.hashCode() < userId2.hashCode()) {
-            userId1+"_"+userId2
+            userId1 + "_" + userId2
         } else {
-            userId2+"_"+userId1
+            userId2 + "_" + userId1
         }
     }
 
@@ -73,9 +77,24 @@ object FirebaseUtils {
             .child(userId)
     }
 
+    //
+//    fun getOtherProfilePicStorageRef(otherUserId: String): StorageReference {
+//        return FirebaseStorage.getInstance().reference
+//            .child("profile_pic")
+//            .child(otherUserId)
+//    }
     fun getOtherProfilePicStorageRef(otherUserId: String): StorageReference {
         return FirebaseStorage.getInstance().reference
             .child("profile_pic")
             .child(otherUserId)
+            .apply {
+                // Enforce cache control
+                metadata.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val metadata = task.result
+                        val cacheControl = metadata?.getCustomMetadata("cacheControl")
+                    }
+                }
+            }
     }
 }
