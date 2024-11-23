@@ -1,4 +1,10 @@
 <resources>
+
+    <string name="version">v0.53</string>
+
+
+
+
     <string name="app_name">Blue Waves</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
@@ -56,7 +62,6 @@
     <string name="new_password">New Password</string>
     <string name="upload">Upload</string>
     <string name="pictures">Pictures</string>
-    <string name="version">v0.51</string>
     <string name="post_a_message">Post a Message</string>
     <string name="just_now">Now</string>
     <string name="yesterday">Yesterday</string>
