@@ -48,4 +48,16 @@ object AndroidUtils {
             )
             .into(imageView)
     }
+
+    fun selectPicture(select: String): Int {
+        return when (select) {
+            "pfp1" -> R.drawable.pfp1
+            "pfp2" -> R.drawable.pfp2
+            "pfp3" -> R.drawable.pfp3
+            "pfp4" -> R.drawable.pfp4
+            "pfp5" -> R.drawable.pfp5
+            "pfp6" -> R.drawable.pfp6
+            else -> R.drawable.profile_white
+        }
+    }
 }

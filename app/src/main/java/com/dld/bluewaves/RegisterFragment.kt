@@ -10,15 +10,21 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import com.dld.bluewaves.databinding.DialogPicturesBinding
+import com.dld.bluewaves.databinding.DialogProfilePicDecisionsBinding
 import com.dld.bluewaves.databinding.FragmentRegisterBinding
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.storageMetadata
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -39,6 +45,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     private lateinit var auth: FirebaseAuth
     private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
     private lateinit var selectedImageUri: Uri
+    private lateinit var dialogProfilePic: DialogProfilePicDecisionsBinding
+    private lateinit var dialogPictures: DialogPicturesBinding
     private var userModel = UserModel()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,11 +56,15 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         imagePickLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    val data = result.data
-                    data?.data?.let { uri ->
-                        selectedImageUri = uri
-                        // Set the selected image to profilePic ImageView using AndroidUtil
-//                    AndroidUtil.setProfilePic(requireContext(), selectedImageUri, profilePic)
+                    val data: Intent? = result.data
+                    if (data != null && data.data != null) {
+                        selectedImageUri = data.data!!
+                        AndroidUtils.setProfilePic(
+                            context as AuthActivity,
+                            selectedImageUri,
+                            mBinding.profilePic
+                        )
+                        userModel.profilePic = ""
                     }
                 }
             }
@@ -74,6 +86,11 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         mBinding.backBtn.setOnClickListener(this)
         mBinding.loginNow.setOnClickListener(this)
         mBinding.registerBtn.setOnClickListener(this)
+        mBinding.profilePic.setOnClickListener(this)
+
+
+        //On Click Listeners Main Functions
+
 
         return mBinding.root
     }
@@ -98,6 +115,93 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                 }
             }
     }
+
+
+    private fun picturesProfilePicture() {
+        dialogPictures = DialogPicturesBinding.inflate(LayoutInflater.from(context as AuthActivity))
+
+        var selectedProfilePic: String = ""
+
+        val alertDialog = AlertDialog.Builder(context as AuthActivity)
+            .setTitle("Choose a Picture")
+            .setView(dialogPictures.root)
+            .setPositiveButton("Save", null)
+            .setNegativeButton("Cancel") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .create()
+
+        alertDialog.setOnShowListener {
+            val saveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            saveButton.setOnClickListener {
+                if (selectedProfilePic != "") {
+                    userModel.profilePic = selectedProfilePic
+                    mBinding.profilePic.setImageResource(AndroidUtils.selectPicture(selectedProfilePic))
+                    alertDialog.dismiss()
+                } else {
+                    AndroidUtils.showToast(context as AuthActivity, "No picture selected")
+                }
+            }
+        }
+
+        // ImageButton IDs
+        val imageViews = listOf(
+            dialogPictures.pfp1,
+            dialogPictures.pfp2,
+            dialogPictures.pfp3,
+            dialogPictures.pfp4,
+            dialogPictures.pfp5,
+            dialogPictures.pfp6
+        )
+
+        val drawableIds = listOf(
+            R.drawable.pfp1,
+            R.drawable.pfp2,
+            R.drawable.pfp3,
+            R.drawable.pfp4,
+            R.drawable.pfp5,
+            R.drawable.pfp6
+        )
+
+        // Listener to handle selection
+        val onImageSelected = { selectedView: ImageView, drawableId: Int ->
+            // Reset the selection for all ImageButtons
+            imageViews.forEach { it.isSelected = false }
+
+            // Set the selected ImageButton
+            selectedView.isSelected = true
+
+            // Update the selected profile picture
+            selectedProfilePic = when (drawableId){
+                R.drawable.pfp1 -> "pfp1"
+                R.drawable.pfp2 -> "pfp2"
+                R.drawable.pfp3 -> "pfp3"
+                R.drawable.pfp4 -> "pfp4"
+                R.drawable.pfp5 -> "pfp5"
+                R.drawable.pfp6 -> "pfp6"
+                else -> ""
+            }
+        }
+
+
+
+        // Set click listeners for each ImageButton
+        imageViews.forEachIndexed { index, imageView ->
+            imageView.setOnClickListener {
+                onImageSelected(imageView, drawableIds[index])
+            }
+        }
+
+        alertDialog.show()
+    }
+
+    private fun uploadProfilePicture() {
+        ImagePicker.with(this).cropSquare().compress(512).maxResultSize(512, 512)
+            .createIntent { intent ->
+                imagePickLauncher.launch(intent)
+            }
+    }
+
 
     private fun validateDisplayName(): Boolean {
         var errorMessage: String? = null
@@ -253,6 +357,37 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     override fun onClick(view: View?) {
         if (view != null) {
             when (view.id) {
+                R.id.profilePic -> {
+                    dialogProfilePic = DialogProfilePicDecisionsBinding.inflate(LayoutInflater.from(context as AuthActivity))
+
+                    // Create the AlertDialog
+                    val alertDialog = AlertDialog.Builder(context as AuthActivity)
+                        .setTitle("Profile Picture")
+                        .setView(dialogProfilePic.root)
+                        .setNegativeButton("Cancel") { dialogInterface, _ ->
+                            dialogInterface.dismiss()
+                        }
+                        .create()
+
+                    // Set click listeners to close the dialog after performing actions
+                    val closeDialogAndPerformAction: (() -> Unit) -> View.OnClickListener = { action ->
+                        View.OnClickListener {
+                            action() // Perform your action (e.g., uploadProfilePicture())
+                            alertDialog.dismiss() // Close the dialog
+                        }
+                    }
+
+                    dialogProfilePic.uploadBtn.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
+                    dialogProfilePic.uploadText.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
+                    dialogProfilePic.uploadLayout.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
+
+                    dialogProfilePic.picturesBtn.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
+                    dialogProfilePic.picturesText.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
+                    dialogProfilePic.picturesLayout.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
+
+                    alertDialog.show()
+                }
+
                 R.id.loginNow -> {
                     AuthActivity.backPressed(context as AuthActivity)
                 }
@@ -286,18 +421,56 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                     // Save user details to Firestore
                                     FirebaseUtils.createUserDetails().set(userModel)
                                         .addOnCompleteListener { firestoreTask ->
-                                            inProgress(false)
                                             if (firestoreTask.isSuccessful) {
-                                                AndroidUtils.showToast(
-                                                    context as AuthActivity,
-                                                    "Account created."
-                                                )
-                                                auth.signOut()
-                                                AuthActivity.changeFragment(
-                                                    context as AuthActivity,
-                                                    LoginFragment(),
-                                                    false
-                                                )
+                                                if(userModel.profilePic == "") {
+
+                                                    val metadata = storageMetadata {
+                                                        cacheControl = "public, max-age=31536000" // Cache for 1 year
+                                                    }
+                                                    FirebaseUtils.getCurrentProfilePicStorageRef()
+                                                        .putFile(selectedImageUri, metadata).addOnCompleteListener {
+                                                            inProgress(false)
+                                                            if (it.isSuccessful) {
+                                                                AndroidUtils.showToast(
+                                                                    context as AuthActivity,
+                                                                    "Account created."
+                                                                )
+                                                                auth.signOut()
+                                                                AuthActivity.changeFragment(
+                                                                    context as AuthActivity,
+                                                                    LoginFragment(),
+                                                                    false
+                                                                )
+                                                            }else{
+                                                                // Rollback: delete user from Firebase Authentication
+                                                                currentUser.delete()
+                                                                    .addOnCompleteListener { deleteTask ->
+                                                                        if (deleteTask.isSuccessful) {
+                                                                            AndroidUtils.showToast(
+                                                                                context as AuthActivity,
+                                                                                "Registration failed. Please try again."
+                                                                            )
+                                                                        } else {
+                                                                            AndroidUtils.showToast(
+                                                                                context as AuthActivity,
+                                                                                "Error during rollback. Contact support."
+                                                                            )
+                                                                        }
+                                                                    }
+                                                            }
+                                                        }
+                                                }else {
+                                                    AndroidUtils.showToast(
+                                                        context as AuthActivity,
+                                                        "Account created."
+                                                    )
+                                                    auth.signOut()
+                                                    AuthActivity.changeFragment(
+                                                        context as AuthActivity,
+                                                        LoginFragment(),
+                                                        false
+                                                    )
+                                                }
                                             } else {
                                                 // Rollback: delete user from Firebase Authentication
                                                 currentUser.delete()

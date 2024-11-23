@@ -39,13 +39,17 @@ class SearchUserRecyclerAdapter(
         holder.displayNameText.text = model.displayName
         holder.emailText.text = model.email
 
-        FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val uri: Uri = task.result
-                AndroidUtils.setProfilePic(context, uri, holder.profilePic)
-            } else {
-                // Optionally, set a placeholder or fallback image for failed loads
-                holder.profilePic.setImageResource(R.drawable.profile_white)
+        if (model.profilePic != "") {
+            holder.profilePic.setImageResource(AndroidUtils.selectPicture(model.profilePic))
+        }else {
+            FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val uri: Uri = task.result
+                    AndroidUtils.setProfilePic(context, uri, holder.profilePic)
+                } else {
+                    // Optionally, set a placeholder or fallback image for failed loads
+                    holder.profilePic.setImageResource(R.drawable.profile_white)
+                }
             }
         }
 

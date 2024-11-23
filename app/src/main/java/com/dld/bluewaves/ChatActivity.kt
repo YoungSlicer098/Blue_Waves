@@ -44,11 +44,20 @@ class ChatActivity : AppCompatActivity() {
         otherUser = AndroidUtils.getUserModelFromIntent(intent)
         chatroomId = FirebaseUtils.getChatroomId(FirebaseUtils.currentUserId()!!, otherUser.userId)
 
-
-        FirebaseUtils.getOtherProfilePicStorageRef(otherUser.userId).downloadUrl.addOnCompleteListener {
-            if (it.isSuccessful) {
-                val uri: Uri = it.result
-                AndroidUtils.setProfilePic(this, uri, mBinding.profilePicLayout.profilePicImageView)
+        if (otherUser.profilePic != "") {
+            mBinding.profilePicLayout.profilePicImageView.setImageResource(AndroidUtils.selectPicture(otherUser.profilePic))
+        }else {
+            FirebaseUtils.getOtherProfilePicStorageRef(otherUser.userId).downloadUrl.addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val uri: Uri = it.result
+                    AndroidUtils.setProfilePic(
+                        this,
+                        uri,
+                        mBinding.profilePicLayout.profilePicImageView
+                    )
+                }else{
+                    mBinding.profilePicLayout.profilePicImageView.setImageResource(R.drawable.profile_white)
+                }
             }
         }
 
@@ -80,7 +89,7 @@ class ChatActivity : AppCompatActivity() {
             FirestoreRecyclerOptions.Builder<ChatMessageModel>()
                 .setQuery(query, ChatMessageModel::class.java).build()
 
-        adapter = ChatRecyclerAdapter(options, applicationContext)
+        adapter = ChatRecyclerAdapter(options, applicationContext, otherUser.profilePic)
         val manager: LinearLayoutManager = LinearLayoutManager(this)
         manager.setReverseLayout(true)
         mBinding.recyclerView.setLayoutManager(manager)

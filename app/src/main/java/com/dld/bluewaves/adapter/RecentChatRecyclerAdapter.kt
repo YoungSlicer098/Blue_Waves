@@ -50,15 +50,20 @@ class RecentChatRecyclerAdapter(
 
                     if (otherUserModel != null) {
                         // Profile Picture
-                        FirebaseUtils.getOtherProfilePicStorageRef(otherUserModel.userId).downloadUrl.addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                val uri: Uri = it.result
-                                AndroidUtils.setProfilePic(context, uri, holder.profilePic)
-                            } else {
-                                // Optionally, set a placeholder or fallback image for failed loads
-                                holder.profilePic.setImageResource(R.drawable.profile_white)
+                        if(otherUserModel.profilePic != ""){
+                            holder.profilePic.setImageResource(AndroidUtils.selectPicture(otherUserModel.profilePic))
+                        }else {
+                            FirebaseUtils.getOtherProfilePicStorageRef(otherUserModel.userId).downloadUrl.addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    val uri: Uri = it.result
+                                    AndroidUtils.setProfilePic(context, uri, holder.profilePic)
+                                } else {
+                                    // Optionally, set a placeholder or fallback image for failed loads
+                                    holder.profilePic.setImageResource(R.drawable.profile_white)
+                                }
                             }
                         }
+
 
                         // Display Name
                         holder.displayNameText.text =

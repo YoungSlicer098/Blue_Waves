@@ -18,7 +18,8 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
 class ChatRecyclerAdapter(
     options: FirestoreRecyclerOptions<ChatMessageModel>,
-    private val context: Context
+    private val context: Context,
+    private val profilePic: String = ""
 ) : FirestoreRecyclerAdapter<ChatMessageModel, ChatRecyclerAdapter.ChatModelViewHolder>(options) {
 
     class ChatModelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,16 +35,20 @@ class ChatRecyclerAdapter(
         position: Int,
         model: ChatMessageModel
     ) {
-
-        FirebaseUtils.getOtherProfilePicStorageRef(model.senderId).downloadUrl.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val uri: Uri = task.result
-                AndroidUtils.setProfilePic(context, uri, holder.profilePicImageView)
-            } else {
-                // Optionally, set a placeholder or fallback image for failed loads
-                holder.profilePicImageView.setImageResource(R.drawable.profile_white)
+        if(profilePic != ""){
+            holder.profilePicImageView.setImageResource(AndroidUtils.selectPicture(profilePic))
+        }else {
+            FirebaseUtils.getOtherProfilePicStorageRef(model.senderId).downloadUrl.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val uri: Uri = task.result
+                    AndroidUtils.setProfilePic(context, uri, holder.profilePicImageView)
+                } else {
+                    // Optionally, set a placeholder or fallback image for failed loads
+                    holder.profilePicImageView.setImageResource(R.drawable.profile_white)
+                }
             }
         }
+
         if (model.senderId.equals(FirebaseUtils.currentUserId())) {
             holder.rightChatLayout.visibility = View.VISIBLE
             holder.leftChatLayout.visibility = View.GONE

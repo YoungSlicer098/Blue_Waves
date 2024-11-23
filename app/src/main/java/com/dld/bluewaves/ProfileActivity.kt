@@ -29,6 +29,7 @@ import androidx.transition.TransitionManager
 import com.dld.bluewaves.databinding.ActivityProfileBinding
 import com.dld.bluewaves.databinding.DialogDisplayNameEditBinding
 import com.dld.bluewaves.databinding.DialogPasswordEditBinding
+import com.dld.bluewaves.databinding.DialogPicturesBinding
 import com.dld.bluewaves.databinding.DialogProfilePicDecisionsBinding
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
@@ -50,6 +51,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private lateinit var dialogName: DialogDisplayNameEditBinding
     private lateinit var dialogPassword: DialogPasswordEditBinding
     private lateinit var dialogProfilePic: DialogProfilePicDecisionsBinding
+    private lateinit var dialogPictures: DialogPicturesBinding
     private var currentUserModel: UserModel? = null
     private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
     private lateinit var selectedImageUri: Uri
@@ -131,6 +133,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                         )
                         needsUpdate = true
                         changedProfilePic = true
+                        currentUserModel?.profilePic = ""
                         showUpdateDialog()
                     }
                 }
@@ -335,7 +338,6 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
         mBinding.saveBtn.setOnClickListener {
             updateUserData()
-            needsUpdate = false
             showUpdateDialog()
         }
 
@@ -352,7 +354,84 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     }
 
     private fun picturesProfilePicture() {
+        dialogPictures = DialogPicturesBinding.inflate(LayoutInflater.from(this))
 
+        var selectedProfilePic: String = ""
+
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("Choose a Picture")
+            .setView(dialogPictures.root)
+            .setPositiveButton("Save", null)
+            .setNegativeButton("Cancel") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .create()
+
+        alertDialog.setOnShowListener {
+            val saveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            saveButton.setOnClickListener {
+                if (selectedProfilePic != "") {
+                    currentUserModel?.profilePic = selectedProfilePic
+                    mBinding.profilePic.setImageResource(AndroidUtils.selectPicture(selectedProfilePic))
+                    needsUpdate = true
+                    changedProfilePic = true
+                    showUpdateDialog()
+                    alertDialog.dismiss()
+                } else {
+                    AndroidUtils.showToast(this, "No picture selected")
+                }
+            }
+        }
+
+        // ImageButton IDs
+        val imageViews = listOf(
+            dialogPictures.pfp1,
+            dialogPictures.pfp2,
+            dialogPictures.pfp3,
+            dialogPictures.pfp4,
+            dialogPictures.pfp5,
+            dialogPictures.pfp6
+        )
+
+        val drawableIds = listOf(
+            R.drawable.pfp1,
+            R.drawable.pfp2,
+            R.drawable.pfp3,
+            R.drawable.pfp4,
+            R.drawable.pfp5,
+            R.drawable.pfp6
+        )
+
+        // Listener to handle selection
+        val onImageSelected = { selectedView: ImageView, drawableId: Int ->
+            // Reset the selection for all ImageButtons
+            imageViews.forEach { it.isSelected = false }
+
+            // Set the selected ImageButton
+            selectedView.isSelected = true
+
+            // Update the selected profile picture
+            selectedProfilePic = when (drawableId){
+                R.drawable.pfp1 -> "pfp1"
+                R.drawable.pfp2 -> "pfp2"
+                R.drawable.pfp3 -> "pfp3"
+                R.drawable.pfp4 -> "pfp4"
+                R.drawable.pfp5 -> "pfp5"
+                R.drawable.pfp6 -> "pfp6"
+                else -> ""
+            }
+        }
+
+
+
+        // Set click listeners for each ImageButton
+        imageViews.forEachIndexed { index, imageView ->
+            imageView.setOnClickListener {
+                onImageSelected(imageView, drawableIds[index])
+            }
+        }
+
+        alertDialog.show()
     }
 
     private fun uploadProfilePicture() {
@@ -391,24 +470,42 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 }
 
                 changedProfilePic -> {
-                    val metadata = storageMetadata {
-                        cacheControl = "public, max-age=31536000" // Cache for 1 year
-                    }
-                    FirebaseUtils.getCurrentProfilePicStorageRef()
-                        .putFile(selectedImageUri, metadata).addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            fadeInAndOut(mBinding.profilePicIconCheck)
-
-                            changedProfilePic = false
-                        } else {
-                            fadeInAndOut(mBinding.profilePicIconClose)
-                            needsUpdate = true
+                    if (currentUserModel?.profilePic != ""){
+                        FirebaseUtils.currentUserDetails().update("profilePic", currentUserModel?.profilePic)
+                            .addOnCompleteListener {
+                                if (it.isSuccessful){
+                                    FirebaseUtils.getCurrentProfilePicStorageRef().delete()
+                                    fadeInAndOut(mBinding.profilePicIconCheck)
+                                    changedProfilePic = false
+                                } else{
+                                    fadeInAndOut(mBinding.profilePicIconClose)
+                                    needsUpdate = true
+                                }
+                            }
+                    }else {
+                        val metadata = storageMetadata {
+                            cacheControl = "public, max-age=31536000" // Cache for 1 year
                         }
+                        FirebaseUtils.getCurrentProfilePicStorageRef()
+                            .putFile(selectedImageUri, metadata).addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    FirebaseUtils.currentUserDetails().update("profilePic", "").addOnCompleteListener {
+                                        if (it.isSuccessful){
+                                            fadeInAndOut(mBinding.profilePicIconCheck)
+                                            changedProfilePic = false
+                                        }else{
+                                            fadeInAndOut(mBinding.profilePicIconClose)
+                                            needsUpdate = true
+                                        }
+                                    }
+                                }
+                            }
                     }
                 }
             }
-            if (!changedName || !changedProfilePic) {
+            if (!changedName && !changedProfilePic) {
                 AndroidUtils.showToast(this, "Changes saved")
+                needsUpdate = false
             }
             updateInProgress(false)
         }
@@ -461,22 +558,6 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private fun getUserData() {
         inProgress(true)
 
-        FirebaseUtils.getCurrentProfilePicStorageRef().metadata.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val metadata = task.result
-            }
-        }
-
-        FirebaseUtils.getCurrentProfilePicStorageRef().downloadUrl.addOnCompleteListener {
-            if (it.isSuccessful) {
-                val uri: Uri = it.result
-                AndroidUtils.setProfilePic(context = this, uri, mBinding.profilePic)
-            } else {
-                // Optionally, set a placeholder or fallback image for failed loads
-                mBinding.profilePic.setImageResource(R.drawable.profile_white)
-            }
-        }
-
         FirebaseUtils.currentUserDetails().get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 inProgress(false)
@@ -485,8 +566,32 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 mBinding.emailText.text = currentUserModel?.email
                 mBinding.roleText.text = currentUserModel?.role?.uppercase()
 
+                if (currentUserModel?.profilePic != "") {
+                    mBinding.profilePic.setImageResource(AndroidUtils.selectPicture(currentUserModel?.profilePic!!))
+                }else{
+                    FirebaseUtils.getCurrentProfilePicStorageRef().downloadUrl.addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val uri: Uri = it.result
+                            AndroidUtils.setProfilePic(context = this, uri, mBinding.profilePic)
+                        } else {
+                            // Optionally, set a placeholder or fallback image for failed loads
+                            mBinding.profilePic.setImageResource(R.drawable.profile_white)
+                        }
+                    }
+                }
+
+
             } else {
                 currentUserModel = UserModel()
+                FirebaseUtils.getCurrentProfilePicStorageRef().downloadUrl.addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val uri: Uri = it.result
+                        AndroidUtils.setProfilePic(context = this, uri, mBinding.profilePic)
+                    } else {
+                        // Optionally, set a placeholder or fallback image for failed loads
+                        mBinding.profilePic.setImageResource(R.drawable.profile_white)
+                    }
+                }
                 AndroidUtils.showToast(this, "Could not gather data")
             }
         }
