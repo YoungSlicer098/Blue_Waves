@@ -65,6 +65,7 @@
     <string name="post_a_message">Post a Message</string>
     <string name="just_now">Now</string>
     <string name="yesterday">Yesterday</string>
+    <string name="write_message_here">Write message here</string>
     <plurals name="minutes_ago">
         <item quantity="one">%d minute ago</item>
         <item quantity="other">%d minutes ago</item>

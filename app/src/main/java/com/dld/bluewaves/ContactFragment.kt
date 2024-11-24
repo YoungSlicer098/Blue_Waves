@@ -1,5 +1,6 @@
 package com.dld.bluewaves
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -70,30 +71,27 @@ class ContactFragment : Fragment() {
         }
     }
 
-//
-//    override fun onStart() {
-//        super.onStart()
-//        adapter?.startListening() // Ensure adapter starts listening here
-//    }
-//
-//    override fun onStop() {
-//        super.onStop()
-//        adapter?.stopListening() // Properly stop adapter when activity stops
-//    }
-//
-//    override fun onResume() {
-//        super.onResume()
-//        adapter?.startListening()
-//
-//    }
-//
-//    override fun onPause(){
-//        super.onPause()
-//        adapter?.stopListening()
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null // Clear binding reference to prevent memory leaks
-//    }
+    // Start adapter listening in onStart
+    override fun onStart() {
+        super.onStart()
+        adapter?.startListening()
+    }
+
+    // Stop adapter listening in onStop
+    override fun onStop() {
+        super.onStop()
+        adapter?.stopListening()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onResume() {
+        super.onResume()
+        adapter?.notifyDataSetChanged() // Ensure dataset is consistent
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding.recyclerView.adapter = null // Clear adapter to prevent memory leaks
+        _binding = null // Clear binding reference
+    }
 }
