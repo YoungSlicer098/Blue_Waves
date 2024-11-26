@@ -16,6 +16,10 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ImageActivity"
+            android:theme="@style/Theme.TransparentActivity"
+            android:launchMode="singleTop" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
@@ -63,7 +67,9 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <service android:name=".FCMNotificationService" android:exported="false">
+        <service
+            android:name=".FCMNotificationService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

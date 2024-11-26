@@ -56,7 +56,9 @@ android {
             force("com.google.protobuf:protobuf-javalite:3.25.1")
             force("com.google.api.grpc:proto-google-common-protos:2.9.6")
             force("com.google.firebase:protolite-well-known-types:18.0.0")
+            force("androidx.core:core:1.15.0")
             exclude(group = "com.google.protobuf", module = "protobuf-java")
+            exclude(group = "com.android.support", module = "support-compat")
 
         }
 
@@ -139,6 +141,9 @@ dependencies {
 
     //glide
     implementation(libs.glide)
+
+    //Photo Viewer
+    implementation(libs.photoview)
 
     //coroutines
     implementation(libs.kotlinx.coroutines.android)

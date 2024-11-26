@@ -35,9 +35,11 @@ firebaseMessaging = "24.1.0"
 okhttp3 = "4.12.0"
 oauth2 = "1.12.1"
 firebaseAdmin = "9.1.1"
+photoView = "2.0.0"
 
 [libraries]
 imagepicker = { group = "com.github.dhaval2404", name = "imagepicker", version.ref = "imagepicker"}
+photoview = { group = "com.github.chrisbanes", name = "PhotoView", version.ref = "photoView"}
 oauth2 = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "oauth2"}
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3"}
 viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }

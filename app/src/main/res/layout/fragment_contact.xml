@@ -5,52 +5,56 @@
     android:layout_height="match_parent"
     tools:context=".ContactFragment"
     android:background="@color/background">
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="50dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="50dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/searchTil"
+                style="@style/TextInputLayoutStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:layout_gravity="center">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/searchTil"
-                    style="@style/TextInputLayoutStyle"
-                    android:layout_width="0dp"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchET"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_gravity="center">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/searchET"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:ems="10"
-                        android:hint="@string/search_user"
-                        android:inputType="text"
-                        android:maxLength="24"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:textColor="@color/text"
-                        android:textColorHint="@color/hintText"
-                        android:focusable="false"/>
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/recyclerView"/>
-
-
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="@string/search_user"
+                    android:inputType="text"
+                    android:maxLength="24"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/hintText"
+                    android:focusable="false"/>
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
-    </ScrollView>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recyclerView"
+                android:scrollbars="vertical"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+
 
     <ProgressBar
         android:layout_width="50dp"

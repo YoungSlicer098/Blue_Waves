@@ -8,15 +8,22 @@
     android:background="@color/background"
     android:gravity="center">
 
-
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/recycler_view"/>
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:id="@+id/post_announcement"
         android:background="@drawable/circular_bg_add"
         android:src="@drawable/add_announcement_icon"
@@ -32,8 +39,9 @@
         android:layout_height="50dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/progressingBar"
-        android:visibility="gone"/>
+        android:id="@+id/progressBar"
+        android:visibility="gone"
+        android:background="@drawable/circular_bg"/>
 
 
 </RelativeLayout>

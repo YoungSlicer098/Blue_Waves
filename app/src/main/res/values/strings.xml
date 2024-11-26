@@ -3,8 +3,6 @@
     <string name="version">v0.53</string>
 
 
-
-
     <string name="app_name">Blue Waves</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>

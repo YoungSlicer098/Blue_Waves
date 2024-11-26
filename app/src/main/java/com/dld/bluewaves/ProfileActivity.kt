@@ -487,9 +487,9 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                             cacheControl = "public, max-age=31536000" // Cache for 1 year
                         }
                         FirebaseUtils.getCurrentProfilePicStorageRef()
-                            .putFile(selectedImageUri, metadata).addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    FirebaseUtils.currentUserDetails().update("profilePic", "").addOnCompleteListener {
+                            .putFile(selectedImageUri, metadata).addOnCompleteListener { img ->
+                                if (img.isSuccessful) {
+                                    FirebaseUtils.currentUserDetails().update("profilePic", "").addOnCompleteListener { it ->
                                         if (it.isSuccessful){
                                             fadeInAndOut(mBinding.profilePicIconCheck)
                                             changedProfilePic = false

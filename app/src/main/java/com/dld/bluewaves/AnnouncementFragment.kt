@@ -1,13 +1,24 @@
 package com.dld.bluewaves
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.dld.bluewaves.adapter.AnnouncementImgRecyclerAdapter
 import com.dld.bluewaves.adapter.AnnouncementRecyclerAdapter
 import com.dld.bluewaves.adapter.RecentChatRecyclerAdapter
 import com.dld.bluewaves.databinding.DialogPostAnnouncementBinding
@@ -17,22 +28,32 @@ import com.dld.bluewaves.model.ChatRoomModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.storageMetadata
 
 
 class AnnouncementFragment : Fragment() {
 
     private var _binding: FragmentAnnouncementBinding? = null
     private val mBinding get() = _binding!!
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var dialogPost: DialogPostAnnouncementBinding
+    private lateinit var imgAdapter: AnnouncementImgRecyclerAdapter
+    private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
+    private lateinit var selectedImageUri: Uri
     private lateinit var auth: FirebaseAuth
     private var adapter: AnnouncementRecyclerAdapter? = null
     private lateinit var annModel: AnnouncementModel
-    private var times = 0
+    private var lastVisible: DocumentSnapshot? = null
     private var hasMoreData = true
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,80 +63,23 @@ class AnnouncementFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         annModel = AnnouncementModel()
 
-        mBinding.postAnnouncement.setOnClickListener {
-            dialogPost = DialogPostAnnouncementBinding.inflate(layoutInflater)
-
-            val dialog = AlertDialog.Builder(context as MainActivity)
-                .setTitle("Post Announcement")
-                .setView(dialogPost.root)
-                .setPositiveButton("Save", null) // Initially null to handle manually
-                .setNegativeButton("Cancel") { dialogInterface, _ ->
-                    dialogInterface.dismiss()
-                }
-                .create()
-
-            // Custom behavior for the Save button
-            dialog.setOnShowListener {
-                val saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                saveButton.setOnClickListener {
-                    inProgress(true)
-                    if (validateMessage(dialogPost)) {
-                        annModel = annModel.copy(
-                            annId = FirebaseUtils.allAnnouncementCollectionReference()
-                                .document().id,
-                            userId = auth.currentUser!!.uid,
-                            message = dialogPost.messageET.text.toString(),
-                            timestamp = Timestamp.now()
-                        )
-                        FirebaseUtils.allAnnouncementCollectionReference().document(annModel.annId)
-                            .set(annModel).addOnCompleteListener {
-                                inProgress(false)
-                                AndroidUtils.showToast(
-                                    context as MainActivity,
-                                    "Announcement posted"
-                                )
-                                dialog.dismiss()
-                            }
+        imagePickLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+                    if (data != null && data.data != null) {
+                        selectedImageUri = data.data!!
+                        imgAdapter.addImage(selectedImageUri)
+                        imgAdapter.notifyDataSetChanged()
                     }
                 }
             }
-
-            dialogPost.messageET.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    dialogPost.messageTil.error = null
-                    dialogPost.messageTil.isErrorEnabled = false
-                } else {
-                    validateMessage(dialogPost)
-                }
-            }
-
-
-            dialog.show()
-        }
-
-
         setupRecyclerView()
+        setupSwipeRefresh()
 
-        mBinding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-
-                // Don't load more data if there's no more data to load
-                if (!hasMoreData) return
-
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val visibleItemCount = layoutManager.childCount
-                val totalItemCount = layoutManager.itemCount
-                val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
-
-                // Check if the user has scrolled to the bottom of the list
-                if ((visibleItemCount + pastVisibleItems) >= totalItemCount ||
-                    layoutManager.findLastCompletelyVisibleItemPosition() == totalItemCount - 1) {
-                    // Load more data if at the bottom and there is more data
-                    loadMoreData()
-                }
-            }
-        })
+        mBinding.postAnnouncement.setOnClickListener {
+            showPostDialog()
+        }
 
 
 
@@ -123,7 +87,29 @@ class AnnouncementFragment : Fragment() {
 
 
     }
+    private fun setupSwipeRefresh() {
+        swipeRefreshLayout = mBinding.swipeRefreshLayout
+        swipeRefreshLayout.setOnRefreshListener {
+            refreshData()
+        }
 
+        swipeRefreshLayout.setColorSchemeResources(
+            R.color.colorPrimary,
+            R.color.colorPrimaryDark,
+            R.color.colorAccent
+        )
+    }
+
+    private fun refreshData() {
+        swipeRefreshLayout.isRefreshing = true
+        hasMoreData = true
+
+        // Simulate data refresh (Replace with actual refresh logic if needed)
+        Handler(Looper.getMainLooper()).postDelayed({
+            setupRecyclerView()
+            swipeRefreshLayout.isRefreshing = false
+        }, 500)
+    }
 
     private fun validateMessage(dialogPost: DialogPostAnnouncementBinding): Boolean {
         val value = dialogPost.messageET.text.toString()
@@ -144,10 +130,8 @@ class AnnouncementFragment : Fragment() {
 
     private fun setupRecyclerView() {
         inProgress(true)
-
         val query = FirebaseUtils.allAnnouncementCollectionReference()
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(20)
 
         val options = FirestoreRecyclerOptions.Builder<AnnouncementModel>()
             .setQuery(query, AnnouncementModel::class.java)
@@ -159,109 +143,151 @@ class AnnouncementFragment : Fragment() {
         mBinding.recyclerView.adapter = adapter
         adapter?.startListening()
 
-        inProgress(false)
+        query.get().addOnSuccessListener { snapshot ->
+            lastVisible = snapshot.documents.lastOrNull()
+        }
 
+        inProgress(false)
     }
 
-    private fun loadMoreData() {
-        if (!hasMoreData) return // Stop if no more data is available
 
-        inProgress(true) // Show progress indicator
+    private fun showPostDialog() {
+        dialogPost = DialogPostAnnouncementBinding.inflate(layoutInflater)
 
-        val currentSnapshots = adapter?.snapshots ?: return inProgress(false) // Ensure snapshots are not null
+        // Initialize the uploading image
+        imgAdapter = AnnouncementImgRecyclerAdapter(mutableListOf(), context as MainActivity)
+        dialogPost.recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        dialogPost.recyclerView.adapter = imgAdapter
 
-        if (currentSnapshots.isEmpty()) {
-            // If there are no items yet, stop loading more
-            hasMoreData = false
-            inProgress(false)
-            return
-        }
 
-        val lastVisibleItem = (mBinding.recyclerView.layoutManager as LinearLayoutManager)
-            .findLastVisibleItemPosition()
+        val dialog = AlertDialog.Builder(context as MainActivity)
+            .setTitle("Post Announcement")
+            .setView(dialogPost.root)
+            .setPositiveButton("Save", null)
+            .setNegativeButton("Cancel") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .create()
 
-        if (lastVisibleItem < 0 || lastVisibleItem >= currentSnapshots.size) {
-            // If the last item index is invalid, stop loading
-            inProgress(false)
-            return
-        }
+        dialog.setOnShowListener {
+            val saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            saveButton.setOnClickListener {
+                saveButton.isEnabled = false
+                var uploadFinish = true
+                dialogInProgress(true)
+                if (validateMessage(dialogPost)) {
+                    val announcementImages = imgAdapter.getImages() // Retrieve images from adapter
+                    val annId = FirebaseUtils.allAnnouncementCollectionReference().document().id
+                    val announcementImageUrls = mutableListOf<String>()
+                    val metadata = storageMetadata {
+                        cacheControl = "public, max-age=3600" // Cache for 1 year
+                    }
 
-        val lastVisibleDocument = currentSnapshots.getSnapshot(lastVisibleItem)
+                    // Start uploading images
+                    for ((index, announcementImage) in announcementImages.withIndex()) {
+                        val imgName = "${annId}_$index"
+                        val storageRef =
+                            FirebaseUtils.getAnnImagePicStorageRef(annId).child(imgName)
+                        storageRef.putFile(announcementImage, metadata)
+                            .continueWithTask { task ->
+                                if (task.isSuccessful) {
+                                    // Get the download URL of the uploaded image
+                                    storageRef.downloadUrl
+                                } else {
+                                    uploadFinish = false
+                                    throw task.exception ?: Exception("Image upload failed")
 
-        // Prepare the query for the next batch of data
-        val nextQuery = FirebaseUtils.allAnnouncementCollectionReference()
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .startAfter(lastVisibleDocument) // Start after the last visible document
-            .limit(20) // Limit the results for pagination
+                                }
+                            }
+                        announcementImageUrls.add(imgName)
+                    }
 
-        nextQuery.get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                if (task.result?.isEmpty == true) {
-                    // No more data available
-                    hasMoreData = false
-                } else {
-                    // Update the adapter with the new query results
-                    val options = FirestoreRecyclerOptions.Builder<AnnouncementModel>()
-                        .setQuery(nextQuery, AnnouncementModel::class.java)
-                        .setLifecycleOwner(viewLifecycleOwner)
-                        .build()
 
-                    mBinding.recyclerView.post {
-                        adapter?.updateOptions(options)
+                    // Create and save the announcement
+                    if (uploadFinish) {
+                        annModel = annModel.copy(
+                            annId = annId,
+                            userId = auth.currentUser!!.uid,
+                            message = dialogPost.messageET.text.toString(),
+                            timestamp = Timestamp.now(),
+                            imageUrls = announcementImageUrls,
+                        )
+                        FirebaseUtils.allAnnouncementCollectionReference().document(annModel.annId)
+                            .set(annModel)
+                            .addOnCompleteListener {
+                                dialogInProgress(false)
+                                AndroidUtils.showToast(
+                                    context as MainActivity,
+                                    "Announcement posted"
+                                )
+                                dialog.dismiss()
+                            }
+                    }else {
+                        // Handle failed uploads
+                        dialogInProgress(false)
+                        saveButton.isEnabled = true // Re-enable the Save button for retrying
+                        AndroidUtils.showToast(
+                            context as MainActivity,
+                            "Failed to upload some images. Please try again."
+                        )
                     }
                 }
-            } else {
-                // Handle errors during data loading
-                AndroidUtils.showToast(context as MainActivity, "Error loading more data: ${task.exception?.message}")
             }
-            inProgress(false) // Hide progress indicator
         }
+
+        dialogPost.messageET.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                dialogPost.messageTil.error = null
+                dialogPost.messageTil.isErrorEnabled = false
+            } else {
+                validateMessage(dialogPost)
+            }
+        }
+
+        // Handle image upload button
+        dialogPost.uploadImageBtn.setOnClickListener {
+            ImagePicker.with(this)
+                .galleryMimeTypes(
+                    mimeTypes = arrayOf("image/png", "image/jpg", "image/jpeg") // Exclude GIF
+                )
+                .createIntent { intent ->
+                    imagePickLauncher.launch(intent)
+                }
+        }
+
+
+
+        dialog.show()
     }
 
+    private fun dialogInProgress(progress: Boolean){
+        dialogPost.progressBar.visibility = if (progress) View.VISIBLE else View.GONE
+    }
 
     private fun inProgress(progress: Boolean) {
-        if (progress) {
-            mBinding.progressingBar.visibility = View.VISIBLE
-        } else {
-            mBinding.progressingBar.visibility = View.GONE
-        }
+        mBinding.progressBar.visibility = if (progress) View.VISIBLE else View.GONE
     }
 
-//
-//    // Lifecycle management for FirestoreRecyclerAdapter
-//    override fun onStart() {
-//        super.onStart()
-//        if (adapter != null) {
-//            adapter?.startListening() // Start listening once when the fragment starts
-//        }
-//    }
-//
-//    override fun onStop() {
-//        super.onStop()
-//        if (adapter != null) {
-//            adapter?.stopListening() // Stop listening when the fragment is no longer in the foreground
-//        }
-//    }
-//
-//    override fun onResume() {
-//        super.onResume()
-//        if (adapter != null) {
-//            adapter?.startListening() // Ensure adapter starts listening here
-//        }
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        if (adapter != null) {
-//            adapter?.stopListening() // Properly stop listening when the fragment is paused
-//        }
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        if (adapter != null) {
-//            adapter?.stopListening() // Clean up to avoid memory leaks
-//        }
-//        _binding = null // Clear binding reference to prevent memory leaks
-//    }
+
+
+    // Lifecycle management for FirestoreRecyclerAdapter
+    override fun onStart() {
+        super.onStart()
+        adapter?.startListening() // Start listening once when the fragment starts
+    }
+
+    override fun onStop() {
+        adapter?.stopListening() // Stop listening when the fragment is no longer in the foreground
+        super.onStop()
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onResume() {
+        super.onResume()
+        adapter?.notifyDataSetChanged() // Ensure dataset is consistent
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding.recyclerView.adapter = null // Clear adapter to prevent memory leaks
+        _binding = null // Clear binding reference
+    }
 }

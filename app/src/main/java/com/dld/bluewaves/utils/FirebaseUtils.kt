@@ -14,6 +14,9 @@ import java.util.Locale
 
 object FirebaseUtils {
 
+
+    //Users
+
     fun currentUserId(): String? {
         return FirebaseAuth.getInstance().uid
     }
@@ -39,16 +42,22 @@ object FirebaseUtils {
         return FirebaseFirestore.getInstance().collection("users")
     }
 
+
+    // Chatroom
+
+    // Collect ChatroomID
     fun getChatroomReference(chatroomId: String): DocumentReference {
         return FirebaseFirestore.getInstance()
             .collection("chatrooms")
             .document(chatroomId)
     }
 
+    // Collect Chats from Chatroom
     fun getChatroomMessageReference(chatroomId: String): CollectionReference {
         return getChatroomReference(chatroomId).collection("chats")
     }
 
+    // Creating Chatroom ID
     fun getChatroomId(userId1: String, userId2: String): String {
         return if (userId1.hashCode() < userId2.hashCode()) {
             userId1 + "_" + userId2
@@ -57,30 +66,15 @@ object FirebaseUtils {
         }
     }
 
+    // Collect All Chatroom Reference
     fun allChatroomCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection("chatrooms")
     }
 
-    fun allAnnouncementCollectionReference(): CollectionReference {
-        return FirebaseFirestore.getInstance().collection("announcements")
-    }
-    fun createAnnouncement(model: AnnouncementModel): Task<DocumentReference> {
-        return allAnnouncementCollectionReference().add(model)
-    }
 
-    fun getAnnouncementReference(announcementId: String): DocumentReference {
-        return FirebaseFirestore.getInstance()
-            .collection("announcements").document(announcementId)
-    }
-    fun getUserAnnouncementReference(userId: String): DocumentReference {
-        return FirebaseFirestore.getInstance()
-            .collection("users")
-            .document(userId)
-    }
 
-    fun deleteAnnouncement(annId: String): Task<Void> {
-        return getAnnouncementReference(annId).delete()
-    }
+
+
 
     fun getOtherUserFromChatroom(userIds: List<String?>): DocumentReference {
         val currentUserId = currentUserId() ?: throw IllegalStateException("User not logged in")
@@ -88,10 +82,6 @@ object FirebaseUtils {
         return allUserCollectionReference().document(otherUserId!!)
     }
 
-    fun timestampToString(timestamp: Timestamp): String {
-        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        return dateFormat.format(timestamp.toDate())
-    }
 
     fun getCurrentProfilePicStorageRef(): StorageReference {
         val userId = currentUserId() ?: throw IllegalStateException("User not logged in")
@@ -106,6 +96,8 @@ object FirebaseUtils {
 //            .child("profile_pic")
 //            .child(otherUserId)
 //    }
+
+    // Getting the other user's data from the profile pic storage
     fun getOtherProfilePicStorageRef(otherUserId: String): StorageReference {
         return FirebaseStorage.getInstance().reference
             .child("profile_pic")
@@ -119,5 +111,41 @@ object FirebaseUtils {
                     }
                 }
             }
+    }
+
+    //Announcements
+
+    // Collect a certain announcement
+    fun getAnnouncementReference(announcementId: String): DocumentReference {
+        return FirebaseFirestore.getInstance()
+            .collection("announcements").document(announcementId)
+    }
+
+    // Collect user data for announcement
+    fun getUserAnnouncementReference(userId: String): DocumentReference {
+        return FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(userId)
+    }
+
+    // Delete Announcement
+    fun deleteAnnouncement(annId: String): Task<Void> {
+        return getAnnouncementReference(annId).delete()
+    }
+
+    // Collect all announcements
+    fun allAnnouncementCollectionReference(): CollectionReference {
+        return FirebaseFirestore.getInstance().collection("announcements")
+    }
+
+    // Create or Post an Announcement
+    fun createAnnouncement(model: AnnouncementModel): Task<DocumentReference> {
+        return allAnnouncementCollectionReference().add(model)
+    }
+
+    fun getAnnImagePicStorageRef(image: String): StorageReference {
+        return FirebaseStorage.getInstance().reference
+            .child("annPics")
+            .child(image)
     }
 }

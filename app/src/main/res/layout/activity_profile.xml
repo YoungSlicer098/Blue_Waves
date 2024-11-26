@@ -168,7 +168,7 @@
                     android:text="@string/edit"
                     android:textColor="@color/buttonColor"
                     android:textIsSelectable="true"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     tools:ignore="RelativeOverlap" />
             </RelativeLayout>
 
@@ -274,7 +274,7 @@
                     android:focusableInTouchMode="false"
                     android:text="@string/edit"
                     android:textColor="@color/buttonColor"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     tools:ignore="RelativeOverlap" />
             </RelativeLayout>
 

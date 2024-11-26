@@ -63,8 +63,42 @@
         android:id="@+id/message_text"
         android:layout_below="@id/user_info_layout"
         android:layout_marginHorizontal="25dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="15dp"/>
 
 
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/image_layout"
+        android:layout_below="@id/message_text"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="15dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:gravity="center">
+
+        <!-- Image 1 -->
+        <include layout="@layout/announcement_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/image_1"/>
+
+        <!-- Image 2 -->
+        <include layout="@layout/announcement_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/image_1"
+            android:id="@+id/image_2"/>
+
+        <!-- Image 3 -->
+        <include layout="@layout/announcement_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/image_1"
+            android:layout_below="@id/image_2"
+            android:id="@+id/image_3"/>
+
+
+    </RelativeLayout>
 </RelativeLayout>

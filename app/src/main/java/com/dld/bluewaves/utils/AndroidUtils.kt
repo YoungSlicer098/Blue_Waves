@@ -1,15 +1,27 @@
+@file:Suppress("DEPRECATION")
+
 package com.dld.bluewaves.utils
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.SimpleTarget
 import com.dld.bluewaves.R
 import com.dld.bluewaves.model.UserModel
+import com.github.chrisbanes.photoview.PhotoView
 
 object AndroidUtils {
 
@@ -62,4 +74,72 @@ object AndroidUtils {
             else -> R.drawable.profile_white
         }
     }
+
+
+
+    fun loadPicAnn(context: Context, imageUri: Uri, imageView: ImageView, progressBar: ProgressBar) {
+        progressBar.visibility = View.VISIBLE  // Show progress bar before image loading
+
+        Glide.with(context)
+            .load(imageUri)
+            .apply(RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.image_icon)
+                .error(R.drawable.image_error_icon)
+            )
+            .into(object : SimpleTarget<Drawable>() {
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    progressBar.visibility = View.GONE  // Hide progress bar after image is loaded
+                    imageView.setImageDrawable(resource)
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    progressBar.visibility = View.GONE  // Hide progress bar if loading fails
+                    retryLoadImage(context, imageUri, imageView, progressBar, 1)
+                }
+            })
+    }
+
+    fun loadPicAnn(context: Context, imageUri: Uri, imageView: PhotoView, progressBar: ProgressBar){
+        progressBar.visibility = View.VISIBLE  // Show progress bar before image loading
+
+        Glide.with(context)
+            .load(imageUri)
+            .apply(RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.image_icon)
+                .error(R.drawable.image_error_icon)
+            )
+            .into(object : SimpleTarget<Drawable>() {
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    progressBar.visibility = View.GONE  // Hide progress bar after image is loaded
+                    imageView.setImageDrawable(resource)
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    progressBar.visibility = View.GONE  // Hide progress bar if loading fails
+                    retryLoadImage(context, imageUri, imageView, progressBar, 1)
+                }
+            })
+    }
+
+
+    fun retryLoadImage(context: Context, imageUri: Uri, imageView: ImageView, progressBar: ProgressBar, attemptCount: Int) {
+        if (attemptCount <= 3) {  // Max retry attempts (e.g., 3)
+            Handler(Looper.getMainLooper()).postDelayed({
+                loadPicAnn(context, imageUri, imageView, progressBar)
+            }, 1000) // Retry after 1 second
+        } else {
+            // After 3 failed attempts, show an error message or default image
+            imageView.setImageResource(R.drawable.image_error_icon)
+        }
+    }
+
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetworkInfo
+        return activeNetwork != null && activeNetwork.isConnected
+    }
+
 }

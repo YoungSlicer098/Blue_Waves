@@ -2,6 +2,7 @@ package com.dld.bluewaves
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
@@ -13,6 +14,7 @@ import com.dld.bluewaves.databinding.WelcomeLayoutBinding
 import com.dld.bluewaves.utils.AndroidUtils
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 
 @Suppress("DEPRECATION")
@@ -50,6 +52,7 @@ class WelcomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 mBinding.drawerLayout.openDrawer(GravityCompat.END)
             }
         }
+
 
 
         // Initialize the navigation view and set the listener

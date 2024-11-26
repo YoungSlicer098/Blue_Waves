@@ -6,5 +6,6 @@ data class AnnouncementModel(
     var annId: String = "",
     var userId: String = "",
     var message: String = "",
-    var timestamp: Timestamp? = null
+    var timestamp: Timestamp? = null,
+    var imageUrls : List<String>  = listOf(),
 )

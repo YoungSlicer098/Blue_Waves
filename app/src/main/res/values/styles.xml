@@ -38,4 +38,17 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
+    <style name="Theme.TransparentActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@style/ActivityFadeAnimation</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="ActivityFadeAnimation">
+        <item name="android:activityOpenEnterAnimation">@anim/fade_in_static</item>
+        <item name="android:activityCloseExitAnimation">@anim/fade_out_static</item>
+    </style>
+
 </resources>
