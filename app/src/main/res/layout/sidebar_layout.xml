@@ -21,7 +21,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:orientation="horizontal"
-        android:layout_below="@id/navCloseBtn">
+        android:layout_below="@id/navCloseBtn"
+        android:id="@+id/layout_title">
 
         <ImageView
             android:id="@+id/navLogo"
@@ -57,7 +58,9 @@
         android:layout_height="wrap_content"
         android:text="@string/version"
         android:layout_alignParentEnd="true"
-        android:layout_margin="2dp"/>
+        android:layout_marginTop="25dp"
+        android:layout_marginHorizontal="15dp"
+        android:textSize="20sp"/>
 
 
 </RelativeLayout>
