@@ -13,17 +13,21 @@
         android:layout_height="match_parent" />
 
     <!-- Indicator container -->
-    <LinearLayout
+    <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/indicatorContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="60dp"
-        android:orientation="horizontal">
+        app:flexWrap="wrap"
+        app:justifyContent="center"
+        app:alignItems="center"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="30dp">
 
-        <!-- Floating buttons will be added dynamically -->
-    </LinearLayout>
+
+    </com.google.android.flexbox.FlexboxLayout>
 
     <ImageView
         android:layout_width="90dp"

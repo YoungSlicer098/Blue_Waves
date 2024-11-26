@@ -37,9 +37,11 @@ oauth2 = "1.12.1"
 firebaseAdmin = "9.1.1"
 photoView = "2.0.0"
 tedimagepicker = "1.6.1"
+flexbox = "3.0.0"
 
 [libraries]
 imagepicker = { group = "com.github.dhaval2404", name = "imagepicker", version.ref = "imagepicker"}
+flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox"}
 tedimagepicker = { group = "io.github.ParkSangGwon", name = "tedimagepicker", version.ref = "tedimagepicker"}
 photoview = { group = "com.github.chrisbanes", name = "PhotoView", version.ref = "photoView"}
 oauth2 = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "oauth2"}

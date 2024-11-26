@@ -165,4 +165,7 @@ dependencies {
 
     //oAuth2
     implementation(libs.oauth2)
+
+    //flexbox
+    implementation(libs.flexbox)
 }

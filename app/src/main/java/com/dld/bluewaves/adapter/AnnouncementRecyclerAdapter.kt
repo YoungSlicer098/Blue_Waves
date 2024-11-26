@@ -22,6 +22,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.storage.StorageException
 
+@Suppress("DEPRECATION")
 class AnnouncementRecyclerAdapter(
     options: FirestoreRecyclerOptions<AnnouncementModel>,
     private val context: Context
@@ -87,132 +88,17 @@ class AnnouncementRecyclerAdapter(
                     val relativeTime = TimeUtils.getRelativeTime(context, timestamp)
                     holder.lastMessageTime.text = relativeTime
 
+                    // Interactions
 
-                    // Image configurations and implementation
+
                     when (model.imageUrls.size) {
-                        0 -> {
-                            holder.imageLayout.visibility = View.GONE
-                        }
-                        1 -> {
-                            holder.imageLayout.visibility = View.VISIBLE
-                            holder.imageBig1.visibility = View.VISIBLE
-
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
-                                }
-                            }
-
-                            holder.imageBig1.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 0)
-                            }
-                        }
-                        2 -> {
-                            holder.imageLayout.visibility = View.VISIBLE
-                            holder.imageBig1.visibility = View.VISIBLE
-                            holder.imageBig2.visibility = View.VISIBLE
-
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
-                                }
-                            }
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[1]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageBig2, holder.imageProgress2)
-                                }
-                            }
-
-                            holder.imageBig1.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 0)
-                            }
-                            holder.imageBig2.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 1)
-                            }
-                        }
-                        3 -> {
-                            holder.imageLayout.visibility = View.VISIBLE
-                            holder.imageBig1.visibility = View.VISIBLE
-                            holder.imageSmall2.visibility = View.VISIBLE
-                            holder.imageSmall3.visibility = View.VISIBLE
-
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
-                                }
-                            }
-                            FirebaseUtils.getAnnImagePicStorageRef(model.imageUrls[1]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageSmall2, holder.imageProgress2)
-                                }
-                            }
-
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[2]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageSmall3, holder.imageProgress3)
-                                }
-                            }
-
-                            holder.imageBig1.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 0)
-                            }
-                            holder.imageSmall2.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 1)
-                            }
-                            holder.imageSmall3.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 2)
-                            }
-                        }
-                        else -> {
-                            holder.imageLayout.visibility = View.VISIBLE
-                            holder.imageBig1.visibility = View.VISIBLE
-                            holder.imageSmall2.visibility = View.VISIBLE
-                            holder.imageSmall3.visibility = View.VISIBLE
-                            holder.extraImagesText.visibility = View.VISIBLE
-
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
-                                }
-                            }
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[1]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageSmall2, holder.imageProgress1)
-                                }
-                            }
-
-                            FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[2]).downloadUrl.addOnCompleteListener { img ->
-                                if (img.isSuccessful) {
-                                    val uri: Uri = img.result
-                                    AndroidUtils.loadPicAnn(context, uri, holder.imageSmall3, holder.imageProgress1)
-                                }
-                            }
-
-                            holder.imageBig1.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 0)
-                            }
-                            holder.imageSmall2.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 1)
-                            }
-                            holder.imageSmall3.setOnClickListener {
-                                navigateToImageActivity(model.imageUrls, model.annId, 2)
-                                }
-
-                            val size = model.imageUrls.size - 3
-                            val moreText = "+$size more photos"
-                            holder.extraImagesText.text = moreText
-                        }
+                        0 -> holder.imageLayout.visibility = View.GONE
+                        1 -> setupSingleImage(holder, model, position)
+                        2 -> setupTwoImages(holder, model, position)
+                        3 -> setupThreeImages(holder, model, position)
+                        else -> setupMultipleImages(holder, model, position)
                     }
 
-                    // Interacti
                     holder.itemView.setOnLongClickListener {
                         // Show an AlertDialog to confirm deletion
                         AlertDialog.Builder(context)
@@ -249,7 +135,23 @@ class AnnouncementRecyclerAdapter(
     override fun getItemId(position: Int): Long {
         return snapshots.getSnapshot(position).id.hashCode().toLong()
     }
-
+    override fun onViewRecycled(holder: AnnouncementModelViewHolder) {
+        super.onViewRecycled(holder)
+        // Clear images to avoid old ones sticking to the view when recycled
+        holder.imageLayout.visibility = View.GONE
+        holder.imageBig1.visibility = View.GONE
+        holder.imageBig1.setImageDrawable(null)
+        holder.imageProgress1.visibility = View.GONE
+        holder.imageBig2.visibility = View.GONE
+        holder.imageBig2.setImageDrawable(null)
+        holder.imageProgress2.visibility = View.GONE
+        holder.imageSmall2.visibility = View.GONE
+        holder.imageSmall2.setImageDrawable(null)
+        holder.imageProgress3.visibility = View.GONE
+        holder.imageSmall3.setImageDrawable(null)
+        holder.imageSmall3.visibility = View.GONE
+        holder.extraImagesText.visibility = View.GONE
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnnouncementModelViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -266,4 +168,141 @@ class AnnouncementRecyclerAdapter(
         }
         context.startActivity(intent)
     }
+
+
+    private fun setupSingleImage(holder: AnnouncementModelViewHolder, model: AnnouncementModel, position: Int) {
+        holder.imageLayout.visibility = View.VISIBLE
+        holder.imageBig1.visibility = View.VISIBLE
+
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful && holder.adapterPosition == position) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
+            }
+        }
+
+        holder.imageBig1.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 0)
+        }
+    }
+
+    private fun setupTwoImages(holder: AnnouncementModelViewHolder, model: AnnouncementModel, position: Int) {
+        holder.imageLayout.visibility = View.VISIBLE
+        holder.imageBig1.visibility = View.VISIBLE
+        holder.imageBig2.visibility = View.VISIBLE
+
+        // Load first image
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful && holder.adapterPosition == position) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
+            }
+        }
+
+        // Load second image
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[1]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful && holder.adapterPosition == position) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageBig2, holder.imageProgress2)
+            }
+        }
+
+        holder.imageBig1.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 0)
+        }
+        holder.imageBig2.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 1)
+        }
+    }
+
+    private fun setupThreeImages(holder: AnnouncementModelViewHolder, model: AnnouncementModel, position: Int) {
+        holder.imageLayout.visibility = View.VISIBLE
+        holder.imageBig1.visibility = View.VISIBLE
+        holder.imageSmall2.visibility = View.VISIBLE
+        holder.imageSmall3.visibility = View.VISIBLE
+
+        // Load first image
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful && holder.adapterPosition == position) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
+            }
+        }
+
+        // Load second image
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[1]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful && holder.adapterPosition == position) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageSmall2, holder.imageProgress2)
+            }
+        }
+
+        // Load third image
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[2]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful && holder.adapterPosition == position) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageSmall3, holder.imageProgress3)
+            }
+        }
+
+        holder.imageBig1.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 0)
+        }
+        holder.imageSmall2.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 1)
+        }
+        holder.imageSmall3.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 2)
+        }
+    }
+
+    private fun setupMultipleImages(holder: AnnouncementModelViewHolder, model: AnnouncementModel, position: Int) {
+
+        holder.imageLayout.visibility = View.VISIBLE
+        holder.imageBig1.visibility = View.VISIBLE
+        holder.imageSmall2.visibility = View.VISIBLE
+        holder.imageSmall3.visibility = View.VISIBLE
+        holder.extraImagesText.visibility = View.VISIBLE
+
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[0]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageBig1, holder.imageProgress1)
+            }
+        }
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[1]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageSmall2, holder.imageProgress1)
+
+            }
+        }
+
+        FirebaseUtils.getAnnImagePicStorageRef(model.annId).child(model.imageUrls[2]).downloadUrl.addOnCompleteListener { img ->
+            if (img.isSuccessful) {
+                val uri: Uri = img.result
+                AndroidUtils.loadPicAnn(context, uri, holder.imageSmall3, holder.imageProgress1)
+
+            }
+        }
+
+        holder.imageBig1.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 0)
+        }
+        holder.imageSmall2.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 1)
+        }
+        holder.imageSmall3.setOnClickListener {
+            navigateToImageActivity(model.imageUrls, model.annId, 2)
+        }
+
+        val size = model.imageUrls.size - 3
+        val moreText = "+$size more photos"
+        holder.extraImagesText.text = moreText
+
+
+        // Load images similarly as in setupThreeImages, making sure to check `holder.adapterPosition == position` before binding
+        // Add logic for the extra images if there are more than 3 images.
+    }
+
 }

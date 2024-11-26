@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.dld.bluewaves.databinding.ActivityImageBinding
 import com.dld.bluewaves.view.ImagePagerAdapter
+import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 @Suppress("DEPRECATION")
@@ -41,7 +42,7 @@ class ImageActivity : AppCompatActivity() {
         val imgList = intent.getStringArrayListExtra("imgList")!!
         val annId = intent.getStringExtra("annId")!!
         val initialPosition = intent.getIntExtra("initialPosition", 0)
-        val indicatorContainer: LinearLayout = findViewById(R.id.indicatorContainer)
+        val indicatorContainer: FlexboxLayout = findViewById(R.id.indicatorContainer)
         val numPages = imgList.size // Replace with the number of images/pages
 
         mBinding.viewPager.adapter = ImagePagerAdapter(imgList, annId)
@@ -52,15 +53,19 @@ class ImageActivity : AppCompatActivity() {
         // Dynamically create indicators
         for (i in 0 until numPages) {
             val indicator = FloatingActionButton(this).apply {
-                layoutParams = LinearLayout.LayoutParams(25.dpToPx(), 25.dpToPx()).apply {
-                    setMargins(8.dpToPx(), 0, 8.dpToPx(), 0)
+                layoutParams = LinearLayout.LayoutParams(15.dpToPx(), 15.dpToPx()).apply {
+                    setMargins(4.dpToPx(), 0, 4.dpToPx(), 0)
                 }
                 size = FloatingActionButton.SIZE_MINI
-                isClickable = false
+                isClickable = true
                 setImageResource(android.R.color.transparent)
                 backgroundTintList = ColorStateList.valueOf(
                     ContextCompat.getColor(context as AppCompatActivity, R.color.unpressed_color)
                 )
+
+                setOnClickListener {
+                    mBinding.viewPager.setCurrentItem(i, true)
+                }
             }
             indicatorContainer.addView(indicator)
         }

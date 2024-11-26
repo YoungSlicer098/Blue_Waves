@@ -144,6 +144,7 @@ class AnnouncementFragment : Fragment() {
         adapter = AnnouncementRecyclerAdapter(options, context as MainActivity)
         mBinding.recyclerView.layoutManager = LinearLayoutManager(context)
         mBinding.recyclerView.adapter = adapter
+        mBinding.recyclerView.setHasFixedSize(true)
         adapter?.startListening()
 
         query.get().addOnSuccessListener { snapshot ->
@@ -333,7 +334,6 @@ class AnnouncementFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     override fun onResume() {
         super.onResume()
-        adapter?.notifyDataSetChanged() // Ensure dataset is consistent
     }
     override fun onDestroyView() {
         super.onDestroyView()
