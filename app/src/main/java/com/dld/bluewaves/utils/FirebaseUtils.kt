@@ -102,15 +102,6 @@ object FirebaseUtils {
         return FirebaseStorage.getInstance().reference
             .child("profile_pic")
             .child(otherUserId)
-            .apply {
-                // Enforce cache control
-                metadata.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val metadata = task.result
-                        val cacheControl = metadata?.getCustomMetadata("cacheControl")
-                    }
-                }
-            }
     }
 
     //Announcements

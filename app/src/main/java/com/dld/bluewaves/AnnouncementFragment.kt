@@ -21,6 +21,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dld.bluewaves.adapter.AnnouncementImgRecyclerAdapter
 import com.dld.bluewaves.adapter.AnnouncementRecyclerAdapter
 import com.dld.bluewaves.adapter.RecentChatRecyclerAdapter
+import com.dld.bluewaves.databinding.DialogPickImageBinding
 import com.dld.bluewaves.databinding.DialogPostAnnouncementBinding
 import com.dld.bluewaves.databinding.FragmentAnnouncementBinding
 import com.dld.bluewaves.model.AnnouncementModel
@@ -36,6 +37,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.storageMetadata
+import gun0912.tedimagepicker.builder.TedImagePicker
 
 
 class AnnouncementFragment : Fragment() {
@@ -44,6 +46,7 @@ class AnnouncementFragment : Fragment() {
     private val mBinding get() = _binding!!
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var dialogPost: DialogPostAnnouncementBinding
+    private lateinit var dialogPick: DialogPickImageBinding
     private lateinit var imgAdapter: AnnouncementImgRecyclerAdapter
     private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
     private lateinit var selectedImageUri: Uri
@@ -246,18 +249,65 @@ class AnnouncementFragment : Fragment() {
 
         // Handle image upload button
         dialogPost.uploadImageBtn.setOnClickListener {
-            ImagePicker.with(this)
-                .galleryMimeTypes(
-                    mimeTypes = arrayOf("image/png", "image/jpg", "image/jpeg") // Exclude GIF
-                )
-                .createIntent { intent ->
-                    imagePickLauncher.launch(intent)
-                }
+            uploadClick()
         }
 
 
 
+
+
         dialog.show()
+    }
+
+    private fun uploadClick(){
+        dialogPick = DialogPickImageBinding.inflate(layoutInflater)
+        val dialog = AlertDialog.Builder(context as MainActivity)
+            .setTitle("Choose...")
+            .setView(dialogPick.root)
+            .setNegativeButton("Cancel") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .create()
+
+        // Set click listeners to close the dialog after performing actions
+        val closeDialogAndPerformAction: (() -> Unit) -> View.OnClickListener = { action ->
+            View.OnClickListener {
+                action()
+                dialog.dismiss()
+            }
+        }
+
+        dialogPick.galleryBtn.setOnClickListener(closeDialogAndPerformAction(::galleryOnly))
+        dialogPick.galleryText.setOnClickListener(closeDialogAndPerformAction(::galleryOnly))
+        dialogPick.galleryLayout.setOnClickListener(closeDialogAndPerformAction(::galleryOnly))
+
+
+        dialogPick.cameraBtn.setOnClickListener(closeDialogAndPerformAction(::cameraOnly))
+        dialogPick.cameraText.setOnClickListener(closeDialogAndPerformAction(::cameraOnly))
+        dialogPick.cameraLayout.setOnClickListener(closeDialogAndPerformAction(::cameraOnly))
+
+
+        dialog.show()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun galleryOnly(){
+        TedImagePicker.with(context as MainActivity)
+            .image()
+            .startMultiImage { uriList ->
+                for (uri in uriList) {
+                    imgAdapter.addImage(uri)
+                }
+                imgAdapter.notifyDataSetChanged()
+            }
+    }
+
+    private fun cameraOnly(){
+        ImagePicker.with(this)
+            .cameraOnly()
+            .createIntent { intent ->
+                imagePickLauncher.launch(intent)
+            }
     }
 
     private fun dialogInProgress(progress: Boolean){

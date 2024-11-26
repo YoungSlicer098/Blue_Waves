@@ -40,6 +40,8 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        //noinspection DataBindingWithoutKapt
+        dataBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -57,8 +59,10 @@ android {
             force("com.google.api.grpc:proto-google-common-protos:2.9.6")
             force("com.google.firebase:protolite-well-known-types:18.0.0")
             force("androidx.core:core:1.15.0")
+            force("androidx.media:media:1.0.0")
             exclude(group = "com.google.protobuf", module = "protobuf-java")
             exclude(group = "com.android.support", module = "support-compat")
+            exclude(group = "com.android.support", module = "support-media-compat")
 
         }
 
@@ -144,6 +148,9 @@ dependencies {
 
     //Photo Viewer
     implementation(libs.photoview)
+
+    // Tedimagepicker
+    implementation(libs.tedimagepicker)
 
     //coroutines
     implementation(libs.kotlinx.coroutines.android)
