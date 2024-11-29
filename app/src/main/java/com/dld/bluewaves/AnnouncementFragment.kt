@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,8 +73,8 @@ class AnnouncementFragment : Fragment() {
                     val data: Intent? = result.data
                     if (data != null && data.data != null) {
                         selectedImageUri = data.data!!
-                        imgAdapter.addImage(selectedImageUri)
-                        imgAdapter.notifyDataSetChanged()
+                        val position = imgAdapter.addImage(selectedImageUri)
+                        imgAdapter.notifyItemInserted(position) // Notify only the new item
                     }
                 }
             }
@@ -93,7 +94,9 @@ class AnnouncementFragment : Fragment() {
     private fun setupSwipeRefresh() {
         swipeRefreshLayout = mBinding.swipeRefreshLayout
         swipeRefreshLayout.setOnRefreshListener {
-            refreshData()
+            swipeRefreshLayout.isRefreshing = true
+            setupRecyclerView() // Reload RecyclerView with fresh data
+            swipeRefreshLayout.isRefreshing = false
         }
 
         swipeRefreshLayout.setColorSchemeResources(
@@ -159,9 +162,7 @@ class AnnouncementFragment : Fragment() {
         dialogPost = DialogPostAnnouncementBinding.inflate(layoutInflater)
 
         // Initialize the uploading image
-        imgAdapter = AnnouncementImgRecyclerAdapter(mutableListOf(), context as MainActivity)
-        dialogPost.recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        dialogPost.recyclerView.adapter = imgAdapter
+
 
 
         val dialog = AlertDialog.Builder(context as MainActivity)
@@ -172,6 +173,14 @@ class AnnouncementFragment : Fragment() {
                 dialogInterface.dismiss()
             }
             .create()
+
+        imgAdapter = AnnouncementImgRecyclerAdapter(mutableListOf(), context as MainActivity)
+        dialogPost.recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        dialogPost.recyclerView.adapter = imgAdapter
+
+        dialog.setOnDismissListener {
+            imgAdapter.clearImages() // Clear images when dialog is dismissed
+        }
 
         dialog.setOnShowListener {
             val saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
@@ -224,6 +233,7 @@ class AnnouncementFragment : Fragment() {
                                     context as MainActivity,
                                     "Announcement posted"
                                 )
+
                                 dialog.dismiss()
                             }
                     }else {
@@ -292,14 +302,14 @@ class AnnouncementFragment : Fragment() {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun galleryOnly(){
+    private fun galleryOnly() {
         TedImagePicker.with(context as MainActivity)
             .image()
             .startMultiImage { uriList ->
                 for (uri in uriList) {
-                    imgAdapter.addImage(uri)
+                    val position = imgAdapter.addImage(uri)
+                    imgAdapter.notifyItemInserted(position) // Notify only the new item
                 }
-                imgAdapter.notifyDataSetChanged()
             }
     }
 
@@ -310,6 +320,7 @@ class AnnouncementFragment : Fragment() {
                 imagePickLauncher.launch(intent)
             }
     }
+
 
     private fun dialogInProgress(progress: Boolean){
         dialogPost.progressBar.visibility = if (progress) View.VISIBLE else View.GONE
@@ -331,13 +342,23 @@ class AnnouncementFragment : Fragment() {
         adapter?.stopListening() // Stop listening when the fragment is no longer in the foreground
         super.onStop()
     }
+
     @SuppressLint("NotifyDataSetChanged")
     override fun onResume() {
         super.onResume()
+        adapter?.startListening()
+        adapter?.notifyDataSetChanged() // Start listening for changes when the fragment is in the foreground
     }
+
+    override fun onPause() {
+        super.onPause()
+        adapter?.stopListening() // Stop listening when the fragment is not in the foreground
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        mBinding.recyclerView.adapter = null // Clear adapter to prevent memory leaks
-        _binding = null // Clear binding reference
+        mBinding.recyclerView.adapter = null
+        adapter?.stopListening()
+        _binding = null
     }
 }

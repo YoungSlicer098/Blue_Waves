@@ -1,5 +1,6 @@
 package com.dld.bluewaves.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
@@ -32,7 +33,7 @@ class AnnouncementImgRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: AnnouncementImgViewHolder, position: Int) {
-        val uri = images[position]
+        val uri = images[holder.bindingAdapterPosition]
 
         // Load image using Glide
         Glide.with(context)
@@ -43,26 +44,41 @@ class AnnouncementImgRecyclerAdapter(
 
         // Handle close button click
         holder.closeBtn.setOnClickListener {
-            images.removeAt(position) // Remove the image
-            notifyItemRemoved(position)
-            notifyItemRangeChanged(position, images.size) // Notify changes for proper update
+            val adapterPosition = holder.bindingAdapterPosition
+            if (adapterPosition != RecyclerView.NO_POSITION && adapterPosition < images.size) {
+                images.removeAt(adapterPosition)
+                notifyItemRemoved(adapterPosition)
+            }
         }
     }
 
     override fun getItemCount(): Int = images.size
 
     override fun getItemId(position: Int): Long {
-        return images[position].hashCode().toLong()
+        return images[position].toString().hashCode().toLong()
     }
 
-    // Function to add a new image
-    fun addImage(uri: Uri) {
-        images.add(uri)
-        notifyItemInserted(images.size - 1)
+    fun addImage(uri: Uri): Int {
+        if (!images.contains(uri)) { // Add only if it doesn't already exist
+            images.add(uri)
+        }
+        return images.size - 1
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun clearImages() {
+        if (images.isNotEmpty()) {
+            images.clear()
+            notifyDataSetChanged()
+        }
     }
 
     // Function to retrieve the current list of images
     fun getImages(): List<Uri> {
         return images.toList() // Return a copy to prevent external modifications
     }
+
+
+
+
 }

@@ -1,5 +1,6 @@
 package com.dld.bluewaves.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -151,6 +152,11 @@ class AnnouncementRecyclerAdapter(
         holder.imageSmall3.setImageDrawable(null)
         holder.imageSmall3.visibility = View.GONE
         holder.extraImagesText.visibility = View.GONE
+        holder.role.text = ""
+        holder.displayNameText.text = ""
+        holder.message.text = ""
+        holder.lastMessageTime.text = ""
+        holder.profilePic.setImageResource(R.drawable.profile_white)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnnouncementModelViewHolder {
@@ -167,6 +173,13 @@ class AnnouncementRecyclerAdapter(
             putExtra("initialPosition", initialPosition)
         }
         context.startActivity(intent)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onDataChanged() {
+        super.onDataChanged()
+        // Notify the RecyclerView that the data has changed or been updated.
+        notifyDataSetChanged()
     }
 
 
