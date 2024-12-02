@@ -74,9 +74,27 @@ class ChatActivity : AppCompatActivity() {
                 sendMessageToUser(message)
             }
         }
+
+        checkUserIds()
         getOrCreateChatroomModel()
         setupChatRecyclerView()
 
+    }
+
+    private fun checkUserIds() {
+        if (chatRoomModel.userIds.size == 2) {
+            if (chatRoomModel.userIds[0] == FirebaseUtils.currentUserId() && chatRoomModel.userIds[1] == otherUser.userId) {
+                return
+            } else if (chatRoomModel.userIds[0] == otherUser.userId && chatRoomModel.userIds[1] == FirebaseUtils.currentUserId()) {
+                return
+            } else {
+                chatRoomModel.userIds = listOf(FirebaseUtils.currentUserId(), otherUser.userId)
+                FirebaseUtils.getChatroomReference(chatroomId).set(chatRoomModel.copy(userIds = chatRoomModel.userIds))
+            }
+        } else {
+            chatRoomModel.userIds = listOf(FirebaseUtils.currentUserId(), otherUser.userId)
+            FirebaseUtils.getChatroomReference(chatroomId).set(chatRoomModel.copy(userIds = chatRoomModel.userIds))
+        }
     }
 
     private fun setupChatRecyclerView() {
