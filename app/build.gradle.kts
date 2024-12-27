@@ -168,4 +168,7 @@ dependencies {
 
     //flexbox
     implementation(libs.flexbox)
+
+    //graphview
+    implementation(libs.graphview)
 }

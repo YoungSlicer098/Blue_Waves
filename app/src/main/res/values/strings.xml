@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="version">v0.54</string>
+    <string name="version">v0.56</string>
 
 
     <string name="app_name">Blue Waves</string>
@@ -65,6 +65,14 @@
     <string name="yesterday">Yesterday</string>
     <string name="write_message_here">Write message here</string>
     <string name="camera">Camera</string>
+    <string name="wifi_icon">WIFI ICON</string>
+    <string name="upload_icon">UPLOAD ICON</string>
+    <string name="upload_speed">Upload Speed:</string>
+    <string name="download_speed">Download Speed:</string>
+    <string name="download_icon">DOWNLOAD ICON</string>
+    <string name="tx_icon">TX ICON</string>
+    <string name="tx">TX</string>
+    <string name="menu_button">Menu Button</string>
     <plurals name="minutes_ago">
         <item quantity="one">%d minute ago</item>
         <item quantity="other">%d minutes ago</item>

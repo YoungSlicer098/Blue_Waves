@@ -8,6 +8,16 @@
         android:icon="@drawable/settings_white"
         android:title="Customization"/>
     <item
+        android:id="@+id/nav_schedule"
+        android:enabled="true"
+        android:icon="@drawable/schedule_icon"
+        android:title="Schedule"/>
+    <item
+        android:id="@+id/nav_admin"
+        android:enabled="true"
+        android:icon="@drawable/admin_panel_settings_icon"
+        android:title="Admin"/>
+    <item
         android:title="">
         <menu>
         <item
@@ -20,6 +30,21 @@
             android:enabled="true"
             android:icon="@drawable/logout_logo_white"
             android:title="Logout"/>
+        </menu>
+    </item>
+    <item
+        android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_about_us"
+                android:enabled="true"
+                android:icon="@drawable/person_outline_icon"
+                android:title="About us"/>
+            <item
+                android:id="@+id/nav_version_changelog"
+                android:enabled="true"
+                android:icon="@drawable/insert_drive_file_icon"
+                android:title="Version Changelog"/>
         </menu>
     </item>
 </menu>
