@@ -11,5 +11,7 @@ data class UserModel(
     var profilePic: String = "",
     var role: String = "",
     var searchKeywords: List<String>? = null,
-    var fcmToken: String = ""
+    var fcmToken: String = "",
+    var contactNumber: String = "",
+    var banned: Boolean = false,
 )

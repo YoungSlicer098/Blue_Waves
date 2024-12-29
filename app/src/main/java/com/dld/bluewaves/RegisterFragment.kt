@@ -83,6 +83,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         mBinding.emailET.onFocusChangeListener = this
         mBinding.passwordET.onFocusChangeListener = this
         mBinding.cPasswordET.onFocusChangeListener = this
+        mBinding.contactNumET.onFocusChangeListener = this
         mBinding.backBtn.setOnClickListener(this)
         mBinding.loginNow.setOnClickListener(this)
         mBinding.registerBtn.setOnClickListener(this)
@@ -136,7 +137,11 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             saveButton.setOnClickListener {
                 if (selectedProfilePic != "") {
                     userModel.profilePic = selectedProfilePic
-                    mBinding.profilePic.setImageResource(AndroidUtils.selectPicture(selectedProfilePic))
+                    mBinding.profilePic.setImageResource(
+                        AndroidUtils.selectPicture(
+                            selectedProfilePic
+                        )
+                    )
                     alertDialog.dismiss()
                 } else {
                     AndroidUtils.showToast(context as AuthActivity, "No picture selected")
@@ -172,7 +177,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             selectedView.isSelected = true
 
             // Update the selected profile picture
-            selectedProfilePic = when (drawableId){
+            selectedProfilePic = when (drawableId) {
                 R.drawable.pfp1 -> "pfp1"
                 R.drawable.pfp2 -> "pfp2"
                 R.drawable.pfp3 -> "pfp3"
@@ -182,7 +187,6 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                 else -> ""
             }
         }
-
 
 
         // Set click listeners for each ImageButton
@@ -213,6 +217,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             errorMessage = "Display name must not contain special characters"
         } else if (value.length < 2) {
             errorMessage = "Display name must be at least 2 characters"
+        } else if (FirebaseUtils.sameDisplayNameVerify(value)) {
+            errorMessage = "Display name already exists"
         }
 
         if (errorMessage != null) {
@@ -240,6 +246,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             errorMessage = "Email is required"
         } else if (!Patterns.EMAIL_ADDRESS.matcher(value).matches()) {
             errorMessage = "Email address is invalid"
+        } else if (FirebaseUtils.sameEmailVerify(value)) {
+            errorMessage = "Email address is already in use"
         }
 
         if (errorMessage != null) {
@@ -324,6 +332,31 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         return errorMessage == null
     }
 
+    private fun validateContactNumber(): Boolean {
+        var errorMessage: String? = null
+        val value: String = mBinding.contactNumET.text.toString()
+        if ((value.length == 12 && value.substring(0,3) == "639") || (value.length == 11 && value.substring(0, 2) == "09")) {
+            errorMessage = "Contact Number must be 09XXXXXXXXX or 639XXXXXXXXX"
+        } else if (FirebaseUtils.sameContactNumberVerify(value)) {
+            errorMessage = "Contact Number already exists"
+        }
+
+        if (errorMessage != null) {
+            mBinding.contactNumTil.apply {
+                isErrorEnabled = true
+                error = errorMessage
+                inProgress(false)
+            }
+        } else {
+            userModel = userModel.copy(
+                contactNumber = value
+            )
+        }
+
+        return errorMessage == null
+
+    }
+
     private fun inProgress(inProgress: Boolean) {
         if (inProgress) {
             mBinding.progressBar.visibility = View.VISIBLE
@@ -358,7 +391,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         if (view != null) {
             when (view.id) {
                 R.id.profilePic -> {
-                    dialogProfilePic = DialogProfilePicDecisionsBinding.inflate(LayoutInflater.from(context as AuthActivity))
+                    dialogProfilePic =
+                        DialogProfilePicDecisionsBinding.inflate(LayoutInflater.from(context as AuthActivity))
 
                     // Create the AlertDialog
                     val alertDialog = AlertDialog.Builder(context as AuthActivity)
@@ -370,12 +404,13 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                         .create()
 
                     // Set click listeners to close the dialog after performing actions
-                    val closeDialogAndPerformAction: (() -> Unit) -> View.OnClickListener = { action ->
-                        View.OnClickListener {
-                            action() // Perform your action (e.g., uploadProfilePicture())
-                            alertDialog.dismiss() // Close the dialog
+                    val closeDialogAndPerformAction: (() -> Unit) -> View.OnClickListener =
+                        { action ->
+                            View.OnClickListener {
+                                action() // Perform your action (e.g., uploadProfilePicture())
+                                alertDialog.dismiss() // Close the dialog
+                            }
                         }
-                    }
 
                     dialogProfilePic.uploadBtn.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
                     dialogProfilePic.uploadText.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
@@ -383,7 +418,11 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
 
                     dialogProfilePic.picturesBtn.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
                     dialogProfilePic.picturesText.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
-                    dialogProfilePic.picturesLayout.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
+                    dialogProfilePic.picturesLayout.setOnClickListener(
+                        closeDialogAndPerformAction(
+                            ::picturesProfilePicture
+                        )
+                    )
 
                     alertDialog.show()
                 }
@@ -401,7 +440,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                     val email = mBinding.emailET.text.toString()
                     val password = mBinding.passwordET.text.toString()
 
-                    if (!validateDisplayName() || !validateEmail() || !validatePassword() || !validateConfirmPassword()) {
+                    if (!validateDisplayName() || !validateEmail() || !validatePassword() || !validateConfirmPassword() || !validateContactNumber()) {
                         inProgress(false)
                         return
                     }
@@ -422,13 +461,15 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                     FirebaseUtils.createUserDetails().set(userModel)
                                         .addOnCompleteListener { firestoreTask ->
                                             if (firestoreTask.isSuccessful) {
-                                                if(userModel.profilePic == "") {
+                                                if (userModel.profilePic == "") {
 
                                                     val metadata = storageMetadata {
-                                                        cacheControl = "public, max-age=31536000" // Cache for 1 year
+                                                        cacheControl =
+                                                            "public, max-age=31536000" // Cache for 1 year
                                                     }
                                                     FirebaseUtils.getCurrentProfilePicStorageRef()
-                                                        .putFile(selectedImageUri, metadata).addOnCompleteListener {
+                                                        .putFile(selectedImageUri, metadata)
+                                                        .addOnCompleteListener {
                                                             inProgress(false)
                                                             if (it.isSuccessful) {
                                                                 AndroidUtils.showToast(
@@ -441,7 +482,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                                                     LoginFragment(),
                                                                     false
                                                                 )
-                                                            }else{
+                                                            } else {
                                                                 // Rollback: delete user from Firebase Authentication
                                                                 currentUser.delete()
                                                                     .addOnCompleteListener { deleteTask ->
@@ -459,7 +500,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                                                     }
                                                             }
                                                         }
-                                                }else {
+                                                } else {
                                                     AndroidUtils.showToast(
                                                         context as AuthActivity,
                                                         "Account created."
@@ -561,6 +602,16 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                 setStartIconTintList(ColorStateList.valueOf(android.graphics.Color.CYAN))
                             }
                         }
+                    }
+                }
+
+                R.id.contactNumET -> {
+                    if (hasFocus) {
+                        if (mBinding.contactNumTil.isErrorEnabled) {
+                            mBinding.contactNumTil.isErrorEnabled = false
+                        }
+                    } else {
+                        validateContactNumber()
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package com.dld.bluewaves.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.view.MenuItem
@@ -12,19 +13,23 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewbinding.ViewBinding
+import com.dld.bluewaves.AdminActivity
 import com.dld.bluewaves.ProfileActivity
 import com.dld.bluewaves.R
 import com.dld.bluewaves.SplashActivity
 import com.dld.bluewaves.databinding.ActivityBaseDrawerBinding
 import com.dld.bluewaves.databinding.DialogAboutUsBinding
+import com.dld.bluewaves.model.UserModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 
-@Suppress("INFERRED_TYPE_VARIABLE_INTO_EMPTY_INTERSECTION_WARNING", "DEPRECATION")
+@Suppress("DEPRECATION")
 object DrawerUtils {
 
     private lateinit var toggle: ActionBarDrawerToggle
+    @SuppressLint("StaticFieldLeak")
     private lateinit var dialogAboutUs: DialogAboutUsBinding
 
     // Initializes the navigation drawer
@@ -96,6 +101,11 @@ object DrawerUtils {
                 activity.startActivity(intent)
                 activity.overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
             }
+            R.id.nav_admin -> {
+            val intent = Intent(activity, AdminActivity::class.java)
+            activity.startActivity(intent)
+            activity.overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
+            }
             R.id.nav_logout -> {
                 FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
                     if (it.isSuccessful) {
@@ -111,7 +121,7 @@ object DrawerUtils {
             R.id.nav_about_us -> {
                 dialogAboutUs = DialogAboutUsBinding.inflate(activity.layoutInflater)
 
-                val alertDialog = AlertDialog.Builder(activity)
+                AlertDialog.Builder(activity)
                     .setTitle("About Us")
                     .setView(dialogAboutUs.root)
                     .setPositiveButton("Ok") { dialogInterface, _ ->
@@ -119,6 +129,48 @@ object DrawerUtils {
                     }
                     .create()
             }
+
+            // Developer's Data Manager Button:
+            R.id.nav_dev_btn -> {
+                FirebaseUtils.allUserCollectionReference().get()
+                    .addOnSuccessListener { querySnapshot ->
+                        val batch = FirebaseFirestore.getInstance().batch()
+
+                        for (document in querySnapshot.documents) {
+                            val data = document.toObject(UserModel::class.java)
+
+                            // Prepare fields to update
+                            val updates = mutableMapOf<String, Any?>()
+
+                            if (data?.contactNumber == null) {
+                                updates["contactNumber"] = "" // Default empty string for contact number
+                            }
+                            if (data?.banned == null) {
+                                updates["banned"] = false // Default value for banned
+                            }
+
+                            // If there are updates, add to the batch
+                            if (updates.isNotEmpty()) {
+                                batch.update(document.reference, updates)
+                            }
+                        }
+
+                        // Commit the batch
+                        batch.commit()
+                            .addOnSuccessListener {
+                                println("All documents updated successfully.")
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error updating documents: ${e.message}")
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error fetching documents: ${e.message}")
+                    }
+
+            }
+
+
         }
         validationSideBar(binding, auth)
     }
@@ -127,6 +179,26 @@ object DrawerUtils {
     // Validation Sidebar: Enables/Disables items based on user authentication
     fun validationSideBar(binding: ActivityBaseDrawerBinding, auth: FirebaseAuth) {
         val user = auth.currentUser
+        binding.sidebarNav.menu.findItem(R.id.nav_admin).isEnabled = false
+        binding.sidebarNav.menu.findItem(R.id.nav_admin).isVisible = false
+        binding.sidebarNav.menu.findItem(R.id.nav_dev_btn).isEnabled = false
+        binding.sidebarNav.menu.findItem(R.id.nav_dev_btn).isVisible = false
+
+        FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                val role = it.result.getString("role")
+                if (role?.lowercase() == "admin") {
+                    binding.sidebarNav.menu.findItem(R.id.nav_admin).isEnabled = true
+                    binding.sidebarNav.menu.findItem(R.id.nav_admin).isVisible = true
+                }
+                if (role?.lowercase() == "developer") {
+                    binding.sidebarNav.menu.findItem(R.id.nav_admin).isEnabled = true
+                    binding.sidebarNav.menu.findItem(R.id.nav_admin).isVisible = true
+                    binding.sidebarNav.menu.findItem(R.id.nav_dev_btn).isEnabled = true
+                    binding.sidebarNav.menu.findItem(R.id.nav_dev_btn).isVisible = true
+                }
+            }
+        }
 
         if (user == null) {
             binding.sidebarNav.menu.findItem(R.id.nav_profile).isEnabled = false

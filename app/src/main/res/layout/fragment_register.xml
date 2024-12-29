@@ -136,6 +136,28 @@
                     android:textColorHint="@color/hintText" />
             </com.google.android.material.textfield.TextInputLayout>
 
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/contactNumTil"
+                style="@style/TextInputLayoutStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contactNumET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="@string/contact_number"
+                    android:inputType="phone"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/hintText"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="36dp"

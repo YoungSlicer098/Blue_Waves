@@ -1,39 +1,55 @@
 package com.dld.bluewaves
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dld.bluewaves.adapter.AdminSearchUserRecyclerAdapter
 import com.dld.bluewaves.adapter.SearchUserRecyclerAdapter
-import com.dld.bluewaves.databinding.ActivitySearchUserBinding
+import com.dld.bluewaves.databinding.ActivityAdminBinding
+import com.dld.bluewaves.databinding.ActivityAdminSearchUserBinding
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
 @Suppress("DEPRECATION")
-class SearchUserActivity : AppCompatActivity() {
+class AdminSearchUserActivity : AppCompatActivity() {
 
-    private lateinit var mBinding: ActivitySearchUserBinding
-    private var adapter: SearchUserRecyclerAdapter? = null
+    private lateinit var mBinding: ActivityAdminSearchUserBinding
+    private var adapter: AdminSearchUserRecyclerAdapter? = null
+
+    public override fun onStart() {
+        super.onStart()
+        FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                val user = it.result
+                val role = user?.getString("role")
+                if (role != "admin") {
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+            }
+        }
+        adapter?.startListening() // Ensure adapter starts listening here
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = ActivitySearchUserBinding.inflate(layoutInflater)
+        mBinding = ActivityAdminSearchUserBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        val recyclerView = mBinding.recyclerView
-        (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations =
-            false
-
-        setupRecyclerView()
-
-        mBinding.searchET.requestFocus()
 
         mBinding.backBtn.setOnClickListener {
             onBackPressed()
@@ -41,7 +57,7 @@ class SearchUserActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finish()
-                overridePendingTransition(R.anim.fade_in_static, R.anim.fade_out_down)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
         })
 
@@ -76,7 +92,6 @@ class SearchUserActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun setupRecyclerView() {
         setupSearchRecyclerView("") // Initialize with empty search input to show all users
@@ -118,7 +133,7 @@ class SearchUserActivity : AppCompatActivity() {
             .setLifecycleOwner(this)
             .build()
 
-        adapter = SearchUserRecyclerAdapter(options, this, this)
+        adapter = AdminSearchUserRecyclerAdapter(options, this, this)
         mBinding.recyclerView.layoutManager = LinearLayoutManager(this)
         mBinding.recyclerView.adapter = adapter
         adapter?.startListening()
@@ -143,13 +158,6 @@ class SearchUserActivity : AppCompatActivity() {
             mBinding.emptyLayout.visibility = View.GONE
         }
     }
-
-
-    override fun onStart() {
-        super.onStart()
-        adapter?.startListening() // Ensure adapter starts listening here
-    }
-
 
     override fun onStop() {
         super.onStop()

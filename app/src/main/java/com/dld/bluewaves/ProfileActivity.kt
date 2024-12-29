@@ -635,6 +635,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
     private fun validateDisplayName(dialogName: DialogDisplayNameEditBinding): Boolean {
         var errorMessage: String? = null
         val value: String = dialogName.displayNameET.text.toString()
+
         val specialCharactersRegex = Regex("[!@#$%&*()_+=|<>?{}\\[\\]~-]")
         if (value.isEmpty()) {
             errorMessage = "Display name is required"

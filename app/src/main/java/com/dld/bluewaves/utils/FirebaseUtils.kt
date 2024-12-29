@@ -42,6 +42,33 @@ object FirebaseUtils {
         return FirebaseFirestore.getInstance().collection("users")
     }
 
+    fun sameDisplayNameVerify(displayName: String): Boolean {
+        var name: String? = null
+        allUserCollectionReference().whereEqualTo("displayName", displayName).get().addOnCompleteListener{
+            if (it.isSuccessful) name = it.result.documents[0].getString("displayName")
+            else name = null
+        }
+        return name != null
+    }
+
+    fun sameEmailVerify(email: String): Boolean {
+        var value: String? = null
+        allUserCollectionReference().whereEqualTo("email", email).get().addOnCompleteListener{
+            if (it.isSuccessful) value = it.result.documents[0].getString("email")
+            else value = null
+        }
+        return value != null
+    }
+
+    fun sameContactNumberVerify(contactNumber: String): Boolean {
+        var value: String? = null
+        allUserCollectionReference().whereEqualTo("contactNumber", contactNumber).get().addOnCompleteListener{
+            if (it.isSuccessful) value = it.result.documents[0].getString("contactNumber")
+            else value = null
+        }
+        return value != null
+    }
+
 
     // Chatroom
 

@@ -18,6 +18,11 @@
         android:icon="@drawable/admin_panel_settings_icon"
         android:title="Admin"/>
     <item
+        android:id="@+id/nav_dev_btn"
+        android:enabled="true"
+        android:icon="@drawable/data_array_icon"
+        android:title="Dev Button"/>
+    <item
         android:title="">
         <menu>
         <item
