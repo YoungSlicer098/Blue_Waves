@@ -18,10 +18,15 @@ class AdminSearchWifiActivity : AppCompatActivity() {
             if (it.isSuccessful) {
                 val user = it.result
                 val role = user?.getString("role")
-                if (role != "admin") {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                when (role) {
+                    "admin", "developer" -> {
+                        return@addOnCompleteListener
+                    }
+                    else -> {
+                        val intent = Intent(this, WelcomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             }
         }

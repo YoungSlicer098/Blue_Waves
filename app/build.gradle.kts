@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -99,9 +101,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //Firebase
-    implementation(libs.firebase.playintegrity) {
-        exclude(group = "com.google.protobuf", module = "protobuf-java")
-    }
     implementation(libs.firebase.ui.firestore) {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
@@ -127,6 +126,9 @@ dependencies {
     implementation(libs.firebase.messaging) {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
+
+    implementation(libs.firebase.appcheck)
+    implementation(libs.firebase.appcheck.debug)
 
     implementation("com.google.firebase:protolite-well-known-types:18.0.0") {
         exclude(group = "com.google.api.grpc", module = "proto-google-common-protos")

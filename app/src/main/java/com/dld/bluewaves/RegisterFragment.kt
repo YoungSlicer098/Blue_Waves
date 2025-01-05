@@ -15,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.dld.bluewaves.databinding.DialogPicturesBinding
 import com.dld.bluewaves.databinding.DialogProfilePicDecisionsBinding
 import com.dld.bluewaves.databinding.FragmentRegisterBinding
@@ -25,6 +26,7 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.storageMetadata
+import kotlinx.coroutines.launch
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -217,8 +219,6 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             errorMessage = "Display name must not contain special characters"
         } else if (value.length < 2) {
             errorMessage = "Display name must be at least 2 characters"
-        } else if (FirebaseUtils.sameDisplayNameVerify(value)) {
-            errorMessage = "Display name already exists"
         }
 
         if (errorMessage != null) {
@@ -230,8 +230,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         } else {
             userModel = userModel.copy(
                 displayName = value,
-                displayNameLowercase = value.lowercase(),
-                searchKeywords = generateSearchKeywords(value)
+                displayNameLowercase = value.lowercase()
             )
         }
 
@@ -246,8 +245,6 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             errorMessage = "Email is required"
         } else if (!Patterns.EMAIL_ADDRESS.matcher(value).matches()) {
             errorMessage = "Email address is invalid"
-        } else if (FirebaseUtils.sameEmailVerify(value)) {
-            errorMessage = "Email address is already in use"
         }
 
         if (errorMessage != null) {
@@ -335,10 +332,8 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     private fun validateContactNumber(): Boolean {
         var errorMessage: String? = null
         val value: String = mBinding.contactNumET.text.toString()
-        if ((value.length == 12 && value.substring(0,3) == "639") || (value.length == 11 && value.substring(0, 2) == "09")) {
+        if (!((value.length == 12 && value.substring(0,3) == "639") || (value.length == 11 && value.substring(0, 2) == "09"))) {
             errorMessage = "Contact Number must be 09XXXXXXXXX or 639XXXXXXXXX"
-        } else if (FirebaseUtils.sameContactNumberVerify(value)) {
-            errorMessage = "Contact Number already exists"
         }
 
         if (errorMessage != null) {
@@ -357,6 +352,45 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
 
     }
 
+    private suspend fun sameDisplayName(displayName: String): Boolean {
+        if (FirebaseUtils.sameDisplayNameVerify(displayName)) {
+            mBinding.displayNameTil.apply {
+                isErrorEnabled = true
+                error = "Display name already exists"
+                inProgress(false)
+            }
+        }else {
+            mBinding.displayNameTil.isErrorEnabled = false
+        }
+        return !mBinding.displayNameTil.isErrorEnabled
+    }
+
+    private suspend fun sameEmail(email: String): Boolean {
+        if (FirebaseUtils.sameEmailVerify(email)) {
+            mBinding.emailTil.apply {
+                isErrorEnabled = true
+                error = "Email already exists"
+                inProgress(false)
+            }
+        }else {
+            mBinding.emailTil.isErrorEnabled = false
+        }
+        return !mBinding.emailTil.isErrorEnabled
+    }
+
+    private suspend fun sameContactNumber(contactNumber: String): Boolean {
+        if (FirebaseUtils.sameContactNumberVerify(contactNumber)) {
+            mBinding.contactNumTil.apply {
+                isErrorEnabled = true
+                error = "Email already exists"
+                inProgress(false)
+            }
+        }else {
+            mBinding.contactNumTil.isErrorEnabled = false
+        }
+        return !mBinding.contactNumTil.isErrorEnabled
+    }
+
     private fun inProgress(inProgress: Boolean) {
         if (inProgress) {
             mBinding.progressBar.visibility = View.VISIBLE
@@ -367,25 +401,6 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         }
     }
 
-    fun generateSearchKeywords(displayName: String): List<String> {
-        val keywords = mutableSetOf<String>()
-        val words = displayName.lowercase().split(" ")
-
-        // Add full name and individual words
-        keywords.add(displayName.lowercase())
-        keywords.addAll(words)
-
-        // Add substrings for each word
-        words.forEach { word ->
-            for (i in 1..word.length) {
-                for (j in 0..word.length - i) {
-                    keywords.add(word.substring(j, j + i))
-                }
-            }
-        }
-
-        return keywords.toList()
-    }
 
     override fun onClick(view: View?) {
         if (view != null) {
@@ -439,106 +454,119 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                     inProgress(true)
                     val email = mBinding.emailET.text.toString()
                     val password = mBinding.passwordET.text.toString()
+                    val displayName = mBinding.displayNameET.text.toString()
+                    val contactNumber = mBinding.contactNumET.text.toString()
 
                     if (!validateDisplayName() || !validateEmail() || !validatePassword() || !validateConfirmPassword() || !validateContactNumber()) {
                         inProgress(false)
                         return
                     }
 
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(context as AuthActivity) { task ->
-                            if (task.isSuccessful) {
-                                val currentUser = auth.currentUser
-                                if (currentUser != null) {
-                                    userModel = userModel.copy(
-                                        userId = currentUser.uid,
-                                        role = "customer",
-                                        lastSession = Timestamp.now(),
-                                    )
+                    lifecycleScope.launch {
+                        val isDisplayNameValid = sameDisplayName(displayName)
+                        val isEmailValid = sameEmail(email)
+                        val isContactNumberValid = sameContactNumber(contactNumber)
+                        if (isDisplayNameValid && isEmailValid && isContactNumberValid) {
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(context as AuthActivity) { task ->
+                                    if (task.isSuccessful) {
+                                        val currentUser = auth.currentUser
+                                        if (currentUser != null) {
+                                            val keywords = AndroidUtils.generateSearchKeywords(userModel.email) + AndroidUtils.generateSearchKeywords(userModel.displayName)
+                                            userModel = userModel.copy(
+                                                userId = currentUser.uid,
+                                                role = "customer",
+                                                lastSession = Timestamp.now(),
+                                                searchKeywords = keywords.distinct(),
+                                            )
 
 
-                                    // Save user details to Firestore
-                                    FirebaseUtils.createUserDetails().set(userModel)
-                                        .addOnCompleteListener { firestoreTask ->
-                                            if (firestoreTask.isSuccessful) {
-                                                if (userModel.profilePic == "") {
+                                            // Save user details to Firestore
+                                            FirebaseUtils.createUserDetails().set(userModel)
+                                                .addOnCompleteListener { firestoreTask ->
+                                                    if (firestoreTask.isSuccessful) {
+                                                        if (userModel.profilePic == "") {
 
-                                                    val metadata = storageMetadata {
-                                                        cacheControl =
-                                                            "public, max-age=31536000" // Cache for 1 year
-                                                    }
-                                                    FirebaseUtils.getCurrentProfilePicStorageRef()
-                                                        .putFile(selectedImageUri, metadata)
-                                                        .addOnCompleteListener {
-                                                            inProgress(false)
-                                                            if (it.isSuccessful) {
-                                                                AndroidUtils.showToast(
-                                                                    context as AuthActivity,
-                                                                    "Account created."
-                                                                )
-                                                                auth.signOut()
-                                                                AuthActivity.changeFragment(
-                                                                    context as AuthActivity,
-                                                                    LoginFragment(),
-                                                                    false
-                                                                )
-                                                            } else {
-                                                                // Rollback: delete user from Firebase Authentication
-                                                                currentUser.delete()
-                                                                    .addOnCompleteListener { deleteTask ->
-                                                                        if (deleteTask.isSuccessful) {
-                                                                            AndroidUtils.showToast(
-                                                                                context as AuthActivity,
-                                                                                "Registration failed. Please try again."
-                                                                            )
-                                                                        } else {
-                                                                            AndroidUtils.showToast(
-                                                                                context as AuthActivity,
-                                                                                "Error during rollback. Contact support."
-                                                                            )
-                                                                        }
-                                                                    }
+                                                            val metadata = storageMetadata {
+                                                                cacheControl =
+                                                                    "public, max-age=31536000" // Cache for 1 year
                                                             }
-                                                        }
-                                                } else {
-                                                    AndroidUtils.showToast(
-                                                        context as AuthActivity,
-                                                        "Account created."
-                                                    )
-                                                    auth.signOut()
-                                                    AuthActivity.changeFragment(
-                                                        context as AuthActivity,
-                                                        LoginFragment(),
-                                                        false
-                                                    )
-                                                }
-                                            } else {
-                                                // Rollback: delete user from Firebase Authentication
-                                                currentUser.delete()
-                                                    .addOnCompleteListener { deleteTask ->
-                                                        if (deleteTask.isSuccessful) {
-                                                            AndroidUtils.showToast(
-                                                                context as AuthActivity,
-                                                                "Registration failed. Please try again."
-                                                            )
+                                                            FirebaseUtils.getCurrentProfilePicStorageRef()
+                                                                .putFile(selectedImageUri, metadata)
+                                                                .addOnCompleteListener {
+                                                                    inProgress(false)
+                                                                    if (it.isSuccessful) {
+                                                                        AndroidUtils.showToast(
+                                                                            context as AuthActivity,
+                                                                            "Account created."
+                                                                        )
+                                                                        auth.signOut()
+                                                                        AuthActivity.changeFragment(
+                                                                            context as AuthActivity,
+                                                                            LoginFragment(),
+                                                                            false
+                                                                        )
+                                                                    } else {
+                                                                        // Rollback: delete user from Firebase Authentication
+                                                                        currentUser.delete()
+                                                                            .addOnCompleteListener { deleteTask ->
+                                                                                if (deleteTask.isSuccessful) {
+                                                                                    AndroidUtils.showToast(
+                                                                                        context as AuthActivity,
+                                                                                        "Registration failed. Please try again."
+                                                                                    )
+                                                                                } else {
+                                                                                    AndroidUtils.showToast(
+                                                                                        context as AuthActivity,
+                                                                                        "Error during rollback. Contact support."
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                    }
+                                                                }
                                                         } else {
                                                             AndroidUtils.showToast(
                                                                 context as AuthActivity,
-                                                                "Error during rollback. Contact support."
+                                                                "Account created."
+                                                            )
+                                                            auth.signOut()
+                                                            AuthActivity.changeFragment(
+                                                                context as AuthActivity,
+                                                                LoginFragment(),
+                                                                false
                                                             )
                                                         }
+                                                    } else {
+                                                        // Rollback: delete user from Firebase Authentication
+                                                        currentUser.delete()
+                                                            .addOnCompleteListener { deleteTask ->
+                                                                if (deleteTask.isSuccessful) {
+                                                                    AndroidUtils.showToast(
+                                                                        context as AuthActivity,
+                                                                        "Registration failed. Please try again."
+                                                                    )
+                                                                } else {
+                                                                    AndroidUtils.showToast(
+                                                                        context as AuthActivity,
+                                                                        "Error during rollback. Contact support."
+                                                                    )
+                                                                }
+                                                            }
                                                     }
-                                            }
+                                                }
                                         }
+                                    } else {
+                                        inProgress(false)
+                                        AndroidUtils.showToast(
+                                            context as AuthActivity,
+                                            "Authentication failed."
+                                        )
+                                    }
                                 }
-                            } else {
-                                inProgress(false)
-                                AndroidUtils.showToast(
-                                    context as AuthActivity,
-                                    "Authentication failed."
-                                )
-                            }
+                        } else{
+                            inProgress(false)
                         }
+                    }
                 }
             }
         }

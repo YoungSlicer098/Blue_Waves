@@ -151,6 +151,7 @@
                     android:ems="10"
                     android:hint="@string/contact_number"
                     android:inputType="phone"
+                    android:maxLength="12"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
                     android:textColor="@color/text"

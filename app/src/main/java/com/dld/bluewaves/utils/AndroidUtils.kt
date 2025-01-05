@@ -37,7 +37,37 @@ object AndroidUtils {
         intent.putExtra("profilePic", userModel.profilePic)
     }
 
+
+    fun passAllUserModelAsIntent(intent: Intent, userModel: UserModel) {
+        intent.putExtra("displayName", userModel.displayName)
+        intent.putExtra("email", userModel.email)
+        intent.putExtra("userId", userModel.userId)
+        intent.putExtra("fcmToken", userModel.fcmToken)
+        intent.putExtra("profilePic", userModel.profilePic)
+        intent.putExtra("contactNumber", userModel.contactNumber)
+        intent.putExtra("lastSession", userModel.lastSession)
+        intent.putExtra("banned", userModel.banned)
+        intent.putExtra("role", userModel.role)
+
+    }
+
     fun getUserModelFromIntent(intent: Intent): UserModel {
+        val userModel: UserModel = UserModel()
+        userModel.displayName = intent.getStringExtra("displayName")!!
+        userModel.email = intent.getStringExtra("email")!!
+        userModel.userId = intent.getStringExtra("userId")!!
+        userModel.fcmToken = intent.getStringExtra("fcmToken")!!
+        userModel.profilePic = intent.getStringExtra("profilePic")!!
+        userModel.contactNumber = intent.getStringExtra("contactNumber")!!
+        userModel.lastSession = intent.getParcelableExtra("lastSession")!!
+        userModel.banned = intent.getBooleanExtra("banned", false)
+        userModel.role = intent.getStringExtra("role")!!
+        return userModel
+
+    }
+
+
+    fun getAllUserModelFromIntent(intent: Intent): UserModel {
         val userModel: UserModel = UserModel()
         userModel.displayName = intent.getStringExtra("displayName")!!
         userModel.email = intent.getStringExtra("email")!!
@@ -140,6 +170,27 @@ object AndroidUtils {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork = connectivityManager.activeNetworkInfo
         return activeNetwork != null && activeNetwork.isConnected
+    }
+
+
+    fun generateSearchKeywords(displayName: String): List<String> {
+        val keywords = mutableSetOf<String>()
+        val words = displayName.lowercase().split(" ")
+
+        // Add full name and individual words
+        keywords.add(displayName.lowercase())
+        keywords.addAll(words)
+
+        // Add substrings for each word
+        words.forEach { word ->
+            for (i in 1..word.length) {
+                for (j in 0..word.length - i) {
+                    keywords.add(word.substring(j, j + i))
+                }
+            }
+        }
+
+        return keywords.toList()
     }
 
 }

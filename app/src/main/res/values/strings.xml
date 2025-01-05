@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="version">v0.57</string>
+    <string name="version">v0.60</string>
 
 
     <string name="app_name">Blue Waves</string>
@@ -75,6 +75,17 @@
     <string name="menu_button">Menu Button</string>
     <string name="expand_collapse">Expand Collapse</string>
     <string name="contact_number">Contact Number</string>
+    <string name="remember_email">Remember Email</string>
+    <string name="remember_password">Remember Password</string>
+    <string name="reset">Reset</string>
+    <string name="version_changelog">Version Changelog</string>
+    <string name="feedback">Feedback</string>
+    <string name="about_us">About us</string>
+    <string name="suggestions">Suggestions</string>
+    <string name="profile">Profile</string>
+    <string name="admin">Admin</string>
+    <string name="schedule">Schedule</string>
+    <string name="customization">Customization</string>
     <plurals name="minutes_ago">
         <item quantity="one">%d minute ago</item>
         <item quantity="other">%d minutes ago</item>

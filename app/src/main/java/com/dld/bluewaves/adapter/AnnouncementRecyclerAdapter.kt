@@ -19,9 +19,9 @@ import com.dld.bluewaves.model.AnnouncementModel
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.firebase.storage.StorageException
 
 @Suppress("DEPRECATION")
 class AnnouncementRecyclerAdapter(
@@ -66,10 +66,10 @@ class AnnouncementRecyclerAdapter(
                     holder.displayNameText.text = userModel?.displayName
                     holder.message.text = model.message
 
-                    if(userModel?.profilePic != ""){
+                    if (userModel?.profilePic != "") {
                         holder.profilePic.setImageResource(AndroidUtils.selectPicture(userModel?.profilePic!!))
-                    }else {
-                        FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
+                    } else {
+                        getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 val uri: Uri = task.result
                                 AndroidUtils.setProfilePic(context, uri, holder.profilePic)
@@ -79,7 +79,6 @@ class AnnouncementRecyclerAdapter(
                             }
                         }
                     }
-
 
 
                     // Convert Firebase.Timestamp to milliseconds
@@ -100,28 +99,42 @@ class AnnouncementRecyclerAdapter(
                         else -> setupMultipleImages(holder, model, position)
                     }
 
-                    holder.itemView.setOnLongClickListener {
-                        // Show an AlertDialog to confirm deletion
-                        AlertDialog.Builder(context)
-                            .setTitle("Delete Announcement")
-                            .setMessage("Are you sure you want to delete this announcement?")
-                            .setPositiveButton("Yes") { _, _ ->
-                                // Remove item from Firestore
-                                snapshots.getSnapshot(position).reference.delete()
-                                    .addOnSuccessListener {
-                                        FirebaseUtils.deleteAnnouncement(model.annId)
-                                        AndroidUtils.showToast(context, "Announcement deleted successfully.")
-                                        FirebaseUtils.getAnnImagePicStorageRef(model.annId).delete()
-                                        notifyItemRemoved(position)
-                                    }
-                                    .addOnFailureListener { e ->
-                                        AndroidUtils.showToast(context, "Failed to delete: ${e.message}")
-                                    }
-                            }
-                            .setNegativeButton("No", null)
-                            .show()
+                    FirebaseUtils.currentUserDetails().get().addOnCompleteListener { currentUser ->
+                        if (currentUser.isSuccessful) {
+                            val role = currentUser.result.getString("role")
+                            if (role?.lowercase() in listOf("staff", "admin", "developer")) {
+                                holder.itemView.setOnLongClickListener {
+                                    // Show an AlertDialog to confirm deletion
+                                    AlertDialog.Builder(context)
+                                        .setTitle("Delete Announcement")
+                                        .setMessage("Are you sure you want to delete this announcement?")
+                                        .setPositiveButton("Yes") { _, _ ->
+                                            // Remove item from Firestore
+                                            snapshots.getSnapshot(position).reference.delete()
+                                                .addOnSuccessListener {
+                                                    FirebaseUtils.deleteAnnouncement(model.annId)
+                                                    AndroidUtils.showToast(
+                                                        context,
+                                                        "Announcement deleted successfully."
+                                                    )
+                                                    FirebaseUtils.getAnnImagePicStorageRef(model.annId)
+                                                        .delete()
+                                                    notifyItemRemoved(position)
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    AndroidUtils.showToast(
+                                                        context,
+                                                        "Failed to delete: ${e.message}"
+                                                    )
+                                                }
+                                        }
+                                        .setNegativeButton("No", null)
+                                        .show()
 
-                        true // Indicate that the long press was handled
+                                    true // Indicate that the long press was handled
+                                }
+                            }
+                        }
                     }
 
                 }

@@ -12,6 +12,7 @@ import com.dld.bluewaves.model.ChatRoomModel
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Timestamp
@@ -47,7 +48,7 @@ class ChatActivity : AppCompatActivity() {
         if (otherUser.profilePic != "") {
             mBinding.profilePicLayout.profilePicImageView.setImageResource(AndroidUtils.selectPicture(otherUser.profilePic))
         }else {
-            FirebaseUtils.getOtherProfilePicStorageRef(otherUser.userId).downloadUrl.addOnCompleteListener {
+            getOtherProfilePicStorageRef(otherUser.userId).downloadUrl.addOnCompleteListener {
                 if (it.isSuccessful) {
                     val uri: Uri = it.result
                     AndroidUtils.setProfilePic(

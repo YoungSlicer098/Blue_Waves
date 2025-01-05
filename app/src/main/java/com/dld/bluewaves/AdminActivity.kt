@@ -2,6 +2,7 @@ package com.dld.bluewaves
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -24,10 +25,16 @@ class AdminActivity : AppCompatActivity() {
             if (it.isSuccessful) {
                 val user = it.result
                 val role = user?.getString("role")
-                if (role != "admin") {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                when (role) {
+                    "admin", "developer" -> {
+                        return@addOnCompleteListener
+                    }
+                    else -> {
+                        val intent = Intent(this, WelcomeActivity::class.java)
+                        AndroidUtils.showToast(this, "You are not authorized to access this page!")
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             }
         }
@@ -42,7 +49,7 @@ class AdminActivity : AppCompatActivity() {
         mBinding.userInfoContainer.setOnClickListener {
             val intent = Intent(this, AdminSearchUserActivity::class.java)
             startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         mBinding.wifiInfoContainer.setOnClickListener {
@@ -51,6 +58,16 @@ class AdminActivity : AppCompatActivity() {
 //            startActivity(intent)
 //            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
         }
+
+        mBinding.backBtn.setOnClickListener {
+            onBackPressed()
+        }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+                overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
+            }
+        })
 
     }
 }

@@ -6,17 +6,17 @@
         android:id="@+id/nav_customization"
         android:enabled="true"
         android:icon="@drawable/settings_white"
-        android:title="Customization"/>
+        android:title="@string/customization"/>
     <item
         android:id="@+id/nav_schedule"
         android:enabled="true"
         android:icon="@drawable/schedule_icon"
-        android:title="Schedule"/>
+        android:title="@string/schedule"/>
     <item
         android:id="@+id/nav_admin"
         android:enabled="true"
         android:icon="@drawable/admin_panel_settings_icon"
-        android:title="Admin"/>
+        android:title="@string/admin"/>
     <item
         android:id="@+id/nav_dev_btn"
         android:enabled="true"
@@ -29,12 +29,12 @@
                 android:id="@+id/nav_profile"
                 android:enabled="true"
                 android:icon="@drawable/profile_white"
-                android:title="Profile"/>
+                android:title="@string/profile"/>
         <item
             android:id="@+id/nav_logout"
             android:enabled="true"
             android:icon="@drawable/logout_logo_white"
-            android:title="Logout"/>
+            android:title="@string/logout"/>
         </menu>
     </item>
     <item
@@ -44,12 +44,22 @@
                 android:id="@+id/nav_about_us"
                 android:enabled="true"
                 android:icon="@drawable/person_outline_icon"
-                android:title="About us"/>
+                android:title="@string/about_us"/>
             <item
                 android:id="@+id/nav_version_changelog"
                 android:enabled="true"
                 android:icon="@drawable/insert_drive_file_icon"
-                android:title="Version Changelog"/>
+                android:title="@string/version_changelog"/>
+            <item
+                android:id="@+id/nav_feedback"
+                android:enabled="true"
+                android:icon="@drawable/feedback_icon"
+                android:title="@string/feedback"/>
+            <item
+                android:id="@+id/nav_suggestions"
+                android:enabled="true"
+                android:icon="@drawable/suggestion_icon"
+                android:title="@string/suggestions"/>
         </menu>
     </item>
 </menu>

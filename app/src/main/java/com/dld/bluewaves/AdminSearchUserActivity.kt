@@ -33,10 +33,15 @@ class AdminSearchUserActivity : AppCompatActivity() {
             if (it.isSuccessful) {
                 val user = it.result
                 val role = user?.getString("role")
-                if (role != "admin") {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                when (role) {
+                    "admin", "developer" -> {
+                        return@addOnCompleteListener
+                    }
+                    else -> {
+                        val intent = Intent(this, WelcomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             }
         }
@@ -50,6 +55,7 @@ class AdminSearchUserActivity : AppCompatActivity() {
         mBinding = ActivityAdminSearchUserBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
+        setupRecyclerView()
 
         mBinding.backBtn.setOnClickListener {
             onBackPressed()
@@ -57,7 +63,7 @@ class AdminSearchUserActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finish()
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
         })
 

@@ -88,42 +88,81 @@ class SearchUserActivity : AppCompatActivity() {
 
         inProgress(true)
 
-        val formattedInput = searchInput.lowercase().trim()
-        val query = if (formattedInput.isEmpty()) {
-            // Show all users
-            FirebaseUtils.allUserCollectionReference()
-                .orderBy("displayNameLowercase")
-        } else {
-            // Search for specific users using keywords
-            FirebaseUtils.allUserCollectionReference()
-                .whereArrayContainsAny("searchKeywords", listOf(formattedInput))
-        }
+        // Get the current user's role
+        FirebaseUtils.currentUserDetails().get().addOnCompleteListener { currentUserTask ->
+            if (currentUserTask.isSuccessful) {
+                val currentUserRole = currentUserTask.result?.getString("role")?.lowercase()
 
-        // Fetch the results to check if we have any documents
-        query.get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val querySnapshot = task.result
-                if (querySnapshot != null && querySnapshot.isEmpty) {
-                    noUserFound(true) // Show empty state if no results found
-                } else {
-                    noUserFound(false) // Hide empty state if there are results
+                val formattedInput = searchInput.lowercase().trim()
+                val query = when {
+                    // Limit "user" role to search for specific roles
+                    currentUserRole in listOf("user", "customer", "paid customer", "unpaid customer") -> {
+                        if (formattedInput.isEmpty()) {
+                            FirebaseUtils.allUserCollectionReference()
+                                .whereIn("role", listOf("staff", "admin", "developer"))
+                                .orderBy("displayNameLowercase")
+                        } else {
+                            FirebaseUtils.allUserCollectionReference()
+                                .whereIn("role", listOf("staff", "admin", "developer"))
+                                .whereArrayContainsAny("searchKeywords", listOf(formattedInput))
+                        }
+                    }
+
+                    // "staff," "admin," and "developer" can search for all users
+                    currentUserRole in listOf("staff", "admin", "developer") -> {
+                        if (formattedInput.isEmpty()) {
+                            FirebaseUtils.allUserCollectionReference()
+                                .orderBy("displayNameLowercase")
+                        } else {
+                            FirebaseUtils.allUserCollectionReference()
+                                .whereArrayContainsAny("searchKeywords", listOf(formattedInput))
+                        }
+                    }
+
+                    // Default to showing no results if role is null or unknown
+                    else ->
+                        if (formattedInput.isEmpty()) {
+                            FirebaseUtils.allUserCollectionReference()
+                                .whereIn("role", listOf("staff", "admin", "developer"))
+                                .orderBy("displayNameLowercase")
+                        } else {
+                            FirebaseUtils.allUserCollectionReference()
+                                .whereIn("role", listOf("staff", "admin", "developer"))
+                                .whereArrayContainsAny("searchKeywords", listOf(formattedInput))
+                        }
                 }
+
+                // Fetch the results to check if we have any documents
+                query.get().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val querySnapshot = task.result
+                        if (querySnapshot != null && querySnapshot.isEmpty) {
+                            noUserFound(true) // Show empty state if no results found
+                        } else {
+                            noUserFound(false) // Hide empty state if there are results
+                        }
+                    } else {
+                        noUserFound(false) // Hide empty state in case of an error
+                    }
+                }
+
+                val options = FirestoreRecyclerOptions.Builder<UserModel>()
+                    .setQuery(query, UserModel::class.java)
+                    .setLifecycleOwner(this)
+                    .build()
+
+                adapter = SearchUserRecyclerAdapter(options, this, this)
+                mBinding.recyclerView.layoutManager = LinearLayoutManager(this)
+                mBinding.recyclerView.adapter = adapter
+                adapter?.startListening()
+
+                inProgress(false)
             } else {
-                noUserFound(false) // Hide empty state in case of an error
+                // Handle errors while fetching current user's role
+                inProgress(false)
+                noUserFound(true)
             }
         }
-
-        val options = FirestoreRecyclerOptions.Builder<UserModel>()
-            .setQuery(query, UserModel::class.java)
-            .setLifecycleOwner(this)
-            .build()
-
-        adapter = SearchUserRecyclerAdapter(options, this, this)
-        mBinding.recyclerView.layoutManager = LinearLayoutManager(this)
-        mBinding.recyclerView.adapter = adapter
-        adapter?.startListening()
-
-        inProgress(false)
     }
 
     private fun inProgress(inProgress: Boolean) {

@@ -13,6 +13,7 @@ import com.dld.bluewaves.R
 import com.dld.bluewaves.model.ChatMessageModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
@@ -38,7 +39,7 @@ class ChatRecyclerAdapter(
         if(profilePic != ""){
             holder.profilePicImageView.setImageResource(AndroidUtils.selectPicture(profilePic))
         }else {
-            FirebaseUtils.getOtherProfilePicStorageRef(model.senderId).downloadUrl.addOnCompleteListener { task ->
+            getOtherProfilePicStorageRef(model.senderId).downloadUrl.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val uri: Uri = task.result
                     AndroidUtils.setProfilePic(context, uri, holder.profilePicImageView)

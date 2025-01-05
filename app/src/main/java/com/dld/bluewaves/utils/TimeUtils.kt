@@ -31,4 +31,9 @@ object TimeUtils {
             }
         }
     }
+
+    fun formatDateToFullMonthDayYearWithTime(timestamp: Long): String {
+        val format = SimpleDateFormat("MMMM dd, yyyy | h:mma", Locale.getDefault())
+        return format.format(Date(timestamp)).lowercase(Locale.getDefault())
+    }
 }

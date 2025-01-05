@@ -1,11 +1,14 @@
 package com.dld.bluewaves
 
+import android.content.Context
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Patterns
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.dld.bluewaves.databinding.FragmentLoginBinding
 import com.dld.bluewaves.utils.AndroidUtils
@@ -27,6 +30,55 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
     private var _binding: FragmentLoginBinding? = null
     private val mBinding get() = _binding!!
     private lateinit var auth: FirebaseAuth
+    private var isResetAllowed = true // Flag to track if the user can reset the password
+    private var timer: CountDownTimer? = null
+    private var remainingTimeMillis: Long = 0L
+
+    private val sharedPreferences by lazy {
+        activity?.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+    }
+
+    private fun saveEmail(email: String, rememberMe: Boolean) {
+        val editor = sharedPreferences?.edit()
+        if (rememberMe) {
+            editor?.putString("SAVED_EMAIL", email)
+            editor?.putBoolean("REMEMBER_EMAIL", true)
+        } else {
+            editor?.remove("SAVED_EMAIL")
+            editor?.putBoolean("REMEMBER_EMAIL", false)
+        }
+        editor?.apply()
+    }
+
+    private fun savePassword(password: String, rememberMe: Boolean) {
+        val editor = sharedPreferences?.edit()
+        if (rememberMe) {
+            editor?.putString("SAVED_PASSWORD", password)
+            editor?.putBoolean("REMEMBER_PASSWORD", true)
+        } else {
+            editor?.remove("SAVED_PASSWORD")
+            editor?.putBoolean("REMEMBER_PASSWORD", false)
+        }
+        editor?.apply()
+    }
+
+    private fun loadSavedEmail() {
+        val isRemembered = sharedPreferences?.getBoolean("REMEMBER_EMAIL", false)
+        if (isRemembered == true) {
+            val savedEmail = sharedPreferences?.getString("SAVED_EMAIL", "")
+            mBinding.emailET.setText(savedEmail)
+            mBinding.rememberEmailCheckbox.isChecked = true
+        }
+    }
+
+    private fun loadSavedPassword() {
+        val isRemembered = sharedPreferences?.getBoolean("REMEMBER_PASSWORD", false)
+        if (isRemembered == true) {
+            val savedPassword = sharedPreferences?.getString("SAVED_PASSWORD", "")
+            mBinding.passwordET.setText(savedPassword)
+            mBinding.rememberPasswordCheckbox.isChecked = true
+        }
+    }
 
 
     override fun onCreateView(
@@ -43,6 +95,10 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
         mBinding.passwordET.onFocusChangeListener = this
         mBinding.registerNow.setOnClickListener(this)
         mBinding.loginBtn.setOnClickListener(this)
+        mBinding.forgetPassword.setOnClickListener(this)
+
+        loadSavedEmail()
+        loadSavedPassword()
 
         // OnClick Events
 
@@ -98,11 +154,15 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
 
     private fun validatePassword(): Boolean {
         var errorMessage: String? = null
+        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = mBinding.passwordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "Password is required"
         } else if (value.length < 8) {
             errorMessage = "Password must be at least 8 characters"
+        } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
+            errorMessage =
+                "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
@@ -126,6 +186,66 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
         }
     }
 
+    private fun showPasswordResetDialog(email: String) {
+        val builder = AlertDialog.Builder(context as AuthActivity)
+        builder.setTitle("Reset Password")
+            .setMessage("Are you sure you want to reset its password?")
+            .setPositiveButton("Reset") { dialog, _ ->
+                if (isResetAllowed) {
+                    FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                AndroidUtils.showToast(
+                                    context as AuthActivity,
+                                    "Password reset email sent to $email. You can request another reset in 5 minutes."
+                                )
+                                startResetTimer()
+                            } else {
+                                val errorMessage = task.exception?.localizedMessage ?: "An error occurred"
+                                AndroidUtils.showToast(
+                                    context as AuthActivity,
+                                    "Failed to send password reset email: $errorMessage"
+                                )
+                            }
+                        }
+                } else {
+                    AndroidUtils.showToast(context as AuthActivity, "Please wait for the timer to finish before resetting again.")
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+
+    private fun startResetTimer() {
+        isResetAllowed = false
+        timer?.cancel() // Cancel any existing timer
+        remainingTimeMillis = 5 * 60 * 1000 // Reset timer to 5 minutes
+
+        timer = object : CountDownTimer(remainingTimeMillis, 1000) { // 5 minutes
+            override fun onTick(millisUntilFinished: Long) {
+                remainingTimeMillis = millisUntilFinished
+            }
+
+            override fun onFinish() {
+                isResetAllowed = true
+                remainingTimeMillis = 0L // Reset remaining time
+                AndroidUtils.showToast(context as AuthActivity, "You can now reset the password.")
+            }
+        }.start()
+    }
+
+    private fun getFormattedTime(): String {
+        val minutes = remainingTimeMillis / 1000 / 60
+        val seconds = (remainingTimeMillis / 1000) % 60
+        return "$minutes:${"%02d".format(seconds)}"
+    }
+
     override fun onClick(view: View?) {
         if (view != null) {
             when (view.id) {
@@ -137,10 +257,17 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
                     inProgress(true)
                     val email = mBinding.emailET.text.toString()
                     val password = mBinding.passwordET.text.toString()
+                    val rememberEmail = mBinding.rememberEmailCheckbox.isChecked
+                    val rememberPassword = mBinding.rememberPasswordCheckbox.isChecked
 
                     if (!validateEmail() || !validatePassword()) {
                         return
                     }
+
+                    saveEmail(email, rememberEmail)
+
+                    savePassword(password, rememberPassword)
+
                     auth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(context as AuthActivity) { task ->
                             inProgress(false)
@@ -154,6 +281,17 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
                                 )
                             }
                         }
+
+                }
+
+                R.id.forgetPassword -> {
+                    if (!isResetAllowed) {
+                        AndroidUtils.showToast(context as AuthActivity, "Please wait for the timer to finish: ${getFormattedTime()}")
+                    } else if (validateEmail()) {
+                        showPasswordResetDialog(mBinding.emailET.text.toString())
+                    } else{
+                        AndroidUtils.showToast(context as AuthActivity, "Fill up the email field.")
+                    }
                 }
             }
         }

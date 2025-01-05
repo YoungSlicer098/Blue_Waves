@@ -29,14 +29,19 @@ class WelcomeActivity : AppCompatActivity() {
         incWelcome = WelcomeLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.baseContent.addView(incWelcome.root)
-
         DrawerUtils.setupDrawer(this, binding, binding.toolbar)
+
 
         // Start button click listener to launch AuthActivity
         incWelcome.startBtn.setOnClickListener {
             val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        DrawerUtils.validationSideBar(binding ,FirebaseAuth.getInstance())
     }
 
     @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")

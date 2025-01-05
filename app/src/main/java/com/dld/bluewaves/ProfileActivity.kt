@@ -23,16 +23,20 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dld.bluewaves.databinding.ActivityBaseDrawerBinding
 import com.dld.bluewaves.databinding.ActivityProfileBinding
+import com.dld.bluewaves.databinding.DialogContactNumberEditBinding
 import com.dld.bluewaves.databinding.DialogDisplayNameEditBinding
 import com.dld.bluewaves.databinding.DialogPasswordEditBinding
 import com.dld.bluewaves.databinding.DialogPicturesBinding
 import com.dld.bluewaves.databinding.DialogProfilePicDecisionsBinding
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
+import com.dld.bluewaves.utils.DrawerUtils
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.navigation.NavigationView
@@ -41,29 +45,37 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.storageMetadata
+import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class ProfileActivity : AppCompatActivity() {
 
-    private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var mBinding: ActivityProfileBinding
+    private lateinit var binding: ActivityBaseDrawerBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var dialogName: DialogDisplayNameEditBinding
     private lateinit var dialogPassword: DialogPasswordEditBinding
     private lateinit var dialogProfilePic: DialogProfilePicDecisionsBinding
     private lateinit var dialogPictures: DialogPicturesBinding
+    private lateinit var dialogContactNumber: DialogContactNumberEditBinding
     private var currentUserModel: UserModel? = null
     private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
     private lateinit var selectedImageUri: Uri
     private var needsUpdate = false
     private var changedName = false
     private var changedProfilePic = false
+    private var changedContactNumber = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityBaseDrawerBinding.inflate(layoutInflater)
         mBinding = ActivityProfileBinding.inflate(layoutInflater)
         auth = FirebaseAuth.getInstance()
-        setContentView(mBinding.root)
+        setContentView(binding.root)
+        binding.baseContent.addView(mBinding.root)
+
+        DrawerUtils.setupDrawer(this, binding, binding.toolbar)
+
 
         val user = auth.currentUser
         if (user == null) {
@@ -76,39 +88,11 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
         mBinding.displayNameEdit.paint.isUnderlineText = true
         mBinding.passwordEdit.paint.isUnderlineText = true
+        mBinding.contactNumberEdit.paint.isUnderlineText = true
 
 
-        setSupportActionBar(mBinding.toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        // Enable the default ActionBarDrawerToggle for the hamburger menu
-        toggle = ActionBarDrawerToggle(
-            this, mBinding.drawerLayout, mBinding.toolbar, R.string.open_nav, R.string.close_nav
-        )
-        mBinding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        validationSideBar(auth)
         showUpdateDialog()
         updateInProgress(false)
-
-        mBinding.toolbar.setNavigationOnClickListener {
-            if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
-                mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-            } else {
-                mBinding.drawerLayout.openDrawer(GravityCompat.END)
-            }
-        }
-
-        // Initialize the navigation view and set the listener
-        mBinding.sidebarNav.setNavigationItemSelectedListener(this)
-
-        // Close button in the sidebar
-        val headerLayout = mBinding.sidebarNav.getHeaderView(0)
-        val navCloseBtn = headerLayout.findViewById<ImageView>(R.id.navCloseBtn)
-        navCloseBtn.setOnClickListener {
-            mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-        }
 
         mBinding.backBtn.setOnClickListener {
             onBackPressed()
@@ -201,13 +185,17 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 val saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 saveButton.setOnClickListener {
                     if (validateDisplayName(dialogName)) {
-
-                        currentUserModel?.displayName = dialogName.displayNameET.text.toString()
-                        mBinding.displayNameText.text = dialogName.displayNameET.text.toString()
-                        needsUpdate = true
-                        changedName = true
-                        showUpdateDialog()
-                        dialog.dismiss() // Dismiss the dialog only after a successful update
+                        lifecycleScope.launch {
+                            val sameDisplayName = sameDisplayName(dialogName.displayNameET.text.toString())
+                            if (sameDisplayName) {
+                                currentUserModel?.displayName = dialogName.displayNameET.text.toString()
+                                mBinding.displayNameText.text = dialogName.displayNameET.text.toString()
+                                needsUpdate = true
+                                changedName = true
+                                showUpdateDialog()
+                                dialog.dismiss()
+                            }
+                        } // Dismiss the dialog only after a successful update
                     } else {
                         // Keep the dialog open if validation fails
                         AndroidUtils.showToast(this, "Please provide a valid name.")
@@ -349,8 +337,8 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
             showUpdateDialog()
         }
 
-
         getUserData()
+
     }
 
     private fun picturesProfilePicture() {
@@ -456,14 +444,21 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
             when {
                 changedName -> {
+                    val keywords = AndroidUtils.generateSearchKeywords(currentUserModel?.displayName!!) + AndroidUtils.generateSearchKeywords(currentUserModel?.email!!)
+                    val updates = mapOf(
+                        "displayName" to currentUserModel?.displayName,
+                        "displayNameLowercase" to currentUserModel?.displayNameLowercase,
+                        "searchKeywords" to keywords.distinct(),
+                    )
                     FirebaseUtils.currentUserDetails()
-                        .update("displayName", currentUserModel?.displayName)
+                        .update(updates)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 fadeInAndOut(mBinding.displayNameIconCheck)
                                 changedName = false
                             } else {
                                 fadeInAndOut(mBinding.displayNameIconClose)
+                                changedName = true
                                 needsUpdate = true
                             }
                         }
@@ -479,6 +474,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                                     changedProfilePic = false
                                 } else{
                                     fadeInAndOut(mBinding.profilePicIconClose)
+                                    changedProfilePic = true
                                     needsUpdate = true
                                 }
                             }
@@ -495,6 +491,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                                             changedProfilePic = false
                                         }else{
                                             fadeInAndOut(mBinding.profilePicIconClose)
+                                            changedProfilePic = true
                                             needsUpdate = true
                                         }
                                     }
@@ -502,8 +499,22 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                             }
                     }
                 }
+
+                changedContactNumber -> {
+                    FirebaseUtils.currentUserDetails()
+                        .update("contactNumber", currentUserModel?.contactNumber).addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                changedContactNumber = false
+                                fadeInAndOut(mBinding.contactNumberIconCheck)
+                            } else {
+                                changedContactNumber = true
+                                needsUpdate = true
+                                fadeInAndOut(mBinding.contactNumberIconClose)
+                            }
+                        }
+                }
             }
-            if (!changedName && !changedProfilePic) {
+            if (!changedName && !changedProfilePic && !changedContactNumber) {
                 AndroidUtils.showToast(this, "Changes saved")
                 needsUpdate = false
             }
@@ -565,6 +576,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
                 mBinding.displayNameText.text = currentUserModel?.displayName
                 mBinding.emailText.text = currentUserModel?.email
                 mBinding.roleText.text = currentUserModel?.role?.uppercase()
+                initContactNumber(currentUserModel?.contactNumber.toString())
 
                 if (currentUserModel?.profilePic != "") {
                     mBinding.profilePic.setImageResource(AndroidUtils.selectPicture(currentUserModel?.profilePic!!))
@@ -611,25 +623,65 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         }
     }
 
+    private fun initContactNumber(contactNumber: String) {
+        if (contactNumber == "") {
+            mBinding.contactNumberText.text = "N/A"
+            mBinding.contactNumberEdit.visibility = View.VISIBLE
+            mBinding.contactNumberEdit.isEnabled = true
+            mBinding.contactNumberEdit.setOnClickListener {
+                dialogContactNumber = DialogContactNumberEditBinding.inflate(LayoutInflater.from(this))
+                dialogContactNumber.contactNumberET.setText(currentUserModel?.contactNumber)
 
-    private fun generateSearchKeywords(displayName: String): List<String> {
-        val keywords = mutableSetOf<String>()
-        val words = displayName.lowercase().split(" ")
+                dialogContactNumber.contactNumberET.onFocusChangeListener =
+                    View.OnFocusChangeListener { _, hasFocus ->
+                        if (hasFocus) {
+                            if (dialogContactNumber.contactNumberTil.isErrorEnabled) {
+                                dialogContactNumber.contactNumberTil.isErrorEnabled = false
+                            }
+                        }else {
+                            validateContactNumber(dialogContactNumber)
+                        }
 
-        // Add full name and individual words
-        keywords.add(displayName.lowercase())
-        keywords.addAll(words)
+                    }
 
-        // Add substrings for each word
-        words.forEach { word ->
-            for (i in 1..word.length) {
-                for (j in 0..word.length - i) {
-                    keywords.add(word.substring(j, j + i))
+                val dialog = AlertDialog.Builder(this)
+                    .setTitle("Edit Contact Number")
+                    .setView(dialogContactNumber.root)
+                    .setPositiveButton("Save", null) // Initially null to handle manually
+                    .setNegativeButton("Cancel") { dialogInterface, _ ->
+                        dialogInterface.dismiss()
+                    }
+                    .create()
+
+                dialog.setOnShowListener {
+                    val saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    saveButton.setOnClickListener {
+                        if (validateContactNumber(dialogContactNumber)) {
+                            lifecycleScope.launch {
+                                val sameContactNumber = sameContactNumber(dialogContactNumber.contactNumberET.text.toString())
+                                if (sameContactNumber) {
+                                    currentUserModel?.contactNumber = dialogContactNumber.contactNumberET.text.toString()
+                                    mBinding.contactNumberText.text = dialogContactNumber.contactNumberET.text.toString()
+                                    needsUpdate = true
+                                    changedContactNumber = true
+                                    showUpdateDialog()
+                                    dialog.dismiss()
+                                }
+                            } // Dismiss the dialog only after a successful update
+                        } else {
+                            // Keep the dialog open if validation fails
+                            AndroidUtils.showToast(this, "Please provide a valid number.")
+                        }
+                    }
                 }
-            }
-        }
 
-        return keywords.toList()
+                dialog.show()
+            }
+        } else {
+            mBinding.contactNumberText.text = contactNumber
+            mBinding.contactNumberEdit.visibility = View.GONE
+            mBinding.contactNumberEdit.isEnabled = false
+        }
     }
 
     private fun validateDisplayName(dialogName: DialogDisplayNameEditBinding): Boolean {
@@ -655,8 +707,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         } else {
             currentUserModel = currentUserModel?.copy(
                 displayName = value,
-                displayNameLowercase = value.lowercase(),
-                searchKeywords = generateSearchKeywords(value)
+                displayNameLowercase = value.lowercase()
             )
         }
 
@@ -673,7 +724,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     private fun validateOPassword(dialogPassword: DialogPasswordEditBinding): Boolean {
         var errorMessage: String? = null
-        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
+        val specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = dialogPassword.oPasswordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "Old Password is required"
@@ -696,7 +747,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     private fun validateNPassword(dialogPassword: DialogPasswordEditBinding): Boolean {
         var errorMessage: String? = null
-        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
+        val specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = dialogPassword.nPasswordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "New Password is required"
@@ -719,7 +770,7 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
 
     private fun validateConfirmPassword(dialogPassword: DialogPasswordEditBinding): Boolean {
         var errorMessage: String? = null
-        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
+        val specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = dialogPassword.cPasswordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "Confirm password is required"
@@ -758,61 +809,53 @@ class ProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItemSele
         return errorMessage == null
     }
 
-    override fun onResume() {
-        super.onResume()
-        validationSideBar(FirebaseAuth.getInstance())
-    }
-
-    private fun validationSideBar(auth: FirebaseAuth) {
-        val user = auth.currentUser
-
-        if (user == null) {
-            // If user is not logged in, disable certain items
-            mBinding.sidebarNav.menu.findItem(R.id.nav_logout).isEnabled = false
-        } else {
-            // If user is logged in, enable all items
-            mBinding.sidebarNav.menu.findItem(R.id.nav_logout).isEnabled = true
-        }
-        mBinding.sidebarNav.menu.findItem(R.id.nav_profile).isEnabled = false
-
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT)
-                .show()
-
-            R.id.nav_profile -> {
-                val intent = Intent(this, ProfileActivity::class.java)
-                startActivity(intent)
-                overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
+    private suspend fun sameDisplayName(displayName: String): Boolean {
+        if (FirebaseUtils.sameDisplayNameVerify(displayName)) {
+            dialogName.displayNameTil.apply {
+                isErrorEnabled = true
+                error = "Display name already exists"
+                inProgress(false)
             }
+        }else {
+            dialogName.displayNameTil.isErrorEnabled = false
+        }
+        return !dialogName.displayNameTil.isErrorEnabled
+    }
 
-            R.id.nav_logout -> {
-                FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        FirebaseAuth.getInstance().signOut()
-                        AndroidUtils.showToast(this, "Logged out!")
-                        validationSideBar(FirebaseAuth.getInstance())
-                        val intent = Intent(this, SplashActivity::class.java)
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        startActivity(intent)
-                    }
-                }
+    private fun validateContactNumber(dialogContactNumber: DialogContactNumberEditBinding): Boolean {
+        var errorMessage: String? = null
+        val value: String = dialogContactNumber.contactNumberET.text.toString()
+        if (!((value.length == 12 && value.substring(0,3) == "639") || (value.length == 11 && value.substring(0, 2) == "09"))) {
+            errorMessage = "Contact Number must be 09XXXXXXXXX or 639XXXXXXXXX"
+        }
+
+        if (errorMessage != null) {
+            dialogContactNumber.contactNumberTil.apply {
+                isErrorEnabled = true
+                error = errorMessage
+                inProgress(false)
             }
+        } else {
+            currentUserModel = currentUserModel?.copy(
+                contactNumber = value
+            )
         }
-        validationSideBar(FirebaseAuth.getInstance())
-        mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-        return true
+
+        return errorMessage == null
+
     }
 
-    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
-    override fun onBackPressed() {
-        if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
-            mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-        } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
+    private suspend fun sameContactNumber(contactNumber: String): Boolean {
+        if (FirebaseUtils.sameContactNumberVerify(contactNumber)) {
+            dialogContactNumber.contactNumberTil.apply {
+                isErrorEnabled = true
+                error = "Email already exists"
+                inProgress(false)
+            }
+        }else {
+            dialogContactNumber.contactNumberTil.isErrorEnabled = false
         }
+        return !dialogContactNumber.contactNumberTil.isErrorEnabled
     }
+
 }

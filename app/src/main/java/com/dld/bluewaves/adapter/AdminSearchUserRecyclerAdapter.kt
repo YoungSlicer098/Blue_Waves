@@ -14,12 +14,11 @@ import androidx.core.animation.addListener
 import androidx.recyclerview.widget.RecyclerView
 import com.dld.bluewaves.AdminSearchUserActivity
 import com.dld.bluewaves.AdminUserEditActivity
-import com.dld.bluewaves.ChatActivity
 import com.dld.bluewaves.R
-import com.dld.bluewaves.SearchUserActivity
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
@@ -44,7 +43,6 @@ class AdminSearchUserRecyclerAdapter(
         val lastSessionInput: TextView = itemView.findViewById(R.id.last_session_input)
         val roleInput: TextView = itemView.findViewById(R.id.role_input)
         val contactNumberInput: TextView = itemView.findViewById(R.id.contactNumber_input)
-        val fcmTokenInput: TextView = itemView.findViewById(R.id.fcmToken_input)
         val bannedInput: TextView = itemView.findViewById(R.id.banned_input)
         val editBtn: TextView = itemView.findViewById(R.id.edit_btn)
     }
@@ -54,10 +52,11 @@ class AdminSearchUserRecyclerAdapter(
         holder.displayNameText.text = model.displayName
         holder.emailText.text = model.email
         holder.userIdInput.text = model.userId
-        holder.lastSessionInput.text = model.lastSession.toString()
+        holder.lastSessionInput.text = model.lastSession?.toDate()?.time?.let {
+            TimeUtils.formatDateToFullMonthDayYearWithTime(it)
+        } ?: "No session recorded"
         holder.roleInput.text = model.role
         holder.contactNumberInput.text = model.contactNumber
-        holder.fcmTokenInput.text = model.fcmToken
         if (model.banned == true) {
             holder.bannedInput.text = "Yes"
         } else {
@@ -67,7 +66,7 @@ class AdminSearchUserRecyclerAdapter(
         if (model.profilePic != "") {
             holder.profilePic.setImageResource(AndroidUtils.selectPicture(model.profilePic))
         }else {
-            FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
+            getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val uri: Uri = task.result
                     AndroidUtils.setProfilePic(context, uri, holder.profilePic)
@@ -115,7 +114,7 @@ class AdminSearchUserRecyclerAdapter(
 //        // Set click listener to navigate to ChatActivity
         holder.editBtn.setOnClickListener {
             val intent = Intent(context, AdminUserEditActivity::class.java).apply {
-                AndroidUtils.passUserModelAsIntent(this, model)
+                AndroidUtils.passAllUserModelAsIntent(this, model)
             }
             context.startActivity(intent)
             activity.finish()

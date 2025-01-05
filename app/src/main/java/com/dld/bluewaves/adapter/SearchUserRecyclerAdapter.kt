@@ -15,6 +15,7 @@ import com.dld.bluewaves.SearchUserActivity
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
@@ -42,7 +43,7 @@ class SearchUserRecyclerAdapter(
         if (model.profilePic != "") {
             holder.profilePic.setImageResource(AndroidUtils.selectPicture(model.profilePic))
         }else {
-            FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
+            getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val uri: Uri = task.result
                     AndroidUtils.setProfilePic(context, uri, holder.profilePic)

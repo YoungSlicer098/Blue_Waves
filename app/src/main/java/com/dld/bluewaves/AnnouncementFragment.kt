@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,23 +15,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dld.bluewaves.adapter.AnnouncementImgRecyclerAdapter
 import com.dld.bluewaves.adapter.AnnouncementRecyclerAdapter
-import com.dld.bluewaves.adapter.RecentChatRecyclerAdapter
 import com.dld.bluewaves.databinding.DialogPickImageBinding
 import com.dld.bluewaves.databinding.DialogPostAnnouncementBinding
 import com.dld.bluewaves.databinding.FragmentAnnouncementBinding
 import com.dld.bluewaves.model.AnnouncementModel
-import com.dld.bluewaves.model.ChatRoomModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.github.dhaval2404.imagepicker.ImagePicker
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -81,9 +75,19 @@ class AnnouncementFragment : Fragment() {
         setupRecyclerView()
         setupSwipeRefresh()
 
-        mBinding.postAnnouncement.setOnClickListener {
-            showPostDialog()
+
+        FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                val role = it.result.getString("role")
+                if (role?.lowercase() in listOf("staff", "admin", "developer")) {
+                    mBinding.postAnnouncement.visibility = View.VISIBLE
+                    mBinding.postAnnouncement.setOnClickListener {
+                        showPostDialog()
+                    }
+                }
+            }
         }
+
 
 
 

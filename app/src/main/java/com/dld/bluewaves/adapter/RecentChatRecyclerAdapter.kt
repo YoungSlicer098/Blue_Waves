@@ -15,6 +15,7 @@ import com.dld.bluewaves.model.ChatRoomModel
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
+import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 
@@ -53,7 +54,7 @@ class RecentChatRecyclerAdapter(
                         if(otherUserModel.profilePic != ""){
                             holder.profilePic.setImageResource(AndroidUtils.selectPicture(otherUserModel.profilePic))
                         }else {
-                            FirebaseUtils.getOtherProfilePicStorageRef(otherUserModel.userId).downloadUrl.addOnCompleteListener {
+                            getOtherProfilePicStorageRef(otherUserModel.userId).downloadUrl.addOnCompleteListener {
                                 if (it.isSuccessful) {
                                     val uri: Uri = it.result
                                     AndroidUtils.setProfilePic(context, uri, holder.profilePic)
@@ -80,7 +81,7 @@ class RecentChatRecyclerAdapter(
                             lastMessageSentByMe && model.lastMessage.length > 20 -> "You: ${
                                 model.lastMessage.substring(
                                     0,
-                                    20
+                                    16
                                 )
                             }..."
 
@@ -88,7 +89,7 @@ class RecentChatRecyclerAdapter(
                             model.lastMessage.length > 20 -> "${
                                 model.lastMessage.substring(
                                     0,
-                                    20
+                                    16
                                 )
                             }..."
 

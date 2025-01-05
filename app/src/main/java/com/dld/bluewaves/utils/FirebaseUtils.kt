@@ -2,15 +2,13 @@ package com.dld.bluewaves.utils
 
 import com.dld.bluewaves.model.AnnouncementModel
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlinx.coroutines.tasks.await
 
 object FirebaseUtils {
 
@@ -42,31 +40,44 @@ object FirebaseUtils {
         return FirebaseFirestore.getInstance().collection("users")
     }
 
-    fun sameDisplayNameVerify(displayName: String): Boolean {
-        var name: String? = null
-        allUserCollectionReference().whereEqualTo("displayName", displayName).get().addOnCompleteListener{
-            if (it.isSuccessful) name = it.result.documents[0].getString("displayName")
-            else name = null
+    suspend fun sameDisplayNameVerify(displayName: String): Boolean {
+        return try {
+            val querySnapshot = FirebaseUtils.allUserCollectionReference()
+                .whereEqualTo("displayName", displayName)
+                .get()
+                .await()
+
+            querySnapshot.documents.isNotEmpty()
+        } catch (e: Exception) {
+            false
         }
-        return name != null
     }
 
-    fun sameEmailVerify(email: String): Boolean {
-        var value: String? = null
-        allUserCollectionReference().whereEqualTo("email", email).get().addOnCompleteListener{
-            if (it.isSuccessful) value = it.result.documents[0].getString("email")
-            else value = null
+    suspend fun sameEmailVerify(email: String): Boolean {
+        return try {
+            val querySnapshot = FirebaseUtils.allUserCollectionReference()
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+
+            querySnapshot.documents.isNotEmpty()
+        } catch (e: Exception) {
+            false
         }
-        return value != null
+
     }
 
-    fun sameContactNumberVerify(contactNumber: String): Boolean {
-        var value: String? = null
-        allUserCollectionReference().whereEqualTo("contactNumber", contactNumber).get().addOnCompleteListener{
-            if (it.isSuccessful) value = it.result.documents[0].getString("contactNumber")
-            else value = null
+    suspend fun sameContactNumberVerify(contactNumber: String): Boolean {
+        return try {
+            val querySnapshot = FirebaseUtils.allUserCollectionReference()
+                .whereEqualTo("contactNumber", contactNumber)
+                .get()
+                .await()
+
+            querySnapshot.documents.isNotEmpty()
+        } catch (e: Exception) {
+            false
         }
-        return value != null
     }
 
 
@@ -117,13 +128,6 @@ object FirebaseUtils {
             .child(userId)
     }
 
-    //
-//    fun getOtherProfilePicStorageRef(otherUserId: String): StorageReference {
-//        return FirebaseStorage.getInstance().reference
-//            .child("profile_pic")
-//            .child(otherUserId)
-//    }
-
     // Getting the other user's data from the profile pic storage
     fun getOtherProfilePicStorageRef(otherUserId: String): StorageReference {
         return FirebaseStorage.getInstance().reference
@@ -166,4 +170,10 @@ object FirebaseUtils {
             .child("annPics")
             .child(image)
     }
+}
+
+fun getOtherProfilePicStorageRef(userId: String): StorageReference {
+    return FirebaseStorage.getInstance().reference
+        .child("profile_pic")
+        .child(userId)
 }

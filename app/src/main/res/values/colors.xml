@@ -23,6 +23,7 @@
     <color name="selectedText">#0282A9</color>
     <color name="check_color">#456DBC</color>
     <color name="close_color">#BF4E4E</color>
+    <color name="red">#C70B0B</color>
 
     <color name="pressed_color">#4EC9EB</color>
     <color name="selected_color">#0282A9</color>

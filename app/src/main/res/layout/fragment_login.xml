@@ -68,6 +68,33 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/rememberEmailCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:text="@string/remember_email"
+            android:textColor="@color/text"
+            android:gravity="center"
+            android:layout_gravity="start"
+            android:layout_marginStart="30dp"/>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/rememberPasswordCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:text="@string/remember_password"
+            android:textColor="@color/text"
+            android:gravity="center"
+            android:layout_gravity="start"
+            android:layout_marginStart="30dp"
+            android:layout_below="@id/rememberEmailCheckbox"/>
+
+
+        </RelativeLayout>
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="36dp"
@@ -77,6 +104,7 @@
             android:visibility="gone"
             android:layout_marginTop="15dp"
             android:indeterminate="true"/>
+
         <TextView
             android:id="@+id/loginBtn"
             android:layout_width="wrap_content"
@@ -95,6 +123,17 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/forgetPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:layout_gravity="top|end"
+            android:text="Forget Password?"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/registerNow"
