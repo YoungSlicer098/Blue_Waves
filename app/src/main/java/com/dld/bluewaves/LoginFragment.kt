@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.dld.bluewaves.databinding.FragmentLoginBinding
 import com.dld.bluewaves.utils.AndroidUtils
+import com.dld.bluewaves.utils.FirebaseUtils
 import com.google.firebase.auth.FirebaseAuth
 
 // TODO: Rename parameter arguments, choose names that match
@@ -154,7 +155,7 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
 
     private fun validatePassword(): Boolean {
         var errorMessage: String? = null
-        var specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
+        val specialCharacters = "[!@#$%&*()_+=|<>?{}\\[\\]~-]"
         val value: String = mBinding.passwordET.text.toString()
         if (value.isEmpty()) {
             errorMessage = "Password is required"
@@ -272,8 +273,18 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
                         .addOnCompleteListener(context as AuthActivity) { task ->
                             inProgress(false)
                             if (task.isSuccessful) {
-                                AndroidUtils.showToast(context as AuthActivity, "Logged in.")
-                                AuthActivity.login(context as AuthActivity)
+                                FirebaseUtils.currentUserDetails().get().addOnCompleteListener{
+                                    if (it.isSuccessful){
+                                        val banned = it.result.getBoolean("banned")
+                                        if (banned == true){
+                                            auth.signOut()
+                                            AndroidUtils.showToast(context as AuthActivity, "This user is banned.")
+                                        }else{
+                                            AndroidUtils.showToast(context as AuthActivity, "Logged in.")
+                                            AuthActivity.login(context as AuthActivity)
+                                        }
+                                    }
+                                }
                             } else {
                                 AndroidUtils.showToast(
                                     context as AuthActivity,

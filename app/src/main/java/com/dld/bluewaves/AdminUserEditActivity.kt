@@ -151,7 +151,6 @@ class AdminUserEditActivity : AppCompatActivity() {
             alertDialog.show()
         }
 
-
         mBinding.displayNameEdit.setOnClickListener {
             dialogName = DialogDisplayNameEditBinding.inflate(LayoutInflater.from(this))
             dialogName.displayNameET.setText(model.displayName)
@@ -257,6 +256,15 @@ class AdminUserEditActivity : AppCompatActivity() {
             dialog.show()
 
         }
+
+        mBinding.banBtn.setOnClickListener {
+            showBanUserDialog()
+        }
+
+        mBinding.unbanBtn.setOnClickListener {
+            showUnBanUserDialog()
+        }
+
 
         mBinding.saveBtn.setOnClickListener {
             updateUserData()
@@ -606,6 +614,14 @@ class AdminUserEditActivity : AppCompatActivity() {
                     }
                 }
 
+                if (model.banned) {
+                    mBinding.banBtn.visibility = View.GONE
+                    mBinding.unbanBtn.visibility = View.VISIBLE
+                } else {
+                    mBinding.banBtn.visibility = View.VISIBLE
+                    mBinding.unbanBtn.visibility = View.GONE
+                }
+
 
             } else {
                 model = UserModel()
@@ -619,6 +635,104 @@ class AdminUserEditActivity : AppCompatActivity() {
                     }
                 }
                 AndroidUtils.showToast(this, "Could not gather data")
+            }
+        }
+    }
+    private fun showDeleteUserDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Delete User?")
+            .setMessage("Are you sure that you want to delete this user?")
+            .setPositiveButton("Yes") { dialog, _ ->
+                val aBuilder = AlertDialog.Builder(this)
+                aBuilder.setTitle("Are you really sure?")
+                    .setPositiveButton("YES") { aDialog, _ ->
+                        inProgress(true)
+                        // First, delete the user document from Firestore
+                        FirebaseUtils.allUserCollectionReference().document(model.userId).delete().addOnCompleteListener { firestoreTask ->
+                            if (firestoreTask.isSuccessful) {
+                                // If the document deletion succeeds, delete the user from FirebaseAuth
+                                val currentUser = FirebaseAuth.getInstance().currentUser
+                                if (currentUser != null && currentUser.uid == model.userId) {
+                                    currentUser.delete().addOnCompleteListener { authTask ->
+                                        if (authTask.isSuccessful) {
+                                            AndroidUtils.showToast(this, "User deleted successfully")
+                                        } else {
+                                            AndroidUtils.showToast(this, "Failed to delete user from FirebaseAuth: ${authTask.exception?.message}")
+                                        }
+                                        inProgress(false)
+                                    }
+                                } else {
+                                    AndroidUtils.showToast(this, "Failed to delete user: User not logged in or mismatch")
+                                    inProgress(false)
+                                }
+                            } else {
+                                AndroidUtils.showToast(this, "Failed to delete user document: ${firestoreTask.exception?.message}")
+                                inProgress(false)
+                            }
+                        }
+                        aDialog.dismiss()
+                    }
+                    .setNegativeButton("No") { aDialog, _ ->
+                        aDialog.dismiss() // Simply dismiss the dialog
+                    }
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss() // Simply dismiss the dialog
+            }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun showBanUserDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Ban User?")
+            .setMessage("Are you sure you want to ban this user?")
+            .setPositiveButton("Yes") { dialog, _ ->
+                inProgress(true)
+                FirebaseUtils.allUserCollectionReference().document(model.userId).update("banned", true).addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        AndroidUtils.showToast(this, "User: ${model.displayName} has been banned")
+                        getUserData()
+                        if (needsUpdate || changedRole || changedName || changedProfilePic || changedContactNumber) {
+                            AndroidUtils.showToast(this, "Changes were rolled back")
+                            needsUpdate = false
+                            changedRole = false
+                            changedName = false
+                            changedProfilePic = false
+                            changedContactNumber = false
+                            showUpdateDialog()
+                        }
+                        dialog.dismiss()
+                    } else {
+                        AndroidUtils.showToast(this, "Failed to reset role")
+                        inProgress(false)
+                    }
+                }
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss() // Simply dismiss the dialog
+            }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun showUnBanUserDialog() {
+        FirebaseUtils.allUserCollectionReference().document(model.userId).update("banned", false).addOnCompleteListener {
+            if (it.isSuccessful) {
+                AndroidUtils.showToast(this, "User: ${model.displayName} has been unbanned")
+                getUserData()
+                if (needsUpdate || changedRole || changedName || changedProfilePic || changedContactNumber) {
+                    AndroidUtils.showToast(this, "Changes were rolled back")
+                    needsUpdate = false
+                    changedRole = false
+                    changedName = false
+                    changedProfilePic = false
+                    changedContactNumber = false
+                    showUpdateDialog()
+                }
             }
         }
     }

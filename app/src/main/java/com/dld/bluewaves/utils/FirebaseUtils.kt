@@ -1,7 +1,10 @@
 package com.dld.bluewaves.utils
 
 import com.dld.bluewaves.model.AnnouncementModel
+import com.dld.bluewaves.model.FeedbackModel
+import com.dld.bluewaves.model.SuggestionModel
 import com.google.android.gms.tasks.Task
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
@@ -149,6 +152,29 @@ object FirebaseUtils {
             .collection("users")
             .document(userId)
     }
+
+    fun addFeedback(feedback: String): Task<Void> {
+        val fb = FirebaseFirestore.getInstance().collection("feedbacks").document()
+        val model = FeedbackModel(
+            fbId = fb.id,
+            userId = currentUserId() ?: throw IllegalStateException("User not logged in"),
+            message = feedback,
+            timestamp = Timestamp.now()
+        )
+        return fb.set(model)
+    }
+
+    fun addSuggestion(suggestion: String): Task<Void> {
+        val sg = FirebaseFirestore.getInstance().collection("suggestions").document()
+        val model = SuggestionModel(
+            sgId = sg.id,
+            userId = currentUserId() ?: throw IllegalStateException("User not logged in"),
+            message = suggestion,
+            timestamp = Timestamp.now()
+        )
+        return sg.set(model)
+    }
+
 
     // Delete Announcement
     fun deleteAnnouncement(annId: String): Task<Void> {

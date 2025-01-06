@@ -23,6 +23,8 @@ import com.dld.bluewaves.R
 import com.dld.bluewaves.SplashActivity
 import com.dld.bluewaves.databinding.ActivityBaseDrawerBinding
 import com.dld.bluewaves.databinding.DialogAboutUsBinding
+import com.dld.bluewaves.databinding.DialogPostFeedbackBinding
+import com.dld.bluewaves.databinding.DialogPostSuggestionBinding
 import com.dld.bluewaves.model.UserModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -30,11 +32,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 
 @Suppress("DEPRECATION")
+@SuppressLint("StaticFieldLeak")
 object DrawerUtils {
 
     private lateinit var toggle: ActionBarDrawerToggle
-    @SuppressLint("StaticFieldLeak")
     private lateinit var dialogAboutUs: DialogAboutUsBinding
+    private lateinit var dialogPostFeedbackBinding: DialogPostFeedbackBinding
+    private lateinit var dialogPostSuggestionBinding: DialogPostSuggestionBinding
 
     // Initializes the navigation drawer
     fun setupDrawer(
@@ -76,11 +80,24 @@ object DrawerUtils {
         binding.sidebarNav.menu.findItem(R.id.nav_customization).isEnabled = false
         binding.sidebarNav.menu.findItem(R.id.nav_schedule).isEnabled = false
         binding.sidebarNav.menu.findItem(R.id.nav_version_changelog).isEnabled = false
-        binding.sidebarNav.menu.findItem(R.id.nav_feedback).isEnabled = false
-        binding.sidebarNav.menu.findItem(R.id.nav_suggestions).isEnabled = false
 
         // Validation for enabling/disabling menu items
         validationSideBar(binding, auth)
+
+
+        if (auth.currentUser != null) {
+            FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val banned = it.result.getBoolean("banned")
+                    if (banned == true) {
+                        AndroidUtils.showToast(activity, "This user is banned.")
+                        val intent = Intent(activity, SplashActivity::class.java)
+                        activity.startActivity(intent)
+                        activity.finish()
+                    }
+                }
+            }
+        }
     }
 
     // Handles sidebar navigation item clicks
@@ -103,7 +120,6 @@ object DrawerUtils {
 
     // Handles individual menu item actions
     private fun handleNavigationItemSelected(activity: Activity, binding: ActivityBaseDrawerBinding, item: MenuItem, auth: FirebaseAuth) {
-        val drawerLayout = activity.findViewById<DrawerLayout>(R.id.drawerLayout)
         when (item.itemId) {
             R.id.nav_customization -> AndroidUtils.showToast(activity, "Coming Soon!")
             R.id.nav_schedule -> AndroidUtils.showToast(activity, "Coming Soon!")
@@ -118,17 +134,28 @@ object DrawerUtils {
             activity.overridePendingTransition(R.anim.fade_in_up, R.anim.fade_out_static)
             }
             R.id.nav_logout -> {
-                FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        clearSavedRemember(activity)
-                        auth.signOut()
-                        Toast.makeText(activity, "Logged out!", Toast.LENGTH_SHORT).show()
-                        validationSideBar(binding, auth)
-                        val intent = Intent(activity, SplashActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        activity.startActivity(intent)
+                val builder = AlertDialog.Builder(activity)
+                builder.setTitle("Logout?")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton("Yes") { dialog, _ ->
+                        FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                clearSavedRemember(activity)
+                                auth.signOut()
+                                Toast.makeText(activity, "Logged out!", Toast.LENGTH_SHORT).show()
+                                validationSideBar(binding, auth)
+                                val intent = Intent(activity, SplashActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                activity.startActivity(intent)
+                            }
+                        }
                     }
-                }
+                    .setNegativeButton("No") { dialog, _ ->
+                        dialog.dismiss() // Simply dismiss the dialog
+                    }
+
+                val alertDialog = builder.create()
+                alertDialog.show()
             }
             R.id.nav_about_us -> {
                 dialogAboutUs = DialogAboutUsBinding.inflate(activity.layoutInflater)
@@ -165,11 +192,65 @@ object DrawerUtils {
             }
 
             R.id.nav_feedback -> {
-                AndroidUtils.showToast(activity, "Coming Soon!")
+                dialogPostFeedbackBinding = DialogPostFeedbackBinding.inflate(activity.layoutInflater)
+                fun inProgress(isVisible: Boolean) {
+                    dialogPostFeedbackBinding.progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
+                }
+
+                val builder = AlertDialog.Builder(activity)
+                builder.setTitle("Feedback")
+                    .setView(dialogPostFeedbackBinding.root)
+                    .setPositiveButton("Send") { dialog, _ ->
+                        inProgress(true)
+                        val message = dialogPostFeedbackBinding.messageET.text.toString()
+                        FirebaseUtils.addFeedback(message).addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                AndroidUtils.showToast(activity, "Feedback sent!")
+                                inProgress(false)
+                                dialog.dismiss()
+                            } else {
+                                AndroidUtils.showToast(activity, "Failed to send the feedback.")
+                                inProgress(false)
+                            }
+                        }
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss() // Simply dismiss the dialog
+                    }
+
+                val alertDialog = builder.create()
+                alertDialog.show()
             }
 
             R.id.nav_suggestions -> {
-                AndroidUtils.showToast(activity, "Coming Soon!")
+                dialogPostSuggestionBinding = DialogPostSuggestionBinding.inflate(activity.layoutInflater)
+                fun inProgress(isVisible: Boolean) {
+                    dialogPostSuggestionBinding.progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
+                }
+
+                val builder = AlertDialog.Builder(activity)
+                builder.setTitle("Suggestion")
+                    .setView(dialogPostSuggestionBinding.root)
+                    .setPositiveButton("Send") { dialog, _ ->
+                        inProgress(true)
+                        val message = dialogPostSuggestionBinding.messageET.text.toString()
+                        FirebaseUtils.addFeedback(message).addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                AndroidUtils.showToast(activity, "Suggestion sent!")
+                                inProgress(false)
+                                dialog.dismiss() // Simply dismiss the dialog
+                            } else {
+                                AndroidUtils.showToast(activity, "Failed to send the Suggestion.")
+                                inProgress(false)
+                            }
+                        }
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss() // Simply dismiss the dialog
+                    }
+
+                val alertDialog = builder.create()
+                alertDialog.show()
             }
 
             // Developer's Data Manager Button:
@@ -239,9 +320,13 @@ object DrawerUtils {
         if (user == null) {
             binding.sidebarNav.menu.findItem(R.id.nav_profile).isEnabled = false
             binding.sidebarNav.menu.findItem(R.id.nav_logout).isEnabled = false
+            binding.sidebarNav.menu.findItem(R.id.nav_feedback).isEnabled = false
+            binding.sidebarNav.menu.findItem(R.id.nav_suggestions).isEnabled = false
         } else {
             binding.sidebarNav.menu.findItem(R.id.nav_profile).isEnabled = true
             binding.sidebarNav.menu.findItem(R.id.nav_logout).isEnabled = true
+            binding.sidebarNav.menu.findItem(R.id.nav_feedback).isEnabled = true
+            binding.sidebarNav.menu.findItem(R.id.nav_suggestions).isEnabled = true
 
             FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
                 if (it.isSuccessful) {
