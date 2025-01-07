@@ -12,13 +12,12 @@ import com.dld.bluewaves.model.ChatRoomModel
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
-import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
+import com.dld.bluewaves.utils.FirebaseUtils.getOtherProfilePicStorageRef
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Query
-import getAccessToken
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -90,11 +89,11 @@ class ChatActivity : AppCompatActivity() {
                 return
             } else {
                 chatRoomModel.userIds = listOf(FirebaseUtils.currentUserId(), otherUser.userId)
-                FirebaseUtils.getChatroomReference(chatroomId).set(chatRoomModel.copy(userIds = chatRoomModel.userIds))
+                FirebaseUtils.getChatroomReference(chatroomId).update("userIds",chatRoomModel.userIds)
             }
         } else {
             chatRoomModel.userIds = listOf(FirebaseUtils.currentUserId(), otherUser.userId)
-            FirebaseUtils.getChatroomReference(chatroomId).set(chatRoomModel.copy(userIds = chatRoomModel.userIds))
+            FirebaseUtils.getChatroomReference(chatroomId).update("userIds",chatRoomModel.userIds)
         }
     }
 
@@ -141,7 +140,7 @@ class ChatActivity : AppCompatActivity() {
                 OnCompleteListener<DocumentReference> { task ->
                     if (task.isSuccessful) {
                         mBinding.chatMessageInput.setText("")
-                        sendNotification(message)
+//                        sendNotification(message)
                     } else {
                         AndroidUtils.showToast(this, "Error sending message")
                     }
@@ -181,78 +180,78 @@ class ChatActivity : AppCompatActivity() {
                 }
             }
     }
-
-    private fun sendNotification(message: String) {
-        FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
-            if (it.isSuccessful) {
-                val currentUser: UserModel = it.result.toObject(UserModel::class.java)!!
-                try {
-                    val jsonObject = JSONObject()
-
-                    // Notification section
-                    val notificationObj = JSONObject()
-                    notificationObj.put("title", currentUser.displayName)
-                    notificationObj.put("body", message)
-
-                    // Data section (custom data)
-                    val dataObj = JSONObject()
-                    dataObj.put("userId", currentUser.userId)
-
-                    // Message payload
-                    val messageObj = JSONObject()
-                    messageObj.put(
-                        "token",
-                        otherUser.fcmToken
-                    ) // Specify the FCM token of the recipient
-                    messageObj.put("notification", notificationObj)
-                    messageObj.put("data", dataObj)
-
-                    jsonObject.put("message", messageObj)
-
-                    callAPI(jsonObject) // Call the API with the structured payload
-                } catch (e: Exception) {
-                    e.printStackTrace() // Log the error for debugging purposes
-                }
-            }
-        }
-    }
-
-    private fun callAPI(jsonObject: JSONObject) {
-        val client = OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-
-        val JSON = "application/json".toMediaTypeOrNull()
-        val url = "https://fcm.googleapis.com/v1/projects/bluewaves-dld/messages:send"
-
-        val bearerToken = getAccessToken(this)
-
-        val body: RequestBody = RequestBody.create(JSON, jsonObject.toString())
-        val request: Request = Request.Builder()
-            .url(url)
-            .post(body)
-            .header("Authorization", "Bearer $bearerToken")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                e.printStackTrace()
-                println("Failed to send notification: ${e.message}")
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                response.use {
-                    if (response.isSuccessful) {
-                        println("Notification sent successfully")
-                    } else {
-                        val errorBody = response.body?.string()
-                        println("Error sending notification: $errorBody")
-                    }
-                }
-            }
-        })
-    }
+//
+//    private fun sendNotification(message: String) {
+//        FirebaseUtils.currentUserDetails().get().addOnCompleteListener {
+//            if (it.isSuccessful) {
+//                val currentUser: UserModel = it.result.toObject(UserModel::class.java)!!
+//                try {
+//                    val jsonObject = JSONObject()
+//
+//                    // Notification section
+//                    val notificationObj = JSONObject()
+//                    notificationObj.put("title", currentUser.displayName)
+//                    notificationObj.put("body", message)
+//
+//                    // Data section (custom data)
+//                    val dataObj = JSONObject()
+//                    dataObj.put("userId", currentUser.userId)
+//
+//                    // Message payload
+//                    val messageObj = JSONObject()
+//                    messageObj.put(
+//                        "token",
+//                        otherUser.fcmToken
+//                    ) // Specify the FCM token of the recipient
+//                    messageObj.put("notification", notificationObj)
+//                    messageObj.put("data", dataObj)
+//
+//                    jsonObject.put("message", messageObj)
+//
+//                    callAPI(jsonObject) // Call the API with the structured payload
+//                } catch (e: Exception) {
+//                    e.printStackTrace() // Log the error for debugging purposes
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun callAPI(jsonObject: JSONObject) {
+//        val client = OkHttpClient.Builder()
+//            .connectTimeout(10, TimeUnit.SECONDS)
+//            .writeTimeout(10, TimeUnit.SECONDS)
+//            .readTimeout(30, TimeUnit.SECONDS)
+//            .build()
+//
+//        val JSON = "application/json".toMediaTypeOrNull()
+//        val url = "https://fcm.googleapis.com/v1/projects/bluewaves-dld/messages:send"
+//
+//        val bearerToken = getAccessToken(this)
+//
+//        val body: RequestBody = RequestBody.create(JSON, jsonObject.toString())
+//        val request: Request = Request.Builder()
+//            .url(url)
+//            .post(body)
+//            .header("Authorization", "Bearer $bearerToken")
+//            .build()
+//
+//        client.newCall(request).enqueue(object : Callback {
+//            override fun onFailure(call: okhttp3.Call, e: IOException) {
+//                e.printStackTrace()
+//                println("Failed to send notification: ${e.message}")
+//            }
+//
+//            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+//                response.use {
+//                    if (response.isSuccessful) {
+//                        println("Notification sent successfully")
+//                    } else {
+//                        val errorBody = response.body?.string()
+//                        println("Error sending notification: $errorBody")
+//                    }
+//                }
+//            }
+//        })
+//    }
 
 }

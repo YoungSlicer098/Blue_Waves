@@ -563,7 +563,7 @@ class AdminUserEditActivity : AppCompatActivity() {
 
                     // Set the spinner selection based on model.role
                     val currentRole = model.role.lowercase() // Replace with your actual model variable
-                    val selectedIndex = roles.indexOf(currentRole)
+                    val selectedIndex = roles.indexOfFirst { it.equals(currentRole, ignoreCase = true) }
                     if (selectedIndex != -1) {
                         mBinding.roleSpinner.setSelection(selectedIndex)
                     }
@@ -606,7 +606,7 @@ class AdminUserEditActivity : AppCompatActivity() {
                 if (model.profilePic != "") {
                     mBinding.profilePic.setImageResource(AndroidUtils.selectPicture(model.profilePic))
                 }else{
-                    FirebaseUtils.getCurrentProfilePicStorageRef().downloadUrl.addOnCompleteListener {
+                    FirebaseUtils.getOtherProfilePicStorageRef(model.userId).downloadUrl.addOnCompleteListener {
                         if (it.isSuccessful) {
                             val uri: Uri = it.result
                             AndroidUtils.setProfilePic(context = this, uri, mBinding.profilePic)
