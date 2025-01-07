@@ -10,10 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.dld.bluewaves.databinding.FragmentLoginBinding
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -299,7 +301,14 @@ class LoginFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListen
                     if (!isResetAllowed) {
                         AndroidUtils.showToast(context as AuthActivity, "Please wait for the timer to finish: ${getFormattedTime()}")
                     } else if (validateEmail()) {
-                        showPasswordResetDialog(mBinding.emailET.text.toString())
+                        val email = mBinding.emailET.text.toString()
+                        lifecycleScope.launch {
+                            if (!FirebaseUtils.sameEmailVerify(email)) {
+                                showPasswordResetDialog(mBinding.emailET.text.toString())
+                            } else {
+                                AndroidUtils.showToast(context as AuthActivity, "Email does not exist.")
+                            }
+                        }
                     } else{
                         AndroidUtils.showToast(context as AuthActivity, "Fill up the email field.")
                     }

@@ -16,6 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.dld.bluewaves.AdminActivity
 import com.dld.bluewaves.ProfileActivity
@@ -30,6 +31,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
 @SuppressLint("StaticFieldLeak")
@@ -196,30 +198,63 @@ object DrawerUtils {
                 fun inProgress(isVisible: Boolean) {
                     dialogPostFeedbackBinding.progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
                 }
-
-                val builder = AlertDialog.Builder(activity)
-                builder.setTitle("Feedback")
-                    .setView(dialogPostFeedbackBinding.root)
-                    .setPositiveButton("Send") { dialog, _ ->
-                        inProgress(true)
-                        val message = dialogPostFeedbackBinding.messageET.text.toString()
-                        FirebaseUtils.addFeedback(message).addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                AndroidUtils.showToast(activity, "Feedback sent!")
-                                inProgress(false)
-                                dialog.dismiss()
-                            } else {
-                                AndroidUtils.showToast(activity, "Failed to send the feedback.")
-                                inProgress(false)
-                            }
+                fun validateMessage(): Boolean {
+                    val message = dialogPostFeedbackBinding.messageET.text.toString()
+                    val messageTil = dialogPostFeedbackBinding.messageTil
+                    var errorMessage: String? = null
+                    if (message.length < 8) {
+                        errorMessage = "Message must be at least 8 characters long."
+                    }
+                    if (errorMessage != null) {
+                        messageTil.apply{
+                            isErrorEnabled = true
+                            error = errorMessage
                         }
                     }
+                    return errorMessage == null
+                }
+                dialogPostFeedbackBinding.messageET.onFocusChangeListener = View
+                    .OnFocusChangeListener { _, hasFocus ->
+                        if (hasFocus) {
+                            if (dialogPostFeedbackBinding.messageTil.isErrorEnabled) {
+                                dialogPostFeedbackBinding.messageTil.isErrorEnabled = false
+                            }
+                        } else{
+                            validateMessage()
+                        }
+                    }
+
+                val builder = AlertDialog.Builder(activity)
+                    .setTitle("Feedback")
+                    .setView(dialogPostFeedbackBinding.root)
+                    .setPositiveButton("Send", null)
                     .setNegativeButton("Cancel") { dialog, _ ->
                         dialog.dismiss() // Simply dismiss the dialog
                     }
+                        .create()
 
-                val alertDialog = builder.create()
-                alertDialog.show()
+                builder.setOnShowListener {
+                    val saveButton = builder.getButton(AlertDialog.BUTTON_POSITIVE)
+                    saveButton.setOnClickListener {
+                        inProgress(true)
+                        val message = dialogPostFeedbackBinding.messageET.text.toString()
+                        if (validateMessage()) {
+                            FirebaseUtils.addFeedback(message).addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    AndroidUtils.showToast(activity, "Feedback sent!")
+                                    inProgress(false)
+                                    builder.dismiss()
+                                } else {
+                                    AndroidUtils.showToast(activity, "Failed to send the feedback.")
+                                    inProgress(false)
+                                }
+                            }
+                        } else {
+                            inProgress(false)
+                        }
+                    }
+                }
+                builder.show()
             }
 
             R.id.nav_suggestions -> {
@@ -228,29 +263,68 @@ object DrawerUtils {
                     dialogPostSuggestionBinding.progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
                 }
 
-                val builder = AlertDialog.Builder(activity)
-                builder.setTitle("Suggestion")
-                    .setView(dialogPostSuggestionBinding.root)
-                    .setPositiveButton("Send") { dialog, _ ->
-                        inProgress(true)
-                        val message = dialogPostSuggestionBinding.messageET.text.toString()
-                        FirebaseUtils.addFeedback(message).addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                AndroidUtils.showToast(activity, "Suggestion sent!")
-                                inProgress(false)
-                                dialog.dismiss() // Simply dismiss the dialog
-                            } else {
-                                AndroidUtils.showToast(activity, "Failed to send the Suggestion.")
-                                inProgress(false)
-                            }
+                fun validateMessage(): Boolean {
+                    val message = dialogPostSuggestionBinding.messageET.text.toString()
+                    val messageTil = dialogPostSuggestionBinding.messageTil
+                    var errorMessage: String? = null
+                    if (message.length < 8) {
+                        errorMessage = "Message must be at least 8 characters long."
+                    }
+                    if (errorMessage != null) {
+                        messageTil.apply{
+                            isErrorEnabled = true
+                            error = errorMessage
                         }
                     }
+                    return errorMessage == null
+                }
+                dialogPostSuggestionBinding.messageET.onFocusChangeListener = View
+                    .OnFocusChangeListener { _, hasFocus ->
+                        if (hasFocus) {
+                            if (dialogPostSuggestionBinding.messageTil.isErrorEnabled) {
+                                dialogPostSuggestionBinding.messageTil.isErrorEnabled = false
+                            }
+                        } else{
+                            validateMessage()
+                        }
+                    }
+
+                val builder = AlertDialog.Builder(activity)
+                    .setTitle("Suggestion")
+                    .setView(dialogPostSuggestionBinding.root)
+                    .setPositiveButton("Send", null)
                     .setNegativeButton("Cancel") { dialog, _ ->
                         dialog.dismiss() // Simply dismiss the dialog
                     }
+                    .create()
 
-                val alertDialog = builder.create()
-                alertDialog.show()
+                builder.setOnShowListener {
+                    val saveButton = builder.getButton(AlertDialog.BUTTON_POSITIVE)
+                    saveButton.setOnClickListener {
+
+                        inProgress(true)
+                        val message = dialogPostSuggestionBinding.messageET.text.toString()
+                        if (validateMessage()) {
+                            FirebaseUtils.addFeedback(message).addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    AndroidUtils.showToast(activity, "Suggestion sent!")
+                                    inProgress(false)
+                                    builder.dismiss() // Simply dismiss the dialog
+                                } else {
+                                    AndroidUtils.showToast(
+                                        activity,
+                                        "Failed to send the Suggestion."
+                                    )
+                                    inProgress(false)
+                                }
+                            }
+                        } else{
+                            inProgress(false)
+                        }
+                    }
+                }
+
+                builder.show()
             }
 
             // Developer's Data Manager Button:

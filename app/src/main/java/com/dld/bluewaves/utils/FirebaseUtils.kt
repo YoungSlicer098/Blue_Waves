@@ -45,7 +45,7 @@ object FirebaseUtils {
 
     suspend fun sameDisplayNameVerify(displayName: String): Boolean {
         return try {
-            val querySnapshot = FirebaseUtils.allUserCollectionReference()
+            val querySnapshot = allUserCollectionReference()
                 .whereEqualTo("displayName", displayName)
                 .get()
                 .await()
@@ -58,7 +58,7 @@ object FirebaseUtils {
 
     suspend fun sameEmailVerify(email: String): Boolean {
         return try {
-            val querySnapshot = FirebaseUtils.allUserCollectionReference()
+            val querySnapshot = allUserCollectionReference()
                 .whereEqualTo("email", email)
                 .get()
                 .await()
@@ -72,7 +72,7 @@ object FirebaseUtils {
 
     suspend fun sameContactNumberVerify(contactNumber: String): Boolean {
         return try {
-            val querySnapshot = FirebaseUtils.allUserCollectionReference()
+            val querySnapshot = allUserCollectionReference()
                 .whereEqualTo("contactNumber", contactNumber)
                 .get()
                 .await()
