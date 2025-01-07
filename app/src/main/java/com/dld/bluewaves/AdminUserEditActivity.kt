@@ -33,7 +33,6 @@ import com.dld.bluewaves.databinding.DialogProfilePicDecisionsBinding
 import com.dld.bluewaves.model.UserModel
 import com.dld.bluewaves.utils.AndroidUtils
 import com.dld.bluewaves.utils.FirebaseUtils
-import com.dld.bluewaves.utils.getOtherProfilePicStorageRef
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.storageMetadata
@@ -264,6 +263,10 @@ class AdminUserEditActivity : AppCompatActivity() {
         mBinding.unbanBtn.setOnClickListener {
             showUnBanUserDialog()
         }
+
+//        mBinding.deleteAccountBtn.setOnClickListener{
+//            showDeleteUserDialog()
+//        }
 
 
         mBinding.saveBtn.setOnClickListener {
@@ -559,7 +562,7 @@ class AdminUserEditActivity : AppCompatActivity() {
                     mBinding.roleSpinner.adapter = spinnerAdapter
 
                     // Set the spinner selection based on model.role
-                    val currentRole = model.role // Replace with your actual model variable
+                    val currentRole = model.role.lowercase() // Replace with your actual model variable
                     val selectedIndex = roles.indexOf(currentRole)
                     if (selectedIndex != -1) {
                         mBinding.roleSpinner.setSelection(selectedIndex)
@@ -568,7 +571,7 @@ class AdminUserEditActivity : AppCompatActivity() {
                     // Detect spinner selection changes
                     mBinding.roleSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            val selectedRole = roles[position]
+                            val selectedRole = roles[position].lowercase()
                             if (selectedRole != currentRole) {
                                 needsUpdate = true
                                 changedRole = true
@@ -638,52 +641,59 @@ class AdminUserEditActivity : AppCompatActivity() {
             }
         }
     }
-    private fun showDeleteUserDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Delete User?")
-            .setMessage("Are you sure that you want to delete this user?")
-            .setPositiveButton("Yes") { dialog, _ ->
-                val aBuilder = AlertDialog.Builder(this)
-                aBuilder.setTitle("Are you really sure?")
-                    .setPositiveButton("YES") { aDialog, _ ->
-                        inProgress(true)
-                        // First, delete the user document from Firestore
-                        FirebaseUtils.allUserCollectionReference().document(model.userId).delete().addOnCompleteListener { firestoreTask ->
-                            if (firestoreTask.isSuccessful) {
-                                // If the document deletion succeeds, delete the user from FirebaseAuth
-                                val currentUser = FirebaseAuth.getInstance().currentUser
-                                if (currentUser != null && currentUser.uid == model.userId) {
-                                    currentUser.delete().addOnCompleteListener { authTask ->
-                                        if (authTask.isSuccessful) {
-                                            AndroidUtils.showToast(this, "User deleted successfully")
-                                        } else {
-                                            AndroidUtils.showToast(this, "Failed to delete user from FirebaseAuth: ${authTask.exception?.message}")
-                                        }
-                                        inProgress(false)
-                                    }
-                                } else {
-                                    AndroidUtils.showToast(this, "Failed to delete user: User not logged in or mismatch")
-                                    inProgress(false)
-                                }
-                            } else {
-                                AndroidUtils.showToast(this, "Failed to delete user document: ${firestoreTask.exception?.message}")
-                                inProgress(false)
-                            }
-                        }
-                        aDialog.dismiss()
-                    }
-                    .setNegativeButton("No") { aDialog, _ ->
-                        aDialog.dismiss() // Simply dismiss the dialog
-                    }
-                dialog.dismiss()
-            }
-            .setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss() // Simply dismiss the dialog
-            }
 
-        val alertDialog = builder.create()
-        alertDialog.show()
-    }
+//    private fun showDeleteUserDialog() {
+//        val builder = AlertDialog.Builder(this)
+//        builder.setTitle("Delete User?")
+//            .setMessage("Are you sure that you want to delete this user?")
+//            .setPositiveButton("Yes") { dialog, _ ->
+//                val aBuilder = AlertDialog.Builder(this)
+//                    .setTitle("Are you really sure?")
+//                    .setPositiveButton("YES") { aDialog, _ ->
+//                        inProgress(true)
+//                        // First, delete the user document from Firestore
+//                        FirebaseUtils.allUserCollectionReference().document(model.userId).delete().addOnCompleteListener { firestoreTask ->
+//                            if (firestoreTask.isSuccessful) {
+//                                // If the document deletion succeeds, delete the user from FirebaseAuth
+//                                val currentUser = FirebaseAuth.getInstance().currentUser
+//                                if (currentUser != null && currentUser.uid == model.userId) {
+//                                    currentUser.delete().addOnCompleteListener { authTask ->
+//                                        if (authTask.isSuccessful) {
+//                                            AndroidUtils.showToast(this, "User deleted successfully")
+//                                            finish()
+//                                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+//                                        } else {
+//                                            AndroidUtils.showToast(this, "Failed to delete user from FirebaseAuth: ${authTask.exception?.message}")
+//                                        }
+//                                        inProgress(false)
+//                                    }
+//                                } else {
+//                                    AndroidUtils.showToast(this, "Failed to delete user: User not logged in or mismatch")
+//                                    inProgress(false)
+//                                }
+//                            } else {
+//                                AndroidUtils.showToast(this, "Failed to delete user document: ${firestoreTask.exception?.message}")
+//                                inProgress(false)
+//                            }
+//                        }
+//                        aDialog.dismiss()
+//                        dialog.dismiss()
+//                    }
+//                    .setNegativeButton("No") { aDialog, _ ->
+//                        aDialog.dismiss() // Simply dismiss the dialog
+//                        dialog.dismiss()
+//                    }
+//                    .create()
+//                aBuilder.show()
+//            }
+//            .setNegativeButton("No") { dialog, _ ->
+//                dialog.dismiss() // Simply dismiss the dialog
+//            }
+//
+//                .create()
+//
+//        builder.show()
+//    }
 
     private fun showBanUserDialog() {
         val builder = AlertDialog.Builder(this)

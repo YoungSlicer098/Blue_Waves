@@ -58,10 +58,6 @@ object AndroidUtils {
         userModel.userId = intent.getStringExtra("userId")!!
         userModel.fcmToken = intent.getStringExtra("fcmToken")!!
         userModel.profilePic = intent.getStringExtra("profilePic")!!
-        userModel.contactNumber = intent.getStringExtra("contactNumber")!!
-        userModel.lastSession = intent.getParcelableExtra("lastSession")!!
-        userModel.banned = intent.getBooleanExtra("banned", false)
-        userModel.role = intent.getStringExtra("role")!!
         return userModel
 
     }
@@ -74,6 +70,10 @@ object AndroidUtils {
         userModel.userId = intent.getStringExtra("userId")!!
         userModel.fcmToken = intent.getStringExtra("fcmToken")!!
         userModel.profilePic = intent.getStringExtra("profilePic")!!
+        userModel.contactNumber = intent.getStringExtra("contactNumber")!!
+        userModel.lastSession = intent.getParcelableExtra("lastSession")!!
+        userModel.banned = intent.getBooleanExtra("banned", false)
+        userModel.role = intent.getStringExtra("role")!!
         return userModel
 
     }
