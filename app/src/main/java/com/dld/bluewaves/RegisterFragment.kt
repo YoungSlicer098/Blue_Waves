@@ -10,15 +10,23 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
+import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Nullable
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.dld.bluewaves.databinding.DialogPicturesBinding
+import com.dld.bluewaves.databinding.DialogProfilePicDecisionsBinding
 import com.dld.bluewaves.databinding.FragmentRegisterBinding
+import com.dld.bluewaves.model.UserModel
+import com.dld.bluewaves.utils.AndroidUtils
+import com.dld.bluewaves.utils.FirebaseUtils
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.storage.storageMetadata
+import kotlinx.coroutines.launch
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -32,87 +40,63 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeListener,
-    View.OnKeyListener{
+    View.OnKeyListener {
 
     private var _binding: FragmentRegisterBinding? = null
     private val mBinding get() = _binding!!
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: DatabaseReference
     private lateinit var imagePickLauncher: ActivityResultLauncher<Intent>
     private lateinit var selectedImageUri: Uri
+    private lateinit var dialogProfilePic: DialogProfilePicDecisionsBinding
+    private lateinit var dialogPictures: DialogPicturesBinding
+    private var userModel = UserModel()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        auth = FirebaseAuth.getInstance()
         // Initialize the image picker launcher
-        imagePickLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                data?.data?.let { uri ->
-                    selectedImageUri = uri
-                    // Set the selected image to profilePic ImageView using AndroidUtil
-//                    AndroidUtil.setProfilePic(requireContext(), selectedImageUri, profilePic)
+        imagePickLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+                    if (data != null && data.data != null) {
+                        selectedImageUri = data.data!!
+                        AndroidUtils.setProfilePic(
+                            context as AuthActivity,
+                            selectedImageUri,
+                            mBinding.profilePic
+                        )
+                        userModel.profilePic = ""
+                    }
                 }
             }
-        }
     }
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout and initialize binding
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
 
         // Initialize UI components
+        mBinding.displayNameET.onFocusChangeListener = this
         mBinding.emailET.onFocusChangeListener = this
         mBinding.passwordET.onFocusChangeListener = this
         mBinding.cPasswordET.onFocusChangeListener = this
+        mBinding.contactNumET.onFocusChangeListener = this
+        mBinding.backBtn.setOnClickListener(this)
+        mBinding.loginNow.setOnClickListener(this)
+        mBinding.registerBtn.setOnClickListener(this)
+        mBinding.profilePic.setOnClickListener(this)
 
-        // OnClick Events
-        mBinding.backBtn.setOnClickListener {
-            AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
-        }
 
-        mBinding.loginNow.setOnClickListener {
-            AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
-        }
+        //On Click Listeners Main Functions
 
-        mBinding.registerBtn.setOnClickListener {
-            mBinding.progressBar.visibility = View.VISIBLE
-            val email = mBinding.emailET.text.toString()
-            val password = mBinding.passwordET.text.toString()
-
-            if (!validateDisplayName() || !validateEmail() || !validatePassword() || !validateConfirmPassword()) {
-                return@setOnClickListener
-            }
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(context as AuthActivity) { task ->
-                    mBinding.progressBar.visibility = View.GONE
-                    if (task.isSuccessful) {
-                        Toast.makeText(
-                            context as AuthActivity,
-                            "Account created.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                        AuthActivity.changeFragment(context as AuthActivity, LoginFragment(), false)
-
-                    } else {
-                        mBinding.progressBar.visibility = View.GONE
-                        Toast.makeText(
-                            context as AuthActivity,
-                            "Authentication failed.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                }
-
-        }
 
         return mBinding.root
     }
-
 
 
     companion object {
@@ -135,19 +119,121 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             }
     }
 
+
+    private fun picturesProfilePicture() {
+        dialogPictures = DialogPicturesBinding.inflate(LayoutInflater.from(context as AuthActivity))
+
+        var selectedProfilePic: String = ""
+
+        val alertDialog = AlertDialog.Builder(context as AuthActivity)
+            .setTitle("Choose a Picture")
+            .setView(dialogPictures.root)
+            .setPositiveButton("Save", null)
+            .setNegativeButton("Cancel") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .create()
+
+        alertDialog.setOnShowListener {
+            val saveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            saveButton.setOnClickListener {
+                if (selectedProfilePic != "") {
+                    userModel.profilePic = selectedProfilePic
+                    mBinding.profilePic.setImageResource(
+                        AndroidUtils.selectPicture(
+                            selectedProfilePic
+                        )
+                    )
+                    alertDialog.dismiss()
+                } else {
+                    AndroidUtils.showToast(context as AuthActivity, "No picture selected")
+                }
+            }
+        }
+
+        // ImageButton IDs
+        val imageViews = listOf(
+            dialogPictures.pfp1,
+            dialogPictures.pfp2,
+            dialogPictures.pfp3,
+            dialogPictures.pfp4,
+            dialogPictures.pfp5,
+            dialogPictures.pfp6
+        )
+
+        val drawableIds = listOf(
+            R.drawable.pfp1,
+            R.drawable.pfp2,
+            R.drawable.pfp3,
+            R.drawable.pfp4,
+            R.drawable.pfp5,
+            R.drawable.pfp6
+        )
+
+        // Listener to handle selection
+        val onImageSelected = { selectedView: ImageView, drawableId: Int ->
+            // Reset the selection for all ImageButtons
+            imageViews.forEach { it.isSelected = false }
+
+            // Set the selected ImageButton
+            selectedView.isSelected = true
+
+            // Update the selected profile picture
+            selectedProfilePic = when (drawableId) {
+                R.drawable.pfp1 -> "pfp1"
+                R.drawable.pfp2 -> "pfp2"
+                R.drawable.pfp3 -> "pfp3"
+                R.drawable.pfp4 -> "pfp4"
+                R.drawable.pfp5 -> "pfp5"
+                R.drawable.pfp6 -> "pfp6"
+                else -> ""
+            }
+        }
+
+
+        // Set click listeners for each ImageButton
+        imageViews.forEachIndexed { index, imageView ->
+            imageView.setOnClickListener {
+                onImageSelected(imageView, drawableIds[index])
+            }
+        }
+
+        alertDialog.show()
+    }
+
+    private fun uploadProfilePicture() {
+        ImagePicker.with(this).cropSquare().compress(512).maxResultSize(512, 512)
+            .createIntent { intent ->
+                imagePickLauncher.launch(intent)
+            }
+    }
+
+
     private fun validateDisplayName(): Boolean {
         var errorMessage: String? = null
         val value: String = mBinding.displayNameET.text.toString()
+        val specialCharactersRegex = Regex("[!@#$%&*()_+=|<>?{}\\[\\]~-]")
         if (value.isEmpty()) {
             errorMessage = "Display name is required"
+        } else if (specialCharactersRegex.containsMatchIn(value)) {
+            errorMessage = "Display name must not contain special characters"
+        } else if (value.length < 2) {
+            errorMessage = "Display name must be at least 2 characters"
         }
 
         if (errorMessage != null) {
             mBinding.displayNameTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                inProgress(false)
             }
+        } else {
+            userModel = userModel.copy(
+                displayName = value,
+                displayNameLowercase = value.lowercase()
+            )
         }
+
 
         return errorMessage == null
     }
@@ -165,7 +251,12 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             mBinding.emailTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
+                inProgress(false)
             }
+        } else {
+            userModel = userModel.copy(
+                email = value
+            )
         }
 
         return errorMessage == null
@@ -180,14 +271,15 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         } else if (value.length < 8) {
             errorMessage = "Password must be at least 8 characters"
         } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
-            errorMessage = "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
+            errorMessage =
+                "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
             mBinding.passwordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
-                mBinding.progressBar.visibility = View.GONE
+                inProgress(false)
             }
         }
 
@@ -203,14 +295,15 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
         } else if (value.length < 8) {
             errorMessage = "Confirm password must be at least 8 characters"
         } else if (!Regex(".*[$specialCharacters].*").containsMatchIn(value)) {
-            errorMessage = "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
+            errorMessage =
+                "Password must contain at least one special character [!@#\$%&*()_+=|<>?{}\\[\\]~-]"
         }
 
         if (errorMessage != null) {
             mBinding.cPasswordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
-                mBinding.progressBar.visibility = View.GONE
+                inProgress(false)
             }
         }
 
@@ -229,22 +322,250 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
             mBinding.cPasswordTil.apply {
                 isErrorEnabled = true
                 error = errorMessage
-                mBinding.progressBar.visibility = View.GONE
+                inProgress(false)
             }
         }
 
         return errorMessage == null
     }
 
+    private fun validateContactNumber(): Boolean {
+        var errorMessage: String? = null
+        val value: String = mBinding.contactNumET.text.toString()
+        if (!((value.length == 12 && value.substring(0,3) == "639") || (value.length == 11 && value.substring(0, 2) == "09"))) {
+            errorMessage = "Contact Number must be 09XXXXXXXXX or 639XXXXXXXXX"
+        }
+
+        if (errorMessage != null) {
+            mBinding.contactNumTil.apply {
+                isErrorEnabled = true
+                error = errorMessage
+                inProgress(false)
+            }
+        } else {
+            userModel = userModel.copy(
+                contactNumber = value
+            )
+        }
+
+        return errorMessage == null
+
+    }
+
+    private suspend fun sameDisplayName(displayName: String): Boolean {
+        if (FirebaseUtils.sameDisplayNameVerify(displayName)) {
+            mBinding.displayNameTil.apply {
+                isErrorEnabled = true
+                error = "Display name already exists"
+                inProgress(false)
+            }
+        }else {
+            mBinding.displayNameTil.isErrorEnabled = false
+        }
+        return !mBinding.displayNameTil.isErrorEnabled
+    }
+
+    private suspend fun sameEmail(email: String): Boolean {
+        if (FirebaseUtils.sameEmailVerify(email)) {
+            mBinding.emailTil.apply {
+                isErrorEnabled = true
+                error = "Email already exists"
+                inProgress(false)
+            }
+        }else {
+            mBinding.emailTil.isErrorEnabled = false
+        }
+        return !mBinding.emailTil.isErrorEnabled
+    }
+
+    private suspend fun sameContactNumber(contactNumber: String): Boolean {
+        if (FirebaseUtils.sameContactNumberVerify(contactNumber)) {
+            mBinding.contactNumTil.apply {
+                isErrorEnabled = true
+                error = "Email already exists"
+                inProgress(false)
+            }
+        }else {
+            mBinding.contactNumTil.isErrorEnabled = false
+        }
+        return !mBinding.contactNumTil.isErrorEnabled
+    }
+
+    private fun inProgress(inProgress: Boolean) {
+        if (inProgress) {
+            mBinding.progressBar.visibility = View.VISIBLE
+            mBinding.registerBtn.visibility = View.GONE
+        } else {
+            mBinding.progressBar.visibility = View.GONE
+            mBinding.registerBtn.visibility = View.VISIBLE
+        }
+    }
+
+
     override fun onClick(view: View?) {
-        if (view != null){
+        if (view != null) {
             when (view.id) {
-                R.id.submitSU_btn -> {
-                    if (validateEmail() && validatePassword() && validateConfirmPassword() && validatePasswordAndConfirmPassword()) {
-                        Toast.makeText(context as AuthActivity, "Registration Successful", Toast.LENGTH_SHORT).show()
+                R.id.profilePic -> {
+                    dialogProfilePic =
+                        DialogProfilePicDecisionsBinding.inflate(LayoutInflater.from(context as AuthActivity))
+
+                    // Create the AlertDialog
+                    val alertDialog = AlertDialog.Builder(context as AuthActivity)
+                        .setTitle("Profile Picture")
+                        .setView(dialogProfilePic.root)
+                        .setNegativeButton("Cancel") { dialogInterface, _ ->
+                            dialogInterface.dismiss()
+                        }
+                        .create()
+
+                    // Set click listeners to close the dialog after performing actions
+                    val closeDialogAndPerformAction: (() -> Unit) -> View.OnClickListener =
+                        { action ->
+                            View.OnClickListener {
+                                action() // Perform your action (e.g., uploadProfilePicture())
+                                alertDialog.dismiss() // Close the dialog
+                            }
+                        }
+
+                    dialogProfilePic.uploadBtn.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
+                    dialogProfilePic.uploadText.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
+                    dialogProfilePic.uploadLayout.setOnClickListener(closeDialogAndPerformAction(::uploadProfilePicture))
+
+                    dialogProfilePic.picturesBtn.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
+                    dialogProfilePic.picturesText.setOnClickListener(closeDialogAndPerformAction(::picturesProfilePicture))
+                    dialogProfilePic.picturesLayout.setOnClickListener(
+                        closeDialogAndPerformAction(
+                            ::picturesProfilePicture
+                        )
+                    )
+
+                    alertDialog.show()
+                }
+
+                R.id.loginNow -> {
+                    AuthActivity.backPressed(context as AuthActivity)
+                }
+
+                R.id.backBtn -> {
+                    AuthActivity.backPressed(context as AuthActivity)
+                }
+
+                R.id.register_btn -> {
+                    inProgress(true)
+                    val email = mBinding.emailET.text.toString()
+                    val password = mBinding.passwordET.text.toString()
+                    val displayName = mBinding.displayNameET.text.toString()
+                    val contactNumber = mBinding.contactNumET.text.toString()
+
+                    if (!validateDisplayName() || !validateEmail() || !validatePassword() || !validateConfirmPassword() || !validateContactNumber()) {
+                        inProgress(false)
+                        return
                     }
-                    else {
-                        Toast.makeText(context as AuthActivity, "Registration Failed", Toast.LENGTH_SHORT).show()
+
+                    lifecycleScope.launch {
+                        val isDisplayNameValid = sameDisplayName(displayName)
+                        val isEmailValid = sameEmail(email)
+                        val isContactNumberValid = sameContactNumber(contactNumber)
+                        if (isDisplayNameValid && isEmailValid && isContactNumberValid) {
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(context as AuthActivity) { task ->
+                                    if (task.isSuccessful) {
+                                        val currentUser = auth.currentUser
+                                        if (currentUser != null) {
+                                            val keywords = AndroidUtils.generateSearchKeywords(userModel.email) + AndroidUtils.generateSearchKeywords(userModel.displayName)
+                                            userModel = userModel.copy(
+                                                userId = currentUser.uid,
+                                                role = "customer",
+                                                lastSession = Timestamp.now(),
+                                                searchKeywords = keywords.distinct(),
+                                            )
+
+
+                                            // Save user details to Firestore
+                                            FirebaseUtils.createUserDetails().set(userModel)
+                                                .addOnCompleteListener { firestoreTask ->
+                                                    if (firestoreTask.isSuccessful) {
+                                                        if (userModel.profilePic == "") {
+
+                                                            val metadata = storageMetadata {
+                                                                cacheControl =
+                                                                    "public, max-age=31536000" // Cache for 1 year
+                                                            }
+                                                            FirebaseUtils.getCurrentProfilePicStorageRef()
+                                                                .putFile(selectedImageUri, metadata)
+                                                                .addOnCompleteListener {
+                                                                    inProgress(false)
+                                                                    if (it.isSuccessful) {
+                                                                        AndroidUtils.showToast(
+                                                                            context as AuthActivity,
+                                                                            "Account created."
+                                                                        )
+                                                                        auth.signOut()
+                                                                        AuthActivity.changeFragment(
+                                                                            context as AuthActivity,
+                                                                            LoginFragment(),
+                                                                            false
+                                                                        )
+                                                                    } else {
+                                                                        // Rollback: delete user from Firebase Authentication
+                                                                        currentUser.delete()
+                                                                            .addOnCompleteListener { deleteTask ->
+                                                                                if (deleteTask.isSuccessful) {
+                                                                                    AndroidUtils.showToast(
+                                                                                        context as AuthActivity,
+                                                                                        "Registration failed. Please try again."
+                                                                                    )
+                                                                                } else {
+                                                                                    AndroidUtils.showToast(
+                                                                                        context as AuthActivity,
+                                                                                        "Error during rollback. Contact support."
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                    }
+                                                                }
+                                                        } else {
+                                                            AndroidUtils.showToast(
+                                                                context as AuthActivity,
+                                                                "Account created."
+                                                            )
+                                                            auth.signOut()
+                                                            AuthActivity.changeFragment(
+                                                                context as AuthActivity,
+                                                                LoginFragment(),
+                                                                false
+                                                            )
+                                                        }
+                                                    } else {
+                                                        // Rollback: delete user from Firebase Authentication
+                                                        currentUser.delete()
+                                                            .addOnCompleteListener { deleteTask ->
+                                                                if (deleteTask.isSuccessful) {
+                                                                    AndroidUtils.showToast(
+                                                                        context as AuthActivity,
+                                                                        "Registration failed. Please try again."
+                                                                    )
+                                                                } else {
+                                                                    AndroidUtils.showToast(
+                                                                        context as AuthActivity,
+                                                                        "Error during rollback. Contact support."
+                                                                    )
+                                                                }
+                                                            }
+                                                    }
+                                                }
+                                        }
+                                    } else {
+                                        inProgress(false)
+                                        AndroidUtils.showToast(
+                                            context as AuthActivity,
+                                            "Authentication failed."
+                                        )
+                                    }
+                                }
+                        } else{
+                            inProgress(false)
+                        }
                     }
                 }
             }
@@ -254,13 +575,23 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
     override fun onFocusChange(view: View?, hasFocus: Boolean) {
         if (view != null) {
             when (view.id) {
+                R.id.displayNameET -> {
+                    if (hasFocus) {
+                        if (mBinding.displayNameTil.isErrorEnabled) {
+                            mBinding.displayNameTil.isErrorEnabled = false
+                        }
+                    } else {
+                        validateDisplayName()
+                    }
+                }
+
                 R.id.emailET -> {
                     if (hasFocus) {
                         if (mBinding.emailTil.isErrorEnabled) {
                             mBinding.emailTil.isErrorEnabled = false
-                        } else {
-                            validateEmail()
                         }
+                    } else {
+                        validateEmail()
                     }
                 }
 
@@ -270,6 +601,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                             mBinding.passwordTil.isErrorEnabled = false
                         }
                     } else {
+                        validatePassword()
                         if (validatePassword() && mBinding.cPasswordET.text!!.isNotEmpty() && validateConfirmPassword() && validatePasswordAndConfirmPassword()) {
                             if (mBinding.cPasswordTil.isErrorEnabled) {
                                 mBinding.cPasswordTil.isErrorEnabled = false
@@ -288,6 +620,7 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                             mBinding.cPasswordTil.isErrorEnabled = false
                         }
                     } else {
+                        validateConfirmPassword()
                         if (validateConfirmPassword() && validatePassword() && validatePasswordAndConfirmPassword()) {
                             if (mBinding.passwordTil.isErrorEnabled) {
                                 mBinding.passwordTil.isErrorEnabled = false
@@ -297,6 +630,16 @@ class RegisterFragment : Fragment(), View.OnClickListener, View.OnFocusChangeLis
                                 setStartIconTintList(ColorStateList.valueOf(android.graphics.Color.CYAN))
                             }
                         }
+                    }
+                }
+
+                R.id.contactNumET -> {
+                    if (hasFocus) {
+                        if (mBinding.contactNumTil.isErrorEnabled) {
+                            mBinding.contactNumTil.isErrorEnabled = false
+                        }
+                    } else {
+                        validateContactNumber()
                     }
                 }
             }

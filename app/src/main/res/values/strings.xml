@@ -1,4 +1,8 @@
 <resources>
+
+    <string name="version">v0.6.1</string>
+
+
     <string name="app_name">Blue Waves</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
@@ -39,4 +43,61 @@
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
     <string name="authactivity">AuthActivity</string>
+    <string name="splashscreen">SplashScreen</string>
+    <string name="blue_waves">Blue Waves</string>
+    <string name="display_name">Display Name</string>
+    <string name="search">Search</string>
+    <string name="search_user">Search User...</string>
+    <string name="password_secret">**************</string>
+    <string name="role">Role:</string>
+    <string name="passwordask">Password:</string>
+    <string name="emailask">Email:</string>
+    <string name="edit">Edit</string>
+    <string name="display_nameask">Display Name:</string>
+    <string name="logo">Logo</string>
+    <string name="no_user_found">No User Found</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="upload">Upload</string>
+    <string name="pictures">Pictures</string>
+    <string name="post_a_message">Post a Message</string>
+    <string name="just_now">Now</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="write_message_here">Write message here</string>
+    <string name="camera">Camera</string>
+    <string name="wifi_icon">WIFI ICON</string>
+    <string name="upload_icon">UPLOAD ICON</string>
+    <string name="upload_speed">Upload Speed:</string>
+    <string name="download_speed">Download Speed:</string>
+    <string name="download_icon">DOWNLOAD ICON</string>
+    <string name="tx_icon">TX ICON</string>
+    <string name="tx">TX</string>
+    <string name="menu_button">Menu Button</string>
+    <string name="expand_collapse">Expand Collapse</string>
+    <string name="contact_number">Contact Number</string>
+    <string name="remember_email">Remember Email</string>
+    <string name="remember_password">Remember Password</string>
+    <string name="reset">Reset</string>
+    <string name="version_changelog">Version Changelog</string>
+    <string name="feedback">Feedback</string>
+    <string name="about_us">About us</string>
+    <string name="suggestions">Suggestions</string>
+    <string name="profile">Profile</string>
+    <string name="admin">Admin</string>
+    <string name="schedule">Schedule</string>
+    <string name="customization">Customization</string>
+    <string name="suggestion">If you have any suggestion towards the app that you want to add and if you encounter any bugs feel free to describe them so it can be fixed immediately</string>
+    <string name="feedback_hint">Please give your honest feedback.</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
 </resources>

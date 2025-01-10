@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="15dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome to Bluewaves, your go-to app for monitoring and enhancing your internet experience. We provide you with the tools to check your internet speed, stay connected with your service provider, and easily access important announcements—all in one place."
+            android:textSize="16dp"/>
+        <TextView
+            android:layout_marginTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="With Bluewaves, you can:"
+            android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test your internet speed: Get real-time data on your connection’s performance."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Contact support: Reach out directly to your provider for assistance or inquiries."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chat with us: Our live chat feature ensures that help is always just a message away."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Stay informed: View the latest announcements and updates from your provider."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Our goal is to give you more control over your internet service, ensuring you always have the information you need to make the most out of your connection."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thank you for choosing Bluewaves—keeping you connected and informed!"
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Developed by:"
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="De Leon, Daniel Vian A."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="1dp"
+                android:layout_marginStart="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="Delgado, Mikhaela Angeline P."
+                android:textSize="16dp"/>
+            <TextView
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="If you have any concern or feedback towards the app feel free to contact any staff members available or email us at:"
+                android:textSize="16dp"/>
+
+            <TextView
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:linksClickable="true"
+                android:text="ispbluewaves@gmail.com"
+                android:textColor="@color/buttonColor"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

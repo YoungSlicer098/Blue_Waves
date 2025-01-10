@@ -1,37 +1,387 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".TrackerFragment"
-    android:background="@color/background"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:background="@color/background">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tracker View"
-        android:textSize="30sp"
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/adminLayout"
+        android:visibility="gone"
+        tools:visibility="gone">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshAdminLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/connectedLayout"
+        android:visibility="gone"
+        android:scrollbars="vertical"
+        android:scrollIndicators="end"
+        tools:visibility="visible">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshConnectedLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:id="@+id/wifiNameLayout"
+                    tools:ignore="UseCompoundDrawables">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="20dp"
+                    android:src="@drawable/wifi_icon"
+                    android:contentDescription="@string/wifi_icon"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    tools:text="WIFI NAME"
+                    android:textStyle="bold"
+                    android:textSize="25sp"
+                    android:textColor="@color/text"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="30dp"
+                    android:id="@+id/wifiNameText"/>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:layout_marginTop="10dp"
+                    android:background="?android:attr/listDivider"
+                    android:backgroundTint="@color/divider_color"
+                    android:layout_below="@id/wifiNameLayout"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:layout_below="@id/divider"
+                    android:id="@+id/uploadSpeedLayout">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="23dp"
+                        android:src="@drawable/arrow_upward_icon"
+                        android:background="@drawable/circular_bg_stroke"
+                        android:contentDescription="@string/upload_icon"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/upload_speed"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        tools:text="1.2 mbps"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="30dp"
+                        android:layout_marginStart="10dp"
+                        android:id="@+id/uploadSpeedText"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:layout_below="@id/uploadSpeedLayout"
+                    android:id="@+id/downloadSpeedLayout">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="23dp"
+                        android:src="@drawable/arrow_downward_icon"
+                        android:background="@drawable/circular_bg_stroke"
+                        android:contentDescription="@string/download_icon"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/download_speed"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        tools:text="3.5 mbps"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="30dp"
+                        android:layout_marginStart="10dp"
+                        android:id="@+id/downloadSpeedText"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total Usage Timeline:"
+                    android:textStyle="bold"
+                    android:textSize="25sp"
+                    android:textColor="@color/text"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginHorizontal="30dp"
+                    android:layout_below="@+id/downloadSpeedLayout"
+                    android:id="@+id/totalUsageText"
+                    tools:ignore="HardcodedText" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/totalUsageText"
+                    android:layout_marginTop="20dp"
+                    android:id="@+id/totalWifiLayout"
+                    android:orientation="vertical">
+
+<!--                <com.jjoe64.graphview.GraphView-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="200dp"-->
+<!--                    android:id="@+id/totalWifiGraph"-->
+<!--                    android:background="@color/background"/>-->
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:layout_below="@id/totalWifiLayout"
+                    android:id="@+id/txColorLayout">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="23dp"
+                        android:background="@drawable/square"
+                        android:backgroundTint="#006AD3"
+                        android:contentDescription="@string/tx_icon"
+                        tools:ignore="ImageContrastCheck" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tx"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="5dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(Upload)"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="30dp"
+                        android:layout_marginStart="5dp"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="5dp"
+                    android:layout_below="@id/txColorLayout"
+                    android:id="@+id/rxColorLayout">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="23dp"
+                        android:background="@drawable/square"
+                        android:backgroundTint="#D30000"
+                        tools:ignore="ContentDescription,ImageContrastCheck" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="RX"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="5dp"
+                        tools:ignore="HardcodedText" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(Download)"
+                        android:textSize="15sp"
+                        android:textColor="@color/text"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="30dp"
+                        android:layout_marginStart="5dp"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/transparent"
+                    android:layout_below="@id/rxColorLayout"
+                    android:layout_marginTop="10dp"
+                    app:tabGravity="center"
+                    app:tabIndicatorColor="@color/selectedText"
+                    app:tabMode="scrollable"
+                    app:tabPaddingEnd="10dp"
+                    app:tabPaddingStart="10dp"
+                    app:tabSelectedTextColor="@color/selectedText"
+                    app:tabTextColor="@color/text"
+                    app:tabIndicatorHeight="4dp"
+                    android:layout_centerHorizontal="true">
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/gupter_bold"
+                        android:text="Monthly"
+                        android:textColor="@color/text"
+                        android:textSize="15sp"
+                        tools:ignore="HardcodedText" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/gupter_bold"
+                        android:paddingHorizontal="40dp"
+                        android:paddingVertical="10dp"
+                        android:text="Weeks"
+                        android:textColor="@color/text"
+                        android:textSize="15sp"
+                        tools:ignore="HardcodedText" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/gupter_bold"
+                        android:text="Days"
+                        android:textColor="@color/text"
+                        android:textSize="15sp"
+                        tools:ignore="HardcodedText" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/gupter_bold"
+                        android:text="Hours"
+                        android:textColor="@color/text"
+                        android:textSize="15sp"
+                        tools:ignore="HardcodedText" />
+
+                </com.google.android.material.tabs.TabLayout>
+
+
+            </RelativeLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/notConnectedLayout"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textStyle="bold"
-        android:textColor="@color/text"/>
+        android:visibility="visible"
+        tools:visibility="gone">
 
-    <TextView
-        android:id="@+id/user"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello, "
-        android:textSize="15sp"
-        android:gravity="center"
-        android:textColor="@color/text" />
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshNotConnectedLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/logout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/logout"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/rounded_corner_fill"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
 
-</LinearLayout>
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/wifi_find_icon"
+                    android:layout_marginBottom="30dp"
+                    tools:ignore="ContentDescription" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="You are not connected to any of our service internet."
+                    android:layout_marginHorizontal="20dp"
+                    android:textSize="25sp"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textColor="@color/text"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="If you are connected please contact any staff that is available."
+                    android:layout_marginTop="10dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:textSize="15sp"
+                    android:gravity="center"
+                    android:textColor="@color/text"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+</RelativeLayout>

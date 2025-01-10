@@ -5,24 +5,25 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.dld.bluewaves.databinding.ActivityAuthBinding
-import com.google.android.material.navigation.NavigationView
+import com.dld.bluewaves.databinding.ActivityBaseDrawerBinding
+import com.dld.bluewaves.utils.DrawerUtils
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 
-class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener  {
+@Suppress("DEPRECATION")
+class AuthActivity : AppCompatActivity(){
 
-    private lateinit var toggle: ActionBarDrawerToggle
-    private lateinit var mBinding: ActivityAuthBinding
+    private lateinit var binding: ActivityBaseDrawerBinding
     private lateinit var auth: FirebaseAuth
 
     public override fun onStart() {
         super.onStart()
+        auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
         if (currentUser != null) {
             val intent = Intent(this, MainActivity::class.java)
@@ -33,54 +34,22 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        mBinding = ActivityAuthBinding.inflate(layoutInflater)
-        setContentView(mBinding.root)
+        binding = ActivityBaseDrawerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         auth = FirebaseAuth.getInstance()
 
+        DrawerUtils.setupDrawer(this, binding, binding.toolbar)
 
         supportFragmentManager.beginTransaction()
-            .replace(mBinding.fragmentContainer.id, LoginFragment())
+            .replace(binding.baseContent.id, LoginFragment())
             .commit()
-
-        setSupportActionBar(mBinding.toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        // Enable the default ActionBarDrawerToggle for the hamburger menu
-        toggle = ActionBarDrawerToggle(
-            this, mBinding.drawerLayout, mBinding.toolbar, R.string.open_nav, R.string.close_nav
-        )
-        mBinding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        validationSideBar(auth)
-
-        mBinding.toolbar.setNavigationOnClickListener {
-            if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
-                mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-            } else {
-                mBinding.drawerLayout.openDrawer(GravityCompat.END)
-            }
-        }
-
-
-        // Initialize the navigation view and set the listener
-        mBinding.sidebarNav.setNavigationItemSelectedListener(this)
-
-        // Close button in the sidebar
-        val headerLayout = mBinding.sidebarNav.getHeaderView(0)
-        val navCloseBtn = headerLayout.findViewById<ImageView>(R.id.navCloseBtn)
-        navCloseBtn.setOnClickListener {
-            mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-        }
-
     }
 
 
     companion object {
         fun changeFragment(context: AuthActivity, fragment: Fragment, addToBackStack: Boolean) {
             val transaction = context.supportFragmentManager.beginTransaction()
-                .replace(context.mBinding.fragmentContainer.id, fragment)
+                .replace(context.binding.baseContent.id, fragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
 
             if (addToBackStack) {
@@ -89,7 +58,12 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             transaction.commit()
         }
-        fun login(context: AuthActivity){
+
+        fun backPressed(context: AuthActivity) {
+            context.onBackPressed()
+        }
+
+        fun login(context: AuthActivity) {
             val intent = Intent(context, MainActivity::class.java)
             context.startActivity(intent)
             context.finish()
@@ -99,42 +73,13 @@ class AuthActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onResume() {
         super.onResume()
-        validationSideBar(FirebaseAuth.getInstance())
-    }
-
-    fun validationSideBar(auth: FirebaseAuth) {
-        val user = auth.currentUser
-
-        if (user == null) {
-            // If user is not logged in, disable certain items
-            mBinding.sidebarNav.menu.findItem(R.id.nav_profile).isEnabled = false
-            mBinding.sidebarNav.menu.findItem(R.id.nav_logout).isEnabled = false
-        } else {
-            // If user is logged in, enable all items
-            mBinding.sidebarNav.menu.findItem(R.id.nav_profile).isEnabled = true
-            mBinding.sidebarNav.menu.findItem(R.id.nav_logout).isEnabled = true
-        }
-
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_customization -> Toast.makeText(this, "Customization!", Toast.LENGTH_SHORT).show()
-            R.id.nav_profile -> Toast.makeText(this, "Profile!", Toast.LENGTH_SHORT).show()
-            R.id.nav_logout -> {
-                FirebaseAuth.getInstance().signOut()
-                Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
-                validationSideBar(FirebaseAuth.getInstance())
-            }
-        }
-        mBinding.drawerLayout.closeDrawer(GravityCompat.END)
-        return true
+        DrawerUtils.validationSideBar(binding ,FirebaseAuth.getInstance())
     }
 
     @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
     override fun onBackPressed() {
-        if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
-            mBinding.drawerLayout.closeDrawer(GravityCompat.END)
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.END)
         } else {
             @Suppress("DEPRECATION")
             super.onBackPressed()

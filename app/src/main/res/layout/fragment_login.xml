@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="50dp">
 
 
         <ImageView
@@ -67,6 +68,33 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/rememberEmailCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:text="@string/remember_email"
+            android:textColor="@color/text"
+            android:gravity="center"
+            android:layout_gravity="start"
+            android:layout_marginStart="30dp"/>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/rememberPasswordCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:text="@string/remember_password"
+            android:textColor="@color/text"
+            android:gravity="center"
+            android:layout_gravity="start"
+            android:layout_marginStart="30dp"
+            android:layout_below="@id/rememberEmailCheckbox"/>
+
+
+        </RelativeLayout>
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="36dp"
@@ -74,19 +102,37 @@
             android:layout_centerInParent="true"
             android:elevation="100dp"
             android:visibility="gone"
-            android:indeterminate="true"/>
-        <Button
-            android:id="@+id/loginBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
             android:layout_marginTop="15dp"
-            android:layout_marginRight="50dp"
+            android:indeterminate="true"/>
+
+        <TextView
+            android:id="@+id/loginBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="20dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/rounded_corner_fill"
+            android:backgroundTint="@color/buttonColor"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="90dp"
+            android:textAllCaps="true"
             android:text="@string/log_in"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/forgetPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:layout_gravity="top|end"
+            android:text="Forget Password?"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView

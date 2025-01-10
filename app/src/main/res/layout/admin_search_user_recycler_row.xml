@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/rounded_corner_fill"
+    android:backgroundTint="@color/foreground"
+    android:layout_marginVertical="5dp"
+    android:layout_marginHorizontal="10dp"
+    android:elevation="2dp"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_gravity="center"
+        android:id="@+id/main_layout">
+
+        <include layout="@layout/profile_pic_view"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:id="@+id/profile_pic_layout"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/profile_pic_layout">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Display Name"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:id="@+id/display_name_text"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="johndoe@gmail.com"
+                android:id="@+id/email_text"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/expand_collapse_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/expand_collapse"
+            android:src="@drawable/arrow_up_icon" />
+    </RelativeLayout>
+
+    <!-- Collapsible Section -->
+    <RelativeLayout
+        android:id="@+id/collapsible_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingLeft="15dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <!-- User ID -->
+        <TextView
+            android:id="@+id/user_id_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UserID: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary" />
+        <TextView
+            android:id="@+id/user_id_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="123456"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_toEndOf="@id/user_id_text"/>
+
+        <!-- Last Session -->
+        <TextView
+            android:id="@+id/last_session_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last Session: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/user_id_input"/>
+        <TextView
+            android:id="@+id/last_session_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="2024-12-21"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/user_id_input"
+            android:layout_toEndOf="@id/last_session_text"/>
+
+        <!-- Role -->
+        <TextView
+            android:id="@+id/role_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Role: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/last_session_input"/>
+        <TextView
+            android:id="@+id/role_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Admin"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/last_session_input"
+            android:layout_toEndOf="@id/role_text"/>
+
+        <!-- Contact Number -->
+        <TextView
+            android:id="@+id/contactNumber_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact Number: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/role_input"/>
+        <TextView
+            android:id="@+id/contactNumber_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="09XXXXXXXXX"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/role_input"
+            android:layout_toEndOf="@id/contactNumber_text"/>
+
+        <!-- Banned? -->
+        <TextView
+            android:id="@+id/banned_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Banned: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/contactNumber_input"/>
+        <TextView
+            android:id="@+id/banned_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="No"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_below="@id/contactNumber_input"
+            android:layout_toEndOf="@id/banned_text"/>
+
+        <!-- Add other data fields here -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EDIT"
+            android:textSize="15sp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="7dp"
+            android:background="@drawable/rounded_corner_save"
+            android:textColor="@color/white"
+            android:layout_below="@id/banned_text"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/edit_btn"
+            android:layout_marginEnd="5dp"/>
+    </RelativeLayout>
+
+</LinearLayout>

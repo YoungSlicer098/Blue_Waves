@@ -18,7 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="50dp">
 
             <ImageView
                 android:id="@+id/backBtn"
@@ -31,7 +32,7 @@
                 app:srcCompat="@drawable/arrow_back_white" />
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/profilePic"
                 android:layout_width="160dp"
                 android:layout_height="160dp"
                 android:layout_gravity="center"
@@ -56,13 +57,13 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:ems="10"
-                    android:hint="Display Name"
+                    android:hint="@string/display_name"
                     android:inputType="text"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
                     android:textColor="@color/text"
                     android:textColorHint="@color/hintText"
-                    android:maxLength="24"/>
+                    android:maxLength="18"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -135,6 +136,29 @@
                     android:textColorHint="@color/hintText" />
             </com.google.android.material.textfield.TextInputLayout>
 
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/contactNumTil"
+                style="@style/TextInputLayoutStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contactNumET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="@string/contact_number"
+                    android:inputType="phone"
+                    android:maxLength="12"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/hintText"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="36dp"
@@ -142,22 +166,27 @@
                 android:visibility="gone"
                 android:layout_centerInParent="true"
                 android:elevation="100dp"
+                android:layout_marginTop="15dp"
                 android:indeterminate="true"/>
 
-            <Button
+            <TextView
                 android:id="@+id/register_btn"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginRight="50dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/rounded_corner_fill"
+                android:backgroundTint="@color/buttonColor"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="90dp"
+                android:textAllCaps="true"
                 android:text="@string/register"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="22sp"
                 android:textStyle="bold"
-                android:backgroundTint="@color/buttonColor"/>
+                android:gravity="center"/>
 
             <TextView
                 android:id="@+id/loginNow"
